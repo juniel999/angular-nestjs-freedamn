@@ -48,7 +48,7 @@ export class AuthService {
 
     try {
       // Create new user
-      const user = await this.usersService.create(username, email, password, firstName, lastName, socials);
+      const user = await this.usersService.create(username, email, password, firstName, lastName, undefined, socials);
       const userObject = user.toObject();
       const { password: _, ...result } = userObject;
       

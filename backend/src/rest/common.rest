@@ -1,0 +1,23 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@authToken = 
+
+### Instructions for using these REST files:
+# 1. Install the "REST Client" extension in VS Code
+# 2. Make sure your NestJS server is running
+# 3. To get a valid auth token, run the login request in auth.rest
+# 4. Copy the token from the response and update the @authToken variable in each file
+# 5. Send requests by clicking on the "Send Request" link above each request
+
+### API Health Check
+GET {{baseUrl}}
+
+### API Documentation
+GET {{baseUrl}}/docs
+
+### Example of a successful login and token workflow:
+# 1. First register or create a test user (make sure to include firstName and lastName fields)
+# 2. Login with those credentials
+# 3. Copy the access_token value from the response
+# 4. Update the @authToken variable above
+# 5. Now you can make authenticated requests 

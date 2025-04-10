@@ -1,0 +1,32 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDk5OSIsInN1YiI6IjY3ZjZkMGZkNWYxYzU0MTk1ZTQ4YmFiNCIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MjI4NjkxLCJleHAiOjE3NDQyMzIyOTF9.8gQMI3m-z0qdYN2PJEMqfYKGz-EVATeJPdebVbapPs8
+
+### Register a new user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "juniel111",
+  "email": "fdsfds@example.com",
+  "password": "123123123",
+  "firstName": "Juniel",
+  "lastName": "Husain"
+}
+
+### Create a test user (predefined)
+POST {{baseUrl}}/auth/test-user
+Content-Type: application/json
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "juniel111",
+  "password": "123123123"
+}
+
+### Get user profile (protected route)
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}} 
