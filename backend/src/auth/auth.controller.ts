@@ -1,17 +1,21 @@
-import { Controller, Request, Post, UseGuards, Body, Get } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Body, Get, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UsersService } from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    return this.authService.login(req.user);
+    return await this.authService.login(req.user);
   }
 
   @Post('register')
@@ -21,8 +25,7 @@ export class AuthController {
       createUserDto.email,
       createUserDto.password,
       createUserDto.firstName,
-      createUserDto.lastName,
-      createUserDto.socials
+      createUserDto.lastName
     );
   }
 
@@ -30,16 +33,5 @@ export class AuthController {
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
-  }
-
-  // For testing purposes - to be removed in production
-  @Post('test-user')
-  async createTestUser() {
-    const socials = {
-      facebook: 'https://facebook.com/testuser',
-      linkedin: 'https://linkedin.com/in/testuser',
-      github: 'https://github.com/testuser'
-    };
-    return this.authService.register('testuser', 'test@example.com', 'password123', 'Test', 'User', socials);
   }
 }

@@ -13,7 +13,21 @@ export class UsersService {
   ) {}
 
   async findOne(username: string): Promise<User | null> {
-    return this.userModel.findOne({ username }).exec();
+    // Try case-insensitive match
+    try {
+      const user = await this.userModel.findOne({ 
+        username: { $regex: new RegExp(`^${username}$`, 'i') } 
+      }).exec();
+      
+      if (user) {
+        return user;
+      }
+      
+      return null;
+    } catch (error) {
+      // Fallback to exact match if regex fails
+      return this.userModel.findOne({ username }).exec();
+    }
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -43,9 +57,7 @@ export class UsersService {
     email: string, 
     password: string,
     firstName: string,
-    lastName: string,
-    preferredTags?: string[],
-    socials?: SocialLinks
+    lastName: string
   ): Promise<User> {
     // Check if required fields are provided
     if (!firstName || !lastName) {
@@ -63,24 +75,23 @@ export class UsersService {
       throw new ConflictException('Email already registered');
     }
 
-    // Process preferred tags if provided
-    if (preferredTags && preferredTags.length > 0) {
-      await this.tagsService.addTagsIfNotExist(preferredTags);
-    }
-
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Use a fixed salt round for consistency
+    const saltRounds = 10;
     
+    // Generate hash with explicit salt rounds
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+    // Create user with required fields and default values for optional fields
     const newUser = new this.userModel({
       username,
       email,
       password: hashedPassword,
       firstName,
       lastName,
-      preferredTags: preferredTags ? preferredTags.map(tag => tag.toLowerCase().trim()) : [],
+      preferredTags: [],
       isActive: true,
       roles: ['user'],
-      socials: socials || {}
+      socials: {}
     });
 
     return newUser.save();
