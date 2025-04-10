@@ -1,0 +1,7 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@authToken = 
+
+### Get current user (protected route)
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{authToken}} 

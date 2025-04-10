@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsObject, ValidateNested, IsNotEmpty } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsObject, ValidateNested, IsNotEmpty, IsIn, IsDate, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SocialLinksDto {
@@ -55,6 +55,32 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   lastName: string;
+
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @IsOptional()
+  @IsString()
+  coverphoto?: string;
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  birthdate?: Date;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['He/Him', 'She/Her', 'They/Them'])
+  pronouns?: string;
 
   @IsOptional()
   @IsObject()

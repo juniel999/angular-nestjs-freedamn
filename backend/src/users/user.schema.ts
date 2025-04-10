@@ -44,11 +44,32 @@ export class User extends Document {
   @Prop({ required: true })
   lastName: string;
 
+  @Prop()
+  title?: string;
+
+  @Prop()
+  location?: string;
+
+  @Prop()
+  avatar?: string;
+
+  @Prop()
+  coverphoto?: string;
+
+  @Prop({ type: Date })
+  birthdate?: Date;
+
+  @Prop({ enum: ['He/Him', 'She/Her', 'They/Them'] })
+  pronouns?: string;
+
   @Prop({ default: true })
   isActive: boolean;
 
   @Prop({ type: [String], default: ['user'] })
   roles: string[];
+
+  @Prop({ type: [String], default: [] })
+  preferredTags: string[];
 
   @Prop({ type: SocialLinks, default: {} })
   socials: SocialLinks;

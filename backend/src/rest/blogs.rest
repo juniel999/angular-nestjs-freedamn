@@ -1,0 +1,57 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDExMSIsInN1YiI6IjY3ZjZlZTM4ZjI2ZDNkMTBiZTk2ODBlZSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MjM2NzE1LCJleHAiOjE3NDQyNDAzMTV9.lghuF-Ky7DHThneRQLpQ6gErzW4DdFK0V_U86SG8Ww8
+
+### ====================== BLOG ROUTES ======================
+
+### Get all blogs
+GET {{baseUrl}}/blogs
+
+### Get featured blogs
+GET {{baseUrl}}/blogs/featured
+
+### Get blogs by tag
+GET {{baseUrl}}/blogs/tag/tagId
+
+### Get blogs by user
+GET {{baseUrl}}/blogs/user/userId
+
+### Get a single blog by ID
+GET {{baseUrl}}/blogs/blogId
+
+### Create a new blog
+POST {{baseUrl}}/blogs
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Getting Started with NestJS",
+  "content": "NestJS is a progressive Node.js framework for building efficient and scalable server-side applications. It uses modern JavaScript, is built with TypeScript and combines elements of OOP (Object Oriented Programming), FP (Functional Programming), and FRP (Functional Reactive Programming). Under the hood, Nest makes use of robust HTTP Server frameworks like Express (the default) and optionally can be configured to use Fastify as well!",
+  "summary": "An introduction to NestJS framework",
+  "published": true,
+  "tags": ["nodejs", "nestjs", "typescript"]
+}
+
+### Update a blog
+PATCH {{baseUrl}}/blogs/blogId
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Updated Blog Title",
+  "content": "Updated content...",
+  "published": true,
+  "tags": ["updated", "tags"]
+}
+
+### Delete a blog
+DELETE {{baseUrl}}/blogs/blogId
+Authorization: Bearer {{authToken}}
+
+### Like a blog
+POST {{baseUrl}}/blogs/blogId/like
+Authorization: Bearer {{authToken}}
+
+### Unlike a blog
+DELETE {{baseUrl}}/blogs/blogId/like
+Authorization: Bearer {{authToken}} 

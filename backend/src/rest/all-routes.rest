@@ -1,0 +1,156 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@authToken = 
+
+### ====================== AUTH ROUTES ======================
+
+### Register a new user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser2",
+  "email": "testuser2@example.com",
+  "password": "password123",
+  "firstName": "Test",
+  "lastName": "User",
+  "title": "Software Developer",
+  "location": "New York, USA",
+  "avatar": "https://example.com/avatar.jpg",
+  "coverphoto": "https://example.com/cover.jpg",
+  "birthdate": "1990-01-15",
+  "pronouns": "They/Them"
+}
+
+### Login with user credentials
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
+
+### Get authenticated user profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+
+### Create a predefined test user
+POST {{baseUrl}}/auth/test-user
+Content-Type: application/json
+
+### ====================== USER ROUTES ======================
+
+### Get current user
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{authToken}}
+
+### ====================== TAG ROUTES ======================
+
+### Get all tags
+GET {{baseUrl}}/tags
+
+### Get a single tag by ID
+GET {{baseUrl}}/tags/tagId
+
+### Create a new tag
+POST {{baseUrl}}/tags
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "javascript"
+}
+
+### Add multiple tags in bulk
+POST {{baseUrl}}/tags/bulk
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tags": ["react", "node", "typescript", "mongodb"]
+}
+
+### Update a tag
+PATCH {{baseUrl}}/tags/tagId
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "updated-tag",
+  "featured": true
+}
+
+### Delete a tag
+DELETE {{baseUrl}}/tags/tagId
+Authorization: Bearer {{authToken}}
+
+### ====================== BLOG ROUTES ======================
+
+### Get all blogs
+GET {{baseUrl}}/blogs
+
+### Get featured blogs
+GET {{baseUrl}}/blogs/featured
+
+### Get blogs by tag
+GET {{baseUrl}}/blogs/tag/tagId
+
+### Get blogs by user
+GET {{baseUrl}}/blogs/user/userId
+
+### Get a single blog by ID
+GET {{baseUrl}}/blogs/blogId
+
+### Create a new blog
+POST {{baseUrl}}/blogs
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Getting Started with NestJS",
+  "content": "NestJS is a progressive Node.js framework...",
+  "summary": "An introduction to NestJS framework",
+  "published": true,
+  "tags": ["nodejs", "nestjs", "typescript"],
+  "coverImage": "https://example.com/blog-cover.jpg"
+}
+
+### Update a blog
+PATCH {{baseUrl}}/blogs/blogId
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Updated Blog Title",
+  "content": "Updated content...",
+  "published": true,
+  "tags": ["updated", "tags"]
+}
+
+### Delete a blog
+DELETE {{baseUrl}}/blogs/blogId
+Authorization: Bearer {{authToken}}
+
+### Like a blog
+POST {{baseUrl}}/blogs/blogId/like
+Authorization: Bearer {{authToken}}
+
+### Unlike a blog
+DELETE {{baseUrl}}/blogs/blogId/like
+Authorization: Bearer {{authToken}}
+
+### =================== WORKFLOW EXAMPLE ===================
+# First time setup:
+# 1. Run the server (npm run start:dev)
+# 2. Create a test user (POST /auth/test-user)
+# 3. Login (POST /auth/login)
+# 4. Copy the access_token from response
+# 5. Update the @authToken variable at the top of this file
+# 6. Now you can make authenticated requests
+
+### Common errors:
+# 401 Unauthorized - Your token is missing, invalid or expired
+# 404 Not Found - The endpoint doesn't exist
+# 409 Conflict - Trying to create a resource that already exists
+# 500 Server Error - Something went wrong on the server 
