@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { SocialLinks } from '../users/user.schema';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -12,22 +11,34 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
+    // Find user by username, case-insensitive
     const user = await this.usersService.findOne(username);
     
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (!user) {
+      return null;
+    }
+    
+    // Use bcrypt to compare the provided password with the stored hash
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (isPasswordValid) {
+      // If validation is successful, remove password from the returned object
       const { password, ...result } = user.toObject();
       return result;
     }
+    
     return null;
   }
 
   async login(user: any) {
+    // Create JWT payload
     const payload = { 
       username: user.username, 
       sub: user._id,
       roles: user.roles 
     };
     
+    // Return JWT token
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -38,8 +49,7 @@ export class AuthService {
     email: string, 
     password: string,
     firstName: string,
-    lastName: string,
-    socials?: SocialLinks
+    lastName: string
   ) {
     // Check if required fields are present
     if (!username || !email || !password || !firstName || !lastName) {
@@ -47,8 +57,8 @@ export class AuthService {
     }
 
     try {
-      // Create new user
-      const user = await this.usersService.create(username, email, password, firstName, lastName, undefined, socials);
+      // Create new user with only required fields
+      const user = await this.usersService.create(username, email, password, firstName, lastName);
       const userObject = user.toObject();
       const { password: _, ...result } = userObject;
       

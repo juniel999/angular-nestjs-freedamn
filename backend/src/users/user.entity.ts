@@ -3,10 +3,10 @@ export class User {
   username: string;
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
   
   // You can extend this with more fields as needed
-  firstName?: string;
-  lastName?: string;
   isActive?: boolean;
   roles?: string[];
   createdAt: Date;

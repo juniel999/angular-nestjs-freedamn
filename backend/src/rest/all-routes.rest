@@ -27,8 +27,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "username": "testuser",
-  "password": "password123"
+  "username": "juniel999",
+  "password": "123123123"
 }
 
 ### Get authenticated user profile

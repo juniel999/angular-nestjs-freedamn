@@ -1,14 +1,14 @@
 ### Variables
 @baseUrl = http://localhost:3000/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDk5OSIsInN1YiI6IjY3ZjZkMGZkNWYxYzU0MTk1ZTQ4YmFiNCIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MjI4NjkxLCJleHAiOjE3NDQyMzIyOTF9.8gQMI3m-z0qdYN2PJEMqfYKGz-EVATeJPdebVbapPs8
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDk5OSIsInN1YiI6IjY3Zjc3MDg4ZDFjOGEwN2NmNTIzNmVmMSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MjY5NDc4LCJleHAiOjE3NDQzNTU4Nzh9.Q7KjVwQMDX8pUzIvnXcCVDAozaZybM1FaDdeIccnP88
 
 ### Register a new user
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "username": "juniel111",
-  "email": "fdsfds@example.com",
+  "username": "juniel999",
+  "email": "fdsfd333s@example.com",
   "password": "123123123",
   "firstName": "Juniel",
   "lastName": "Husain"
@@ -23,7 +23,7 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "username": "juniel111",
+  "username": "juniel999",
   "password": "123123123"
 }
 
