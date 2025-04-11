@@ -1,6 +1,11 @@
 ### Variables
 @baseUrl = http://localhost:3000/api
-@authToken = 
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDk5OSIsInN1YiI6IjY3Zjc3MDg4ZDFjOGEwN2NmNTIzNmVmMSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MzYxNzg2LCJleHAiOjE3NDQ0NDgxODZ9.2igPOUmMIu-qYOXN53sEYiILkpNrVfIQ49MVlJ_IH44
+@blogId = 67f8cf997b39f11b1d270e19
+@userId = 67f77088d1c8a07cf5236ef1
+@tagId = 67f817d1ab3d3a5c1901ae86
+@tagName = nodejs
+@commentId = 67f8d540c18031678ca3bb7d
 
 ### ====================== AUTH ROUTES ======================
 
@@ -9,9 +14,9 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "username": "testuser2",
+  "username": "hssndev",
   "email": "testuser2@example.com",
-  "password": "password123",
+  "password": "123123123",
   "firstName": "Test",
   "lastName": "User",
   "title": "Software Developer",
@@ -19,7 +24,7 @@ Content-Type: application/json
   "avatar": "https://example.com/avatar.jpg",
   "coverphoto": "https://example.com/cover.jpg",
   "birthdate": "1990-01-15",
-  "pronouns": "They/Them"
+  "pronouns": "He/Him"
 }
 
 ### Login with user credentials
@@ -51,7 +56,7 @@ Authorization: Bearer {{authToken}}
 GET {{baseUrl}}/tags
 
 ### Get a single tag by ID
-GET {{baseUrl}}/tags/tagId
+GET {{baseUrl}}/tags/{{tagId}}
 
 ### Create a new tag
 POST {{baseUrl}}/tags
@@ -72,7 +77,7 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Update a tag
-PATCH {{baseUrl}}/tags/tagId
+PATCH {{baseUrl}}/tags/{{tagId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -82,7 +87,7 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Delete a tag
-DELETE {{baseUrl}}/tags/tagId
+DELETE {{baseUrl}}/tags/{{tagId}}
 Authorization: Bearer {{authToken}}
 
 ### ====================== BLOG ROUTES ======================
@@ -93,14 +98,14 @@ GET {{baseUrl}}/blogs
 ### Get featured blogs
 GET {{baseUrl}}/blogs/featured
 
-### Get blogs by tag
-GET {{baseUrl}}/blogs/tag/tagId
+### Get blogs by tag name
+GET {{baseUrl}}/blogs/tag/{{tagName}}
 
 ### Get blogs by user
-GET {{baseUrl}}/blogs/user/userId
+GET {{baseUrl}}/blogs/user/{{userId}}
 
 ### Get a single blog by ID
-GET {{baseUrl}}/blogs/blogId
+GET {{baseUrl}}/blogs/{{blogId}}
 
 ### Create a new blog
 POST {{baseUrl}}/blogs
@@ -117,7 +122,7 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Update a blog
-PATCH {{baseUrl}}/blogs/blogId
+PATCH {{baseUrl}}/blogs/{{blogId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -129,15 +134,54 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Delete a blog
-DELETE {{baseUrl}}/blogs/blogId
+DELETE {{baseUrl}}/blogs/{{blogId}}
 Authorization: Bearer {{authToken}}
 
 ### Like a blog
-POST {{baseUrl}}/blogs/blogId/like
+POST {{baseUrl}}/blogs/{{blogId}}/like
 Authorization: Bearer {{authToken}}
 
 ### Unlike a blog
-DELETE {{baseUrl}}/blogs/blogId/like
+DELETE {{baseUrl}}/blogs/{{blogId}}/like
+Authorization: Bearer {{authToken}}
+
+### ====================== COMMENT ENDPOINTS ======================
+
+### Get all comments for a blog
+GET {{baseUrl}}/comments/blog/{{blogId}}
+
+### Get a specific comment
+GET {{baseUrl}}/comments/{{commentId}}
+
+### Create a new comment (authenticated)
+POST {{baseUrl}}/comments
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "content": "This is a great blog post! Very informative.",
+  "blogId": "{{blogId}}"
+}
+
+### Update a comment (authenticated)
+PATCH {{baseUrl}}/comments/{{commentId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "content": "Updated comment content with more details!"
+}
+
+### Delete a comment (authenticated)
+DELETE {{baseUrl}}/comments/{{commentId}}
+Authorization: Bearer {{authToken}}
+
+### Like a comment (authenticated)
+POST {{baseUrl}}/comments/{{commentId}}/like
+Authorization: Bearer {{authToken}}
+
+### Unlike a comment (authenticated)
+DELETE {{baseUrl}}/comments/{{commentId}}/like
 Authorization: Bearer {{authToken}}
 
 ### =================== WORKFLOW EXAMPLE ===================

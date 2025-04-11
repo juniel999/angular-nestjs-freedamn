@@ -1,6 +1,6 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Error as MongooseError } from 'mongoose';
+import { Model, Error as MongooseError, Types } from 'mongoose';
 import { Tag } from './tag.schema';
 
 @Injectable()
@@ -14,6 +14,10 @@ export class TagsService {
   }
 
   async findOne(id: string): Promise<Tag | null> {
+    if(!Types.ObjectId.isValid(id)){
+      throw new NotFoundException('Invalid tag ID format');
+    }
+
     return this.tagModel.findById(id).exec();
   }
 
@@ -62,6 +66,10 @@ export class TagsService {
   }
 
   async update(id: string, updateTagDto: any): Promise<Tag | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid tag ID format');
+    }
+    
     try {
       // If updating the name, check if it would create a duplicate
       if (updateTagDto.name) {
@@ -94,6 +102,10 @@ export class TagsService {
   }
 
   async remove(id: string): Promise<Tag | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid tag ID format');
+    }
+    
     return this.tagModel.findByIdAndDelete(id).exec();
   }
 } 
