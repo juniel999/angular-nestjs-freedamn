@@ -11,17 +11,38 @@ export class CommentsService {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
   ) {}
 
-  // Get all comments for a blog
+  // Get all top-level comments for a blog
   async findAllByBlogId(blogId: string) {
     if(!Types.ObjectId.isValid(blogId)){
       throw new NotFoundException('Invalid blog ID format');
     }
 
     return this.commentModel
-      .find({ blogId })
+      .find({ blogId, parentId: null })
       .populate('userId', 'username avatar')
       .populate('likedBy', 'username avatar')
+      .populate({
+        path: 'replies',
+        populate: {
+          path: 'userId',
+          select: 'username avatar'
+        }
+      })
       .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  // Get replies for a specific comment
+  async getReplies(commentId: string) {
+    if(!Types.ObjectId.isValid(commentId)){
+      throw new NotFoundException('Invalid comment ID format');
+    }
+
+    return this.commentModel
+      .find({ parentId: commentId })
+      .populate('userId', 'username avatar')
+      .populate('likedBy', 'username avatar')
+      .sort({ createdAt: 1 })
       .exec();
   }
 
@@ -35,6 +56,13 @@ export class CommentsService {
       .findById(id)
       .populate('userId', 'username avatar')
       .populate('likedBy', 'username avatar')
+      .populate({
+        path: 'replies',
+        populate: {
+          path: 'userId',
+          select: 'username avatar'
+        }
+      })
       .exec();
     
     if (!comment) {
@@ -44,8 +72,31 @@ export class CommentsService {
     return comment;
   }
 
-  // Create a new comment
+  // Create a new comment or reply
   async create(createCommentDto: CreateCommentDto, userId: string) {
+    if (createCommentDto.parentId) {
+      // Check if parent comment exists
+      const parentComment = await this.commentModel.findById(createCommentDto.parentId);
+      if (!parentComment) {
+        throw new NotFoundException('Parent comment not found');
+      }
+      
+      // Create the reply
+      const newReply = new this.commentModel({
+        ...createCommentDto,
+        userId,
+      });
+      
+      // Increment the parent's reply count
+      await this.commentModel.findByIdAndUpdate(
+        createCommentDto.parentId,
+        { $inc: { replyCount: 1 } }
+      );
+      
+      return newReply.save();
+    }
+    
+    // Create a top-level comment
     const newComment = new this.commentModel({
       ...createCommentDto,
       userId,
@@ -91,6 +142,14 @@ export class CommentsService {
     // Check if the user is the owner of the comment
     if (comment.userId.toString() !== userId) {
       throw new ForbiddenException('You can only delete your own comments');
+    }
+
+    // If this is a reply, decrement parent's reply count
+    if (comment.parentId) {
+      await this.commentModel.findByIdAndUpdate(
+        comment.parentId,
+        { $inc: { replyCount: -1 } }
+      );
     }
     
     return this.commentModel.findByIdAndDelete(id).exec();

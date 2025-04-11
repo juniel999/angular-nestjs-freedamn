@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsMongoId } from 'class-validator';
+import { IsString, IsNotEmpty, IsMongoId, IsOptional } from 'class-validator';
 
 export class CreateCommentDto {
   @IsString()
@@ -8,4 +8,8 @@ export class CreateCommentDto {
   @IsMongoId()
   @IsNotEmpty()
   blogId: string;
+
+  @IsMongoId()
+  @IsOptional()
+  parentId?: string;
 } 

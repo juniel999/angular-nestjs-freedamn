@@ -145,42 +145,56 @@ Authorization: Bearer {{authToken}}
 DELETE {{baseUrl}}/blogs/{{blogId}}/like
 Authorization: Bearer {{authToken}}
 
-### ====================== COMMENT ENDPOINTS ======================
+### ====================== COMMENT ROUTES ======================
 
-### Get all comments for a blog
+### Get all comments for a blog (top-level comments with replies)
 GET {{baseUrl}}/comments/blog/{{blogId}}
 
-### Get a specific comment
+### Get replies for a specific comment
+GET {{baseUrl}}/comments/{{commentId}}/replies
+
+### Get a single comment by ID (with its replies)
 GET {{baseUrl}}/comments/{{commentId}}
 
-### Create a new comment (authenticated)
+### Create a new top-level comment
 POST {{baseUrl}}/comments
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "content": "This is a great blog post! Very informative.",
+  "content": "This is a top-level comment",
   "blogId": "{{blogId}}"
 }
 
-### Update a comment (authenticated)
+### Create a reply to a comment
+POST {{baseUrl}}/comments
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "content": "This is a reply to the comment",
+  "blogId": "{{blogId}}",
+  "parentId": "{{commentId}}"
+}
+
+### Update a comment
 PATCH {{baseUrl}}/comments/{{commentId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "content": "Updated comment content with more details!"
+  "content": "Updated comment content"
 }
 
-### Delete a comment (authenticated)
+### Delete a comment
 DELETE {{baseUrl}}/comments/{{commentId}}
 Authorization: Bearer {{authToken}}
 
-### Like a comment (authenticated)
+### Like a comment
 POST {{baseUrl}}/comments/{{commentId}}/like
 Authorization: Bearer {{authToken}}
 
-### Unlike a comment (authenticated)
+### Unlike a comment
 DELETE {{baseUrl}}/comments/{{commentId}}/like
 Authorization: Bearer {{authToken}}
 
