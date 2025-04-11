@@ -6,6 +6,9 @@
 # Rest files
 src/rest/*  
 
+# Secrets
+src/auth/constants.ts
+
 # Logs
 logs
 *.log
