@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:3000/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDExMSIsInN1YiI6IjY3ZjZlZTM4ZjI2ZDNkMTBiZTk2ODBlZSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MjYwMzc2LCJleHAiOjE3NDQyNjM5NzZ9.DPtnXGpd9hrH17V1-HYC4hOjzTMmSWRgBTWv9dMiYdE
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDk5OSIsInN1YiI6IjY3Zjc3MDg4ZDFjOGEwN2NmNTIzNmVmMSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MzEyMjQ5LCJleHAiOjE3NDQzOTg2NDl9.rTKDLg25MK7ZfVwFbbaJSoVhGHsMswwHSUlp6oVv-jc
 
 ### ====================== TAG ROUTES ======================
 
@@ -8,7 +8,7 @@
 GET {{baseUrl}}/tags
 
 ### Get a single tag by ID
-GET {{baseUrl}}/tags/67f6ef98d2699b59b2d59c47
+GET {{baseUrl}}/tags/67f773df23565cfef6d6fd2d
 
 ### Create a new tag
 POST {{baseUrl}}/tags
@@ -29,18 +29,18 @@ Authorization: Bearer {{authToken}}
 }
 
 ### Update a tag
-PATCH {{baseUrl}}/tags/67f6ef98d2699b59b2d59c47
+PATCH {{baseUrl}}/tags/67f8183fab3d3a5c1901ae9f
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "name": "ddd",
+  "name": "mongodbv2",
   "featured": true
 }
 
 ### Update a tag (potential duplicate scenario)
 # This request might result in a 409 Conflict error if another tag with this name already exists
-PATCH {{baseUrl}}/tags/67f6ef98d2699b59b2d59c47
+PATCH {{baseUrl}}/tags/67f8183fab3d3a5c1901ae9f
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 

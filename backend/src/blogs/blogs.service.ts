@@ -25,18 +25,81 @@ export class BlogsService {
     return createdBlog.save();
   }
 
-  async findAll(): Promise<Blog[]> {
-    return this.blogModel.find().exec();
+  async findAll(page = 1, limit = 10, sort = 'newest'): Promise<{ blogs: Blog[], total: number }> {
+    const skip = (page - 1) * limit;
+    let sortOptions = {};
+    
+    // Set sort options based on parameter
+    switch(sort) {
+      case 'popular':
+        sortOptions = { likes: -1, viewCount: -1 };
+        break;
+      case 'oldest':
+        sortOptions = { createdAt: 1 };
+        break;
+      case 'newest':
+      default:
+        sortOptions = { createdAt: -1 };
+    }
+    
+    const [blogs, total] = await Promise.all([
+      this.blogModel.find({ published: true })
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit)
+        .populate('author', 'username firstName lastName avatar')
+        .exec(),
+      this.blogModel.countDocuments({ published: true }).exec()
+    ]);
+    
+    return { blogs, total };
   }
 
-  async findByTag(tag: string): Promise<Blog[]> {
-    return this.blogModel.find({ tags: { $in: [tag.toLowerCase().trim()] } }).exec();
+  async findByTag(name: string): Promise<Blog[]> {
+    const tag = await this.tagsService.findByName(name);
+    if (!tag) {
+      throw new NotFoundException('Tag not found');
+    }
+
+    return this.blogModel.find({ 
+      tags: { $in: [tag.name.toLowerCase().trim()] },
+      published: true
+    })
+    .sort({ createdAt: -1 })
+    .populate('author', 'username firstName lastName avatar')
+    .exec();
+  }
+
+  async findByUser(userId: string): Promise<Blog[]> {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new NotFoundException('Invalid user ID format');
+    }
+
+    return this.blogModel.find({ 
+      author: userId,
+      published: true 
+    })
+    .sort({ createdAt: -1 })
+    .populate('author', 'username firstName lastName avatar')
+    .exec();
+  }
+
+  async findFeatured(): Promise<Blog[]> {
+    // Featured blogs are those with the most likes and views
+    // We're limiting to 10 featured blogs
+    return this.blogModel.find({ published: true })
+      .sort({ likes: -1, viewCount: -1, createdAt: -1 })
+      .limit(10)
+      .populate('author', 'username firstName lastName avatar')
+      .exec();
   }
 
   async findUserFeedByTags(userTags: string[]): Promise<Blog[]> {
     if (!userTags || userTags.length === 0) {
       return this.blogModel.find({ published: true })
         .sort({ createdAt: -1 })
+        .limit(20)
+        .populate('author', 'username firstName lastName avatar')
         .exec();
     }
     
@@ -45,11 +108,23 @@ export class BlogsService {
       published: true
     })
     .sort({ createdAt: -1 })
+    .limit(20)
+    .populate('author', 'username firstName lastName avatar')
     .exec();
   }
 
   async findOne(id: string): Promise<Blog | null> {
-    return this.blogModel.findById(id).exec();
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid blog ID format');
+    }
+    
+    // Increment view count
+    await this.blogModel.findByIdAndUpdate(id, { $inc: { viewCount: 1 } }).exec();
+    
+    // Return the blog with populated author information
+    return this.blogModel.findById(id)
+      .populate('author', 'username firstName lastName avatar')
+      .exec();
   }
 
   async update(id: string, updateBlogDto: any): Promise<Blog | null> {

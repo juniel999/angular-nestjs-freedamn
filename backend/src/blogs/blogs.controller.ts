@@ -13,13 +13,31 @@ export class BlogsController {
   }
 
   @Get()
-  findAll() {
-    return this.blogsService.findAll();
+  findAll(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('sort') sort?: string
+  ) {
+    return this.blogsService.findAll(
+      page ? parseInt(page.toString()) : 1,
+      limit ? parseInt(limit.toString()) : 10,
+      sort || 'newest'
+    );
   }
 
   @Get('tag/:tag')
   findByTag(@Param('tag') tag: string) {
     return this.blogsService.findByTag(tag);
+  }
+
+  @Get('featured')
+  findFeatured() {
+    return this.blogsService.findFeatured();
+  }
+
+  @Get('user/:userId')
+  findByUser(@Param('userId') userId: string) {
+    return this.blogsService.findByUser(userId);
   }
 
   @UseGuards(JwtAuthGuard)

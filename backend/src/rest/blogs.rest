@@ -1,23 +1,36 @@
 ### Variables
 @baseUrl = http://localhost:3000/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDExMSIsInN1YiI6IjY3ZjZlZTM4ZjI2ZDNkMTBiZTk2ODBlZSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MjM2NzE1LCJleHAiOjE3NDQyNDAzMTV9.lghuF-Ky7DHThneRQLpQ6gErzW4DdFK0V_U86SG8Ww8
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDk5OSIsInN1YiI6IjY3Zjc3MDg4ZDFjOGEwN2NmNTIzNmVmMSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MjcwMjY2LCJleHAiOjE3NDQzNTY2NjZ9.kDlRCzMugpyTaZI7fi3x4CJ8zJtKXzXluYFHTrvkfgE
+@blogId = 67f7745923565cfef6d6fd3c
+@userId = 67f77088d1c8a07cf5236ef1
+@tagName = typescript
 
-### ====================== BLOG ROUTES ======================
+### ====================== PUBLIC BLOG ENDPOINTS ======================
 
-### Get all blogs
+### Get all blogs (default pagination and sorting)
 GET {{baseUrl}}/blogs
+
+### Get all blogs with pagination and sorting
+# Available sort options: newest, oldest, popular
+GET {{baseUrl}}/blogs?page=1&limit=10&sort=newest
 
 ### Get featured blogs
 GET {{baseUrl}}/blogs/featured
 
-### Get blogs by tag
-GET {{baseUrl}}/blogs/tag/tagId
+### Get blogs by tag name
+GET {{baseUrl}}/blogs/tag/{{tagName}}
 
-### Get blogs by user
-GET {{baseUrl}}/blogs/user/userId
+### Get blogs by user ID
+GET {{baseUrl}}/blogs/user/{{userId}}
 
 ### Get a single blog by ID
-GET {{baseUrl}}/blogs/blogId
+GET {{baseUrl}}/blogs/{{blogId}}
+
+### ====================== AUTHENTICATED BLOG ENDPOINTS ======================
+
+### Get personalized feed based on user's preferred tags
+GET {{baseUrl}}/blogs/feed
+Authorization: Bearer {{authToken}}
 
 ### Create a new blog
 POST {{baseUrl}}/blogs
@@ -28,30 +41,44 @@ Authorization: Bearer {{authToken}}
   "title": "Getting Started with NestJS",
   "content": "NestJS is a progressive Node.js framework for building efficient and scalable server-side applications. It uses modern JavaScript, is built with TypeScript and combines elements of OOP (Object Oriented Programming), FP (Functional Programming), and FRP (Functional Reactive Programming). Under the hood, Nest makes use of robust HTTP Server frameworks like Express (the default) and optionally can be configured to use Fastify as well!",
   "summary": "An introduction to NestJS framework",
+  "coverImage": "https://example.com/images/nestjs.jpg",
   "published": true,
   "tags": ["nodejs", "nestjs", "typescript"]
 }
 
 ### Update a blog
-PATCH {{baseUrl}}/blogs/blogId
+PATCH {{baseUrl}}/blogs/{{blogId}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
   "title": "Updated Blog Title",
-  "content": "Updated content...",
+  "content": "Updated content with more details about NestJS...",
   "published": true,
-  "tags": ["updated", "tags"]
+  "tags": ["updated", "nestjs", "backend"]
 }
 
 ### Delete a blog
-DELETE {{baseUrl}}/blogs/blogId
+DELETE {{baseUrl}}/blogs/{{blogId}}
 Authorization: Bearer {{authToken}}
 
+### ====================== BLOG INTERACTION ENDPOINTS ======================
+
 ### Like a blog
-POST {{baseUrl}}/blogs/blogId/like
+POST {{baseUrl}}/blogs/{{blogId}}/like
 Authorization: Bearer {{authToken}}
 
 ### Unlike a blog
-DELETE {{baseUrl}}/blogs/blogId/like
-Authorization: Bearer {{authToken}} 
+DELETE {{baseUrl}}/blogs/{{blogId}}/like
+Authorization: Bearer {{authToken}}
+
+### ====================== EXAMPLES WITH REAL DATA ======================
+
+### Example: Get all blogs with pagination (10 per page) sorted by popularity
+GET {{baseUrl}}/blogs?page=1&limit=10&sort=popular
+
+### Example: Get blogs by specific user
+GET {{baseUrl}}/blogs/user/67f77088d1c8a07cf5236ef1
+
+### Example: Get blogs with specific tag
+GET {{baseUrl}}/blogs/tag/nodejs 
