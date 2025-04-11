@@ -29,4 +29,15 @@ export class Blog extends Document {
   likes: User[];
 }
 
-export const BlogSchema = SchemaFactory.createForClass(Blog); 
+export const BlogSchema = SchemaFactory.createForClass(Blog);
+
+// Add virtual property for comments
+BlogSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'blogId',
+});
+
+// Ensure virtuals are included when converting to JSON
+BlogSchema.set('toJSON', { virtuals: true });
+BlogSchema.set('toObject', { virtuals: true }); 

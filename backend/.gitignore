@@ -4,10 +4,10 @@
 /build
 
 # Rest files
-src/rest/*  
+/src/rest/*  
 
 # Secrets
-src/auth/constants.ts
+/src/auth/constants.ts
 
 # Logs
 logs

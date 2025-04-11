@@ -121,13 +121,25 @@ export class BlogsService {
     // Increment view count
     await this.blogModel.findByIdAndUpdate(id, { $inc: { viewCount: 1 } }).exec();
     
-    // Return the blog with populated author information
+    // Return the blog with populated author and comments information
     return this.blogModel.findById(id)
       .populate('author', 'username firstName lastName avatar')
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'userId',
+          select: 'username avatar'
+        },
+        options: { sort: { 'createdAt': -1 } }
+      })
       .exec();
   }
 
   async update(id: string, updateBlogDto: any): Promise<Blog | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid blog ID format');
+    }
+    
     // If tags are being updated, process them
     if (updateBlogDto.tags && updateBlogDto.tags.length > 0) {
       await this.tagsService.addTagsIfNotExist(updateBlogDto.tags);
@@ -139,10 +151,18 @@ export class BlogsService {
   }
 
   async remove(id: string): Promise<Blog | null> {
+    if(!Types.ObjectId.isValid(id)){
+      throw new NotFoundException('Invalid blog ID format');
+    }
+
     return this.blogModel.findByIdAndDelete(id).exec();
   }
 
   async like(blogId: string, userId: string): Promise<Blog> {
+    if(!Types.ObjectId.isValid(blogId)){
+      throw new NotFoundException('Invalid blog ID format');
+    }
+
     const blog = await this.blogModel.findById(blogId);
     
     if (!blog) {
@@ -172,6 +192,10 @@ export class BlogsService {
   }
 
   async unlike(blogId: string, userId: string): Promise<Blog> {
+    if(!Types.ObjectId.isValid(blogId)){
+      throw new NotFoundException('Invalid blog ID format');
+    }
+
     const blog = await this.blogModel.findById(blogId);
     
     if (!blog) {

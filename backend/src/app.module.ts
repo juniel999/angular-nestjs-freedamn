@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { TagsModule } from './tags/tags.module';
+import { CommentsModule } from './comments/comments.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -13,7 +14,8 @@ import { MongooseModule } from '@nestjs/mongoose';
     UsersModule, 
     AuthModule,
     BlogsModule,
-    TagsModule
+    TagsModule,
+    CommentsModule
   ],
   controllers: [AppController],
   providers: [AppService],
