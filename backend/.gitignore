@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+#sample image
+/sample_image
+
 # Rest files
 /src/rest/*  
 
