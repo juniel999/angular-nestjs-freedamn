@@ -16,6 +16,12 @@ export class Comment extends Document {
 
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User', default: [] })
   likes: Types.ObjectId[];
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Comment', default: null })
+  parentId: Comment | null;
+
+  @Prop({ default: 0 })
+  replyCount: number;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
@@ -25,6 +31,13 @@ CommentSchema.virtual('likedBy', {
   ref: 'User',
   localField: 'likes',
   foreignField: '_id',
+});
+
+// Add virtual property for replies
+CommentSchema.virtual('replies', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'parentId',
 });
 
 // Ensure virtuals are included when converting to JSON

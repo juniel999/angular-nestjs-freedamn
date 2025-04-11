@@ -1,15 +1,18 @@
-import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, SocialLinks } from './user.schema';
 import * as bcrypt from 'bcrypt';
 import { TagsService } from '../tags/tags.service';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private tagsService: TagsService
+    private tagsService: TagsService,
+    private cloudinaryService: CloudinaryService
   ) {}
 
   async findOne(username: string): Promise<User | null> {
@@ -95,5 +98,89 @@ export class UsersService {
     });
 
     return newUser.save();
+  }
+
+  async updateAvatar(userId: string, file: Express.Multer.File): Promise<User> {
+    // Find the user first to get the current avatar URL
+    const user = await this.userModel.findById(userId).exec();
+    
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    
+    // Upload new image to Cloudinary
+    const newAvatarUrl = await this.cloudinaryService.uploadImage(file, 'user-avatars');
+    
+    // Update user with new avatar URL
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      { avatar: newAvatarUrl },
+      { new: true }
+    ).exec();
+    
+    if (!updatedUser) {
+      throw new NotFoundException(`User with id ${userId} not found after update`);
+    }
+    
+    // Delete the old avatar image if it exists
+    if (user.avatar) {
+      try {
+        await this.cloudinaryService.deleteImageByUrl(user.avatar);
+      } catch (error) {
+        console.error('Failed to delete old avatar image:', error);
+        // Continue execution even if deletion fails
+      }
+    }
+    
+    return updatedUser;
+  }
+
+  async updateCoverPhoto(userId: string, file: Express.Multer.File): Promise<User> {
+    // Find the user first to get the current cover photo URL
+    const user = await this.userModel.findById(userId).exec();
+    
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    
+    // Upload new image to Cloudinary
+    const newCoverPhotoUrl = await this.cloudinaryService.uploadImage(file, 'user-coverphoto');
+    
+    // Update user with new cover photo URL
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      { coverphoto: newCoverPhotoUrl },
+      { new: true }
+    ).exec();
+    
+    if (!updatedUser) {
+      throw new NotFoundException(`User with id ${userId} not found after update`);
+    }
+    
+    // Delete the old cover photo image if it exists
+    if (user.coverphoto) {
+      try {
+        await this.cloudinaryService.deleteImageByUrl(user.coverphoto);
+      } catch (error) {
+        console.error('Failed to delete old cover photo image:', error);
+        // Continue execution even if deletion fails
+      }
+    }
+    
+    return updatedUser;
+  }
+
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<User> {
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      updateProfileDto,
+      { new: true }
+    ).exec();
+    
+    if (!updatedUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    
+    return updatedUser;
   }
 }

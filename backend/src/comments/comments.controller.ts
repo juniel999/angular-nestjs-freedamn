@@ -13,6 +13,11 @@ export class CommentsController {
     return this.commentsService.findAllByBlogId(blogId);
   }
 
+  @Get(':id/replies')
+  getReplies(@Param('id') id: string) {
+    return this.commentsService.getReplies(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.commentsService.findOne(id);
@@ -21,7 +26,7 @@ export class CommentsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   create(@Body() createCommentDto: CreateCommentDto, @Request() req) {
-    return this.commentsService.create(createCommentDto, req.user);
+    return this.commentsService.create(createCommentDto, req.user.userId);
   }
 
   @Patch(':id')
