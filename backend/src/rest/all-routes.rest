@@ -50,6 +50,45 @@ Content-Type: application/json
 GET {{baseUrl}}/users/me
 Authorization: Bearer {{authToken}}
 
+### Update User Profile
+PATCH {{baseUrl}}/users/me/profile
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Software Developer",
+  "location": "New York",
+  "pronouns": "He/Him"
+}
+
+### Upload Avatar
+# Note: This is just an example. 
+# To test in a real client, use a multipart/form-data request with a file field named 'file'
+POST {{baseUrl}}/users/me/avatar
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="avatar.jpg"
+Content-Type: image/jpeg
+
+< ../../sample_image/my.png
+------WebKitFormBoundary--
+
+### Upload Cover Photo
+# Note: This is just an example.
+# To test in a real client, use a multipart/form-data request with a file field named 'file'
+POST {{baseUrl}}/users/me/coverphoto
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="cover.jpg"
+Content-Type: image/jpeg
+
+< ../../sample_image/cat.jpg
+------WebKitFormBoundary--
+
 ### ====================== TAG ROUTES ======================
 
 ### Get all tags

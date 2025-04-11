@@ -4,11 +4,13 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User, UserSchema } from './user.schema';
 import { TagsModule } from '../tags/tags.module';
+import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    TagsModule
+    TagsModule,
+    CloudinaryModule
   ],
   providers: [UsersService],
   controllers: [UsersController],
