@@ -3,3 +3,19 @@
 @plugin "daisyui" {
     themes: bumblebee --default;
 }
+
+/* Override DaisyUI default label and placeholder styles */
+.label-text {
+  color: black !important;
+}
+
+input::placeholder {
+  color: black !important;
+  opacity: 0.5 !important;
+}
+
+/* Set focus border color to primary */
+input:focus {
+  border-color:#E5B400 !important;
+  outline-color: transparent !important;
+}

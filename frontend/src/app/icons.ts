@@ -7,7 +7,9 @@ import {
   faUser, 
   faCog, 
   faSignOutAlt, 
-  faBars 
+  faBars,
+  faEye,
+  faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faCommentDots,
@@ -32,6 +34,8 @@ export function initializeIcons(library: FaIconLibrary) {
     faBars,
     faCommentDots,
     faTwitter,
-    faGithub
+    faGithub,
+    faEye,
+    faEyeSlash
   );
 } 

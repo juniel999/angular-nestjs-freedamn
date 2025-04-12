@@ -27,8 +27,8 @@
       <!-- Not Logged In Section -->
       @if (!isLoggedIn) {
       <div class="hidden sm:flex items-center space-x-3">
-        <button class="btn btn-ghost">Login</button>
-        <button class="btn btn-primary">Sign Up</button>
+        <button class="btn btn-ghost" [routerLink]="['/']" >Login</button>
+        <button class="btn btn-primary" [routerLink]="['/signup']">Sign Up</button>
       </div>
       }
       
@@ -90,7 +90,7 @@
         <!-- Mobile Menu Items -->
         @if (!isLoggedIn) {
         <li><a class="btn btn-ghost justify-start">Login</a></li>
-        <li><a class="btn btn-primary justify-start mt-2">Sign Up</a></li>
+        <li><a class="btn btn-primary justify-start mt-2" [routerLink]="['/signup']">Sign Up</a></li>
         }
         
         @if (isLoggedIn) {
