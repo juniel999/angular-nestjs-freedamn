@@ -1,0 +1,207 @@
+<div class="min-h-screen bg-base-100 flex items-center justify-center p-4">
+  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+    <div class="card-body">
+      <!-- Branding -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold">
+          <span class="text-primary">free</span><span class="text-accent">damn.</span>
+        </h1>
+      </div>
+      
+      <!-- Form Title & Subtitle -->
+      <h2 class="card-title text-2xl font-bold mb-1 text-center mx-auto">Create your Account</h2>
+      <p class="text-base-content/70 mb-6">Fill-in your information and let's get started.</p>
+      
+      <!-- Sign Up Form -->
+      <form [formGroup]="signUpForm" (submit)="onSubmit()" class="space-y-4">
+
+        @if (errorMessage) {
+          <p class="text-error">{{ errorMessage }}</p>
+        }
+
+        <!-- Username -->
+        <div class="form-control w-full">
+          <div class="flex justify-start">
+            <label for="username" class="label">
+              <span class="text-black">Username</span>
+            </label>
+          </div>
+          <input 
+            type="text" 
+            id="username"
+            placeholder="Enter your username" 
+            class="input input-bordered w-full" 
+            formControlName="username"
+          />
+          @if (formControls['username'].invalid && formControls['username'].touched) {
+            <div class="text-left w-full">
+              <span class="label-text-alt text-error">Username is required</span>
+            </div>
+          }
+        </div>
+        
+        
+        <!-- First Name -->
+        <div class="form-control w-full">
+          <div class="flex justify-start">
+            <label for="firstname" class="label">
+              <span class="text-black">Firstname</span>
+            </label>
+          </div>
+          <input 
+            type="text" 
+            id="firstname"
+            placeholder="Enter your firstname" 
+            class="input input-bordered w-full" 
+            formControlName="firstname"
+          />
+          @if (formControls['firstname'].invalid && formControls['firstname'].touched) {
+            <div class="text-left w-full">
+              <span class="label-text-alt text-error">Firstname is required</span>
+            </div>
+          }
+        </div>
+        
+        <!-- Last Name -->
+        <div class="form-control w-full">
+          <div class="flex justify-start">
+            <label class="label">
+              <span class="label-text">Lastname</span>
+            </label>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Enter your lastname" 
+            class="input input-bordered w-full" 
+            formControlName="lastname"
+          />
+          @if (formControls['lastname'].invalid && formControls['lastname'].touched) {
+            <div class="text-left w-full">
+              <span class="label-text-alt text-error">Lastname is required</span>
+            </div>
+          }
+        </div>
+        
+        <!-- Email -->
+        <div class="form-control w-full">
+          <div class="flex justify-start">
+            <label class="label">
+              <span class="label-text">Email</span>
+            </label>
+          </div>
+          <input 
+            type="email" 
+            placeholder="Enter your email" 
+            class="input input-bordered w-full" 
+            formControlName="email"
+          />
+          @if (formControls['email'].invalid && formControls['email'].touched) {
+            <div class="text-left w-full">
+              <span class="label-text-alt text-error">
+                @if (formControls['email'].errors?.['required']) {
+                  Email is required
+                } @else if (formControls['email'].errors?.['email']) {
+                  Please enter a valid email address
+                }
+              </span>
+            </div>
+          }
+        </div>
+        
+        <!-- Password -->
+        <div class="form-control w-full">
+          <div class="flex justify-start">
+            <label class="label">
+              <span class="label-text">Password</span>
+            </label>
+          </div>
+          <div class="relative">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              placeholder="Enter your password" 
+              class="input input-bordered w-full pr-10" 
+              formControlName="password"
+            />
+            <button 
+              type="button" 
+              class="absolute right-3 top-1/2 -translate-y-1/2" 
+              (click)="togglePasswordVisibility()"
+            >
+              @if (showPassword) {
+                <fa-icon [icon]="['fas', 'eye']"></fa-icon>
+              } @else {
+                <fa-icon [icon]="['fas', 'eye-slash']"></fa-icon>
+              }
+            </button>
+          </div>
+          @if (formControls['password'].invalid && formControls['password'].touched) {
+            <div class="text-left w-full">
+              <span class="label-text-alt text-error">
+                @if (formControls['password'].errors?.['required']) {
+                  Password is required
+                } @else if (formControls['password'].errors?.['minlength']) {
+                  Password should be at least 8 characters
+                }
+              </span>
+            </div>
+          }
+        </div>
+        
+        <!-- Confirm Password -->
+        <div class="form-control w-full">
+          <div class="flex justify-start">
+            <label class="label">
+              <span class="label-text">Confirm Password</span>
+            </label>
+          </div>
+          <div class="relative">
+            <input 
+              [type]="showConfirmPassword ? 'text' : 'password'" 
+              placeholder="Enter confirm password" 
+              class="input input-bordered w-full pr-10" 
+              formControlName="confirmPassword"
+            />
+            <button 
+              type="button" 
+              class="absolute right-3 top-1/2 -translate-y-1/2" 
+              (click)="toggleConfirmPasswordVisibility()"
+            >
+              @if (showConfirmPassword) {
+                <fa-icon [icon]="['fas', 'eye']"></fa-icon>
+              } @else {
+                <fa-icon [icon]="['fas', 'eye-slash']"></fa-icon>
+              }
+            </button>
+          </div>
+          @if (signUpForm.hasError('passwordMismatch') && formControls['confirmPassword'].touched) {
+            <div class="text-left w-full">
+              <span class="label-text-alt text-error">Passwords must match</span>
+            </div>
+          } @else if (formControls['confirmPassword'].invalid && formControls['confirmPassword'].touched) {
+            <div class="text-left w-full">
+              <span class="label-text-alt text-error">Please confirm your password</span>
+            </div>
+          }
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="form-control mt-6">
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="signUpForm.invalid"
+          >
+            Sign Up
+          </button>
+        </div>
+      </form>
+      
+      <!-- Login Link -->
+      <div class="text-center mt-4">
+        <p>Don't have an account yet? 
+          <button [routerLink]="['/']" class="text-primary cursor-pointer font-semibold">Login</button>
+        </p>
+      </div>
+    </div>
+  </div>
+</div> 
