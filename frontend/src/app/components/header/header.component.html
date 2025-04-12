@@ -1,0 +1,106 @@
+<header class="w-full bg-base-100 shadow-md">
+  <div class="container max-w-6xl mx-auto px-4 py-3">
+    <div class="flex items-center justify-between">
+      <!-- Logo and Search Section (Common) -->
+      <div class="flex items-center space-x-4 flex-grow md:flex-grow-0">
+        <!-- Logo -->
+        <a href="/" class="text-xl font-bold">
+          <span class="text-primary">free</span><span class="text-accent">damn.</span>
+        </a>
+        
+        <!-- Search Input - Hidden on very small screens -->
+        <div class="relative mx-2 hidden sm:block w-full md:w-64">
+          <input type="text" placeholder="Search" class="input input-bordered w-full rounded-full" />
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <fa-icon [icon]="['fas', 'search']" class="text-gray-400"></fa-icon>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile Menu Button - Only visible on small screens -->
+      <div class="sm:hidden">
+        <label for="mobile-menu" class="btn btn-square btn-ghost">
+          <fa-icon [icon]="['fas', 'bars']" class="h-6 w-6"></fa-icon>
+        </label>
+      </div>
+      
+      <!-- Not Logged In Section -->
+      @if (!isLoggedIn) {
+      <div class="hidden sm:flex items-center space-x-3">
+        <button class="btn btn-ghost">Login</button>
+        <button class="btn btn-primary">Sign Up</button>
+      </div>
+      }
+      
+      <!-- Logged In Section -->
+      @if (isLoggedIn) {
+      <div class="hidden sm:flex items-center space-x-3">
+        <button class="btn btn-primary">
+          <fa-icon [icon]="['fas', 'plus']" class="mr-1"></fa-icon>
+          <span class="hidden md:inline">Compose</span>
+        </button>
+        
+        <!-- Notification Bell -->
+        <div class="dropdown dropdown-end">
+          <label tabindex="0" class="btn btn-ghost btn-circle">
+            <div class="indicator">
+              <fa-icon [icon]="['far', 'bell']" [size]="'2x'"></fa-icon>
+              <span class="badge badge-sm badge-primary indicator-item">3</span>
+            </div>
+          </label>
+        </div>
+        
+        <!-- User Profile/Dropdown -->
+        <div class="dropdown dropdown-end">
+          <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+            <div class="w-10 rounded-full">
+              <img [src]="userAvatar" alt="User avatar" />
+            </div>
+          </label>
+          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+            <li class="mb-2 p-2 font-semibold">
+              <div>{{ username }}</div>
+            </li>
+            <li><a><fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile</a></li>
+            <li><a><fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings</a></li>
+            <li><a><fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon>Logout</a></li>
+          </ul>
+        </div>
+        
+        <!-- Username - Only visible on larger screens -->
+        <span class="text-sm font-medium hidden md:inline-block">{{ username }}</span>
+      </div>
+      }
+    </div>
+  </div>
+  
+  <!-- Mobile Menu Drawer -->
+  <div class="drawer sm:hidden">
+    <input id="mobile-menu" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-side z-10">
+      <label for="mobile-menu" class="drawer-overlay"></label>
+      <ul class="menu p-4 w-80 h-full bg-base-100 text-base-content">
+        <!-- Search Input for Mobile -->
+        <li class="mb-4">
+          <div class="form-control">
+            <input type="text" placeholder="Search" class="input input-bordered w-full rounded-full" />
+          </div>
+        </li>
+        
+        <!-- Mobile Menu Items -->
+        @if (!isLoggedIn) {
+        <li><a class="btn btn-ghost justify-start">Login</a></li>
+        <li><a class="btn btn-primary justify-start mt-2">Sign Up</a></li>
+        }
+        
+        @if (isLoggedIn) {
+        <li><a class="btn btn-primary justify-start"><fa-icon [icon]="['fas', 'plus']" class="mr-2"></fa-icon>Compose</a></li>
+        <li class="mt-2"><a><fa-icon [icon]="['far', 'bell']" [size]="'lg'" class="mr-2"></fa-icon>Notifications</a></li>
+        <li><a><fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile</a></li>
+        <li><a><fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings</a></li>
+        <li><a><fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon>Logout</a></li>
+        }
+      </ul>
+    </div>
+  </div>
+</header>
