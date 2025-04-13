@@ -1,0 +1,10 @@
+<div class="toast toast-bottom toast-end z-50">
+    <div class="alert {{ getAlertClass() }}">
+      @if (type === 'success') {
+        <fa-icon [icon]="['fas', 'check']" class="mr-2"></fa-icon>
+      } @else {
+        <fa-icon [icon]="['fas', 'times']" class="mr-2"></fa-icon>
+      }
+      <span>{{ message }}</span>
+    </div>
+  </div>
