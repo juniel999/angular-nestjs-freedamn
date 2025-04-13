@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormGroup, Validators, FormControl, AbstractContro
 import { Router, RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -24,7 +25,11 @@ export class SignUpComponent {
   showConfirmPassword = false;
   errorMessage: string | null = null;
   
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private router: Router, 
+    private authService: AuthService,
+    private toastService: ToastService
+  ) {}
 
   get formControls() {
     return this.signUpForm.controls;
@@ -63,11 +68,24 @@ export class SignUpComponent {
       } ).subscribe({
         next: (res) => {
           console.log('Registration successful', res);
-          // this.router.navigate(['/login']);
+          // Show toast notification with primary color
+          this.toastService.show(
+            'Registration successful! Welcome to freedamn.',
+            'success'
+          );
+          
+          // Navigate to home after a short delay
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 1500);
         },
         error: (error) => {
           console.error('Registration failed', error);
           this.errorMessage = error.error.message;
+          this.toastService.show(
+            `Registration failed: ${error.error.message}`,
+            'error'
+          );
         }
       })
     } else {
