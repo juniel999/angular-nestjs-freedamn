@@ -1,38 +1,45 @@
 <div class="min-h-screen flex">
   <!-- Left side: Form -->
-  <div class="w-full md:w-1/2 bg-base-100 flex items-center justify-center p-6 md:p-10">
+  <div
+    class="w-full md:w-1/2 bg-base-100 flex items-center justify-center p-6 md:p-10"
+  >
     <div class="w-full max-w-md">
       <!-- Branding -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold">
-          <span class="text-primary">free</span><span class="text-accent">damn.</span>
+      <button class="mb-6" routerLink="/">
+        <h1 class="text-2xl font-bold cursor-pointer">
+          <span class="text-primary">free</span
+          ><span class="text-accent">damn.</span>
         </h1>
-      </div>
-      
+      </button>
+
       <!-- Form Title & Subtitle -->
       <h2 class="text-3xl font-bold mb-2">Create your Account</h2>
-      <p class="text-base-content/70 mb-8">Fill-in your information and let's get started.</p>
-      
+      <p class="text-base-content/70 mb-8">
+        Fill-in your information and let's get started.
+      </p>
+
       <!-- Sign Up Form -->
       <form [formGroup]="signUpForm" (submit)="onSubmit()" class="space-y-4">
-
         <!-- Username -->
         <div class="form-control w-full">
           <label for="username" class="label">
             <span class="label-text font-medium">Username</span>
           </label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             id="username"
-            placeholder="Enter your username" 
-            class="input input-bordered w-full" 
+            placeholder="Enter your username"
+            class="input input-bordered w-full"
             formControlName="username"
           />
-          @if (formControls['username'].invalid && formControls['username'].touched) {
-            <span class="text-xs text-error mt-1 block">Username is required</span>
+          @if (formControls['username'].invalid &&
+          formControls['username'].touched) {
+          <span class="text-xs text-error mt-1 block"
+            >Username is required</span
+          >
           }
         </div>
-        
+
         <!-- Name fields in a row -->
         <div class="grid grid-cols-2 gap-4">
           <!-- First Name -->
@@ -40,173 +47,211 @@
             <label for="firstname" class="label">
               <span class="label-text font-medium">First Name</span>
             </label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               id="firstname"
-              placeholder="First name" 
-              class="input input-bordered w-full" 
+              placeholder="First name"
+              class="input input-bordered w-full"
               formControlName="firstname"
             />
-            @if (formControls['firstname'].invalid && formControls['firstname'].touched) {
-              <span class="text-xs text-error mt-1 block">Required</span>
+            @if (formControls['firstname'].invalid &&
+            formControls['firstname'].touched) {
+            <span class="text-xs text-error mt-1 block">Required</span>
             }
           </div>
-          
+
           <!-- Last Name -->
           <div class="form-control w-full">
             <label for="lastname" class="label">
               <span class="label-text font-medium">Last Name</span>
             </label>
-            <input 
+            <input
               type="text"
-              id="lastname" 
-              placeholder="Last name" 
-              class="input input-bordered w-full" 
+              id="lastname"
+              placeholder="Last name"
+              class="input input-bordered w-full"
               formControlName="lastname"
             />
-            @if (formControls['lastname'].invalid && formControls['lastname'].touched) {
-              <span class="text-xs text-error mt-1 block">Required</span>
+            @if (formControls['lastname'].invalid &&
+            formControls['lastname'].touched) {
+            <span class="text-xs text-error mt-1 block">Required</span>
             }
           </div>
         </div>
-        
+
         <!-- Email -->
         <div class="form-control w-full">
           <label for="email" class="label">
             <span class="label-text font-medium">Email</span>
           </label>
-          <input 
+          <input
             type="email"
-            id="email" 
-            placeholder="your.email@example.com" 
-            class="input input-bordered w-full" 
+            id="email"
+            placeholder="your.email@example.com"
+            class="input input-bordered w-full"
             formControlName="email"
           />
           @if (formControls['email'].invalid && formControls['email'].touched) {
-            <span class="text-xs text-error mt-1 block">
-              @if (formControls['email'].errors?.['required']) {
-                Email is required
-              } @else if (formControls['email'].errors?.['email']) {
-                Please enter a valid email address
-              }
-            </span>
+          <span class="text-xs text-error mt-1 block">
+            @if (formControls['email'].errors?.['required']) { Email is required
+            } @else if (formControls['email'].errors?.['email']) { Please enter
+            a valid email address }
+          </span>
           }
         </div>
-        
+
         <!-- Password -->
         <div class="form-control w-full">
           <label for="password" class="label">
             <span class="label-text font-medium">Password</span>
           </label>
           <div class="relative">
-            <input 
+            <input
               id="password"
-              [type]="showPassword ? 'text' : 'password'" 
-              placeholder="Create a strong password" 
-              class="input input-bordered w-full pr-10" 
+              [type]="showPassword ? 'text' : 'password'"
+              placeholder="Create a strong password"
+              class="input input-bordered w-full pr-10"
               formControlName="password"
             />
-            <button 
-              type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content" 
+            <button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content"
               (click)="togglePasswordVisibility()"
             >
               @if (showPassword) {
-                <fa-icon [icon]="['fas', 'eye']"></fa-icon>
+              <fa-icon [icon]="['fas', 'eye']"></fa-icon>
               } @else {
-                <fa-icon [icon]="['fas', 'eye-slash']"></fa-icon>
+              <fa-icon [icon]="['fas', 'eye-slash']"></fa-icon>
               }
             </button>
           </div>
-          @if (formControls['password'].invalid && formControls['password'].touched) {
-            <span class="text-xs text-error mt-1 block">
-              @if (formControls['password'].errors?.['required']) {
-                Password is required
-              } @else if (formControls['password'].errors?.['minlength']) {
-                Password should be at least 8 characters
-              }
-            </span>
+          @if (formControls['password'].invalid &&
+          formControls['password'].touched) {
+          <span class="text-xs text-error mt-1 block">
+            @if (formControls['password'].errors?.['required']) { Password is
+            required } @else if (formControls['password'].errors?.['minlength'])
+            { Password should be at least 8 characters }
+          </span>
           }
         </div>
-        
+
         <!-- Confirm Password -->
         <div class="form-control w-full">
           <label for="confirmPassword" class="label">
             <span class="label-text font-medium">Confirm Password</span>
           </label>
           <div class="relative">
-            <input 
+            <input
               id="confirmPassword"
-              [type]="showConfirmPassword ? 'text' : 'password'" 
-              placeholder="Confirm your password" 
-              class="input input-bordered w-full pr-10" 
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              placeholder="Confirm your password"
+              class="input input-bordered w-full pr-10"
               formControlName="confirmPassword"
             />
-            <button 
-              type="button" 
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content" 
+            <button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content"
               (click)="toggleConfirmPasswordVisibility()"
             >
               @if (showConfirmPassword) {
-                <fa-icon [icon]="['fas', 'eye']"></fa-icon>
+              <fa-icon [icon]="['fas', 'eye']"></fa-icon>
               } @else {
-                <fa-icon [icon]="['fas', 'eye-slash']"></fa-icon>
+              <fa-icon [icon]="['fas', 'eye-slash']"></fa-icon>
               }
             </button>
           </div>
-          @if (signUpForm.hasError('passwordMismatch') && formControls['confirmPassword'].touched) {
-            <span class="text-xs text-error mt-1 block">Passwords must match</span>
-          } @else if (formControls['confirmPassword'].invalid && formControls['confirmPassword'].touched) {
-            <span class="text-xs text-error mt-1 block">Please confirm your password</span>
+          @if (signUpForm.hasError('passwordMismatch') &&
+          formControls['confirmPassword'].touched) {
+          <span class="text-xs text-error mt-1 block"
+            >Passwords must match</span
+          >
+          } @else if (formControls['confirmPassword'].invalid &&
+          formControls['confirmPassword'].touched) {
+          <span class="text-xs text-error mt-1 block"
+            >Please confirm your password</span
+          >
           }
         </div>
-        
+
         <!-- Action Buttons -->
         <div class="form-control mt-8">
-          <button 
-            type="submit" 
-            class="btn btn-primary"
-          >
-            Create Account
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+            @if (isLoading) {
+              <span class="inline-block animate-spin mr-2">
+                <fa-icon [icon]="['fas', 'spinner']"></fa-icon>
+              </span>
+              Creating account...
+            } @else {
+              Create Account
+            }
           </button>
         </div>
       </form>
-      
+
       <!-- Login Link -->
       <div class="text-center mt-6">
-        <p>Already have an account? 
-          <button [routerLink]="['/']" class="text-primary cursor-pointer font-semibold">Log in</button>
+        <p>
+          Already have an account?
+          <button
+            [routerLink]="['/signin']"
+            class="text-primary cursor-pointer font-semibold hover:underline"
+          >
+            Log in here.
+          </button>
         </p>
       </div>
     </div>
   </div>
-  
+
   <!-- Right side: Text content instead of image -->
-  <div class="hidden md:flex md:w-1/2 bg-black text-white flex-col justify-center items-center p-10">
+  <div
+    class="hidden md:flex md:w-1/2 bg-black text-white flex-col justify-center items-center p-10"
+  >
     <div class="max-w-md text-center space-y-8">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to <span class="text-accent"><span class="text-primary">free</span><span class="text-white">damn.</span></span></h1>
-      
-      <p class="text-xl opacity-90 mb-6">Join our community and connect with like-minded people from around the world.</p>
-      
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">
+        Welcome to
+        <span class="text-accent"
+          ><span class="text-primary">free</span
+          ><span class="text-white">damn.</span></span
+        >
+      </h1>
+
+      <p class="text-xl opacity-90 mb-6">
+        Join our community and connect with like-minded people from around the
+        world.
+      </p>
+
       <div class="flex flex-col gap-6 items-center">
         <div class="flex items-center gap-3">
-          <fa-icon [icon]="['fas', 'check']" class="text-primary text-xl"></fa-icon>
+          <fa-icon
+            [icon]="['fas', 'check']"
+            class="text-primary text-xl"
+          ></fa-icon>
           <span class="text-lg">Share your thoughts and ideas</span>
         </div>
-        
+
         <div class="flex items-center gap-3">
-          <fa-icon [icon]="['fas', 'check']" class="text-primary text-xl"></fa-icon>
+          <fa-icon
+            [icon]="['fas', 'check']"
+            class="text-primary text-xl"
+          ></fa-icon>
           <span class="text-lg">Connect with friends and colleagues</span>
         </div>
-        
+
         <div class="flex items-center gap-3">
-          <fa-icon [icon]="['fas', 'check']" class="text-primary text-xl"></fa-icon>
+          <fa-icon
+            [icon]="['fas', 'check']"
+            class="text-primary text-xl"
+          ></fa-icon>
           <span class="text-lg">Discover new content every day</span>
         </div>
       </div>
-      
+
       <div class="mt-12 text-base opacity-80">
-        <p>"A platform for the bold—where unfiltered thoughts meet unapologetic freedom."</p>
+        <p>
+          "A platform for the bold—where unfiltered thoughts meet unapologetic
+          freedom."
+        </p>
       </div>
     </div>
   </div>

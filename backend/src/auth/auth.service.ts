@@ -3,6 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 
+type User = {
+  userId: string;
+  username: string;
+  roles: []
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -35,7 +41,7 @@ export class AuthService {
     const payload = { 
       username: user.username, 
       sub: user._id,
-      roles: user.roles 
+      roles: user.roles,
     };
     
     // Return JWT token
@@ -71,4 +77,15 @@ export class AuthService {
       throw error;
     }
   }
+
+  // return user profile without password
+  async getProfile(user : User) : Promise<Omit<User, 'password'> | null>  {
+    const userProfile = await this.usersService.findById(user.userId);
+    if (!userProfile) {
+      return null;
+    }
+    const { password, ...result } = userProfile.toObject();
+    return result;
+  }
+
 }
