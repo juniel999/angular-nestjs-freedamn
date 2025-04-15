@@ -19,9 +19,6 @@ export interface UserProfile {
   username: string;
   sub: string;
   roles: string[];
-  avatar?: string;
-  cover?: string;
-  [key: string]: any;
 }
 
 @Injectable({
@@ -42,9 +39,6 @@ export class AuthService {
    */
   private initializeAuthentication(): void {
     this.loadUserFromStorage();
-    if (this.isLoggedIn()) {
-      this.fetchFullProfile();
-    }
   }
 
   /**
@@ -56,7 +50,6 @@ export class AuthService {
         tap(response => {
           this.saveToken(response.access_token);
           this.loadUserFromStorage();
-          this.fetchFullProfile();
         })
       );
   }
@@ -91,43 +84,10 @@ export class AuthService {
   }
 
   /**
-   * Refresh the profile data
-   */
-  refreshProfile(): void {
-    this.fetchFullProfile();
-  }
-
-  /**
    * Get the current authentication token
    */
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
-  }
-
-  /**
-   * Fetch the complete user profile from API
-   */
-  private fetchFullProfile(): void {
-    if (!this.isLoggedIn()) return;
-    
-    this.getProfile().pipe(
-      catchError((error: HttpErrorResponse) => {
-        console.error('Error fetching profile:', error);
-        
-        // If unauthorized (401) or forbidden (403), clear the token
-        // This handles expired tokens or invalid tokens automatically
-        if (error.status === 401 || error.status === 403) {
-          console.log('Authentication error. Logging out user.');
-          this.logout();
-        }
-        
-        return of(null);
-      })
-    ).subscribe(profile => {
-      if (profile) {
-        this.currentUserSubject.next(profile);
-      }
-    });
   }
 
   /**
@@ -156,7 +116,14 @@ export class AuthService {
         return;
       }
       
-      this.currentUserSubject.next(payload);
+      // Extract only the essential user properties
+      const userProfile: UserProfile = {
+        username: payload.username,
+        sub: payload.sub,
+        roles: payload.roles,
+      };
+      
+      this.currentUserSubject.next(userProfile);
     } catch (error) {
       console.error('Invalid token format', error);
       this.logout();

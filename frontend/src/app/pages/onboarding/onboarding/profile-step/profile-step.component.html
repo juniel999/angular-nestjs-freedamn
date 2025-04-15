@@ -1,0 +1,131 @@
+<div class="w-full">
+  <h2 class="text-2xl font-semibold mb-6 text-center">Your Profile Information</h2>
+  
+  <form [formGroup]="profileForm" class="space-y-6">
+    <!-- Basic Info -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">First Name</span>
+        </label>
+        <input type="text" formControlName="firstName" class="input input-bordered w-full" placeholder="Your first name" />
+        @if (profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched) {
+          <div class="text-error text-sm mt-1">
+            First name is required
+          </div>
+        }
+      </div>
+      
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Last Name</span>
+        </label>
+        <input type="text" formControlName="lastName" class="input input-bordered w-full" placeholder="Your last name" />
+        @if (profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched) {
+          <div class="text-error text-sm mt-1">
+            Last name is required
+          </div>
+        }
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Pronouns</span>
+        </label>
+        <select formControlName="pronouns" class="select select-bordered w-full">
+          <option value="">Select pronouns</option>
+          @for (option of pronounOptions; track option.value) {
+            <option [value]="option.value">
+              {{ option.label }}
+            </option>
+          }
+        </select>
+      </div>
+      
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Job Title</span>
+        </label>
+        <input type="text" formControlName="title" class="input input-bordered w-full" placeholder="Your job title" />
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Location</span>
+        </label>
+        <input type="text" formControlName="location" class="input input-bordered w-full" placeholder="City, Country" />
+      </div>
+      
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Birthdate</span>
+        </label>
+        <input type="date" formControlName="birthdate" class="input input-bordered w-full" />
+      </div>
+    </div>
+    
+    <div class="form-control w-full">
+      <label class="label">
+        <span class="label-text">Bio</span>
+      </label>
+      <textarea formControlName="bio" class="textarea textarea-bordered h-24" placeholder="Tell us about yourself"></textarea>
+    </div>
+    
+    <!-- Social Links -->
+    <div formGroupName="socials">
+      <h3 class="text-xl font-medium mb-4">Social Media Links</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-control w-full">
+          <label class="label">
+            <span class="label-text">Facebook</span>
+          </label>
+          <input type="text" formControlName="facebook" class="input input-bordered w-full" placeholder="Your Facebook profile" />
+        </div>
+        
+        <div class="form-control w-full">
+          <label class="label">
+            <span class="label-text">Twitter</span>
+          </label>
+          <input type="text" formControlName="twitter" class="input input-bordered w-full" placeholder="Your Twitter profile" />
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <div class="form-control w-full">
+          <label class="label">
+            <span class="label-text">Instagram</span>
+          </label>
+          <input type="text" formControlName="instagram" class="input input-bordered w-full" placeholder="Your Instagram profile" />
+        </div>
+        
+        <div class="form-control w-full">
+          <label class="label">
+            <span class="label-text">LinkedIn</span>
+          </label>
+          <input type="text" formControlName="linkedin" class="input input-bordered w-full" placeholder="Your LinkedIn profile" />
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <div class="form-control w-full">
+          <label class="label">
+            <span class="label-text">GitHub</span>
+          </label>
+          <input type="text" formControlName="github" class="input input-bordered w-full" placeholder="Your GitHub profile" />
+        </div>
+        
+        <div class="form-control w-full">
+          <label class="label">
+            <span class="label-text">Website</span>
+          </label>
+          <input type="text" formControlName="website" class="input input-bordered w-full" placeholder="Your personal website" />
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

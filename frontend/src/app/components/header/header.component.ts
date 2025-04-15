@@ -3,6 +3,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { UserService } from '../../services/user.service';
+
 
 @Component({
   selector: 'app-header',
@@ -12,13 +14,15 @@ import { ToastService } from '../../services/toast.service';
 })
 export class HeaderComponent {
   username: string = 'Guest';
-  userAvatar: string = 'https://ui-avatars.com/api/?name=Guest&background=random';
+  userAvatar: string = '';
   isLoggedIn = false;
+  userId = '';
   
   constructor(
     private router: Router,
     private authService: AuthService,
     private toastService: ToastService,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -26,21 +30,21 @@ export class HeaderComponent {
     this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user;
       this.username = user?.username || 'Guest';
-      
-      // Set avatar, falling back to generated avatar
-      if (user?.avatar && this.isValidAvatarUrl(user.avatar)) {
-        this.userAvatar = user.avatar;
-      } else {
-        const initial = (this.username.charAt(0) || 'G').toUpperCase();
-        this.userAvatar = `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(initial)}`;
-      }
+      this.userId = user?.sub || "";
     });
+
+    if(this.userId){  
+      this.userService.getUserProfile(this.userId).subscribe(userProfile => {
+        this.userAvatar = userProfile?.avatar || 'https://ui-avatars.com/api/?name=Guest&background=random&name='+this.username.charAt(0).toUpperCase();
+      });
+    }
   }
 
   // Simple URL validation for security
   private isValidAvatarUrl(url: string): boolean {
     return url.startsWith('https://') && url.length < 500;
   }
+
 
   async logout(): Promise<void> {
     try {

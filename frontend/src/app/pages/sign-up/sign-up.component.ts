@@ -85,10 +85,10 @@ export class SignUpComponent {
               console.log('Auto login successful', loginRes);
           
               
-              // Navigate to home after a short delay
+              // Navigate to onboarding after a short delay
               setTimeout(() => {
                 this.isLoading = false;
-                this.router.navigate(['/']);
+                this.router.navigate(['/onboarding']);
               }, 1000);
             },
             error: (loginError) => {
