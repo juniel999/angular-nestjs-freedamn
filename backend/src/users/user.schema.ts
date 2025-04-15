@@ -62,6 +62,12 @@ export class User extends Document {
   @Prop({ enum: ['He/Him', 'She/Her', 'They/Them'] })
   pronouns?: string;
 
+  @Prop()
+  bio?: string;
+
+  @Prop({ default: false })
+  onboardingCompleted?: boolean;
+
   @Prop({ default: true })
   isActive: boolean;
 

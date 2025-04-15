@@ -183,4 +183,44 @@ export class UsersService {
     
     return updatedUser;
   }
+
+  async getUserProfile(userId: string) {
+    const user = await this.userModel.findById(userId).select('-password').exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    return {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      pronouns: user.pronouns,
+      title: user.title,
+      location: user.location,
+      birthdate: user.birthdate,
+      bio: user.bio,
+      socials: user.socials,
+      avatar: user.avatar,
+      coverphoto: user.coverphoto
+    };
+  }
+
+  async getOnboardingStatus(userId: string) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    // Consider onboarding complete if the user has at least 3 preferred tags or has completed the onboarding explicitly
+    const hasCompletedOnboarding = user.onboardingCompleted || (user.preferredTags && user.preferredTags.length >= 3);
+    return { completed: hasCompletedOnboarding };
+  }
+
+  async completeOnboarding(userId: string) {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { onboardingCompleted: true },
+      { new: true }
+    ).exec();
+    return { completed: true };
+  }
 }

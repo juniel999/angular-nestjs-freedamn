@@ -10,7 +10,8 @@ import {
   UploadedFile, 
   ParseFilePipe, 
   MaxFileSizeValidator, 
-  FileTypeValidator 
+  FileTypeValidator,
+  Param
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -49,7 +50,14 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Patch('me/profile')
   updateProfile(@Body() updateProfileDto: UpdateProfileDto, @Request() req) {
-    return this.usersService.updateProfile(req.user._id, updateProfileDto);
+    return this.usersService.updateProfile(req.user.userId, updateProfileDto);
+  }
+
+  // Get user profile by ID
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/profile')
+  getUserProfile(@Param('id') id: string) {
+    return this.usersService.getUserProfile(id);
   }
 
   // Upload avatar
@@ -71,6 +79,25 @@ export class UsersController {
     return this.usersService.updateAvatar(req.user._id, file);
   }
 
+  // Upload avatar for specific user
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadUserAvatar(
+    @Param('id') id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File
+  ) {
+    return this.usersService.updateAvatar(id, file);
+  }
+
   // Upload cover photo
   @UseGuards(JwtAuthGuard)
   @Post('me/coverphoto')
@@ -88,5 +115,48 @@ export class UsersController {
     @Request() req,
   ) {
     return this.usersService.updateCoverPhoto(req.user._id, file);
+  }
+
+  // Upload cover photo for specific user
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/cover-photo')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadUserCoverPhoto(
+    @Param('id') id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File
+  ) {
+    return this.usersService.updateCoverPhoto(id, file);
+  }
+
+  // Update tags for specific user
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/tags')
+  updateUserTags(
+    @Param('id') id: string,
+    @Body() body: { tags: string[] }
+  ) {
+    return this.usersService.updatePreferredTags(id, body.tags);
+  }
+
+  // Get onboarding status
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/onboarding-status')
+  getOnboardingStatus(@Param('id') id: string) {
+    return this.usersService.getOnboardingStatus(id);
+  }
+
+  // Complete onboarding
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/complete-onboarding')
+  completeOnboarding(@Param('id') id: string) {
+    return this.usersService.completeOnboarding(id);
   }
 }

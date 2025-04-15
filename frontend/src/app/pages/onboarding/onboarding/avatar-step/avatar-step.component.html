@@ -1,0 +1,113 @@
+<div class="w-full">
+  <h2 class="text-2xl font-semibold mb-6 text-center">Upload Your Photos</h2>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+    <!-- Avatar Upload Section -->
+    <div class="flex flex-col items-center">
+      <h3 class="text-lg font-medium mb-3">Profile Picture</h3>
+      
+      <div class="avatar mb-4">
+        <div class="w-40 h-40 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center bg-gray-100 overflow-hidden">
+          @if (avatarPreview) {
+            <img [src]="avatarPreview" alt="Avatar Preview" class="w-full h-full object-cover" />
+          }
+          @if (!avatarPreview) {
+            <div class="text-gray-400 text-center">
+              <fa-icon [icon]="['fas', 'user']" class="h-16 w-16 mx-auto"></fa-icon>
+              <p class="mt-2">No image selected</p>
+            </div>
+          }
+        </div>
+      </div>
+      
+      <div class="form-control w-full max-w-xs">
+        <label class="label">
+          <span class="label-text">Choose a profile picture</span>
+        </label>
+        <input type="file" accept="image/png, image/jpeg, image/jpg" (change)="onAvatarSelected($event)" class="file-input file-input-bordered w-full" />
+        <label class="label">
+          <span class="label-text-alt">Recommended size: 400x400px</span>
+          <span class="label-text-alt">Max size: 2MB</span>
+        </label>
+      </div>
+      
+      @if (avatarSizeError) {
+        <div class="alert alert-error mt-2 w-full max-w-xs">
+          <fa-icon [icon]="['fas', 'times']" class="h-6 w-6 shrink-0"></fa-icon>
+          <span>{{avatarError}}</span>
+        </div>
+      }
+      
+      <button 
+        (click)="uploadAvatar()" 
+        class="btn btn-primary mt-4" 
+        [disabled]="!avatarFile || isUploadingAvatar">
+        @if (isUploadingAvatar) {
+          <span class="loading loading-spinner loading-sm mr-2"></span>
+        }
+        {{ isUploadingAvatar ? 'Uploading...' : 'Upload Avatar' }}
+      </button>
+      
+      @if (avatarUpdated) {
+        <div class="alert alert-primary mt-4">
+          <fa-icon [icon]="['fas', 'check']" class="h-6 w-6"></fa-icon>
+          <span>Avatar updated successfully!</span>
+        </div>
+      }
+    </div>
+    
+    <!-- Cover Photo Upload Section -->
+    <div class="flex flex-col items-center">
+      <h3 class="text-lg font-medium mb-3">Cover Photo</h3>
+      
+      <div class="mb-4 w-full max-w-sm">
+        <div class="w-full h-32 rounded-lg ring ring-primary ring-offset-base-100 ring-offset-2 flex items-center justify-center bg-gray-100 overflow-hidden">
+          @if (coverPhotoPreview) {
+            <img [src]="coverPhotoPreview" alt="Cover Photo Preview" class="w-full h-full object-cover" />
+          }
+          @if (!coverPhotoPreview) {
+            <div class="text-gray-400 text-center">
+              <fa-icon [icon]="['fas', 'file-image']" class="h-12 w-12 mx-auto"></fa-icon>
+              <p class="mt-2">No cover photo selected</p>
+            </div>
+          }
+        </div>
+      </div>
+      
+      <div class="form-control w-full max-w-xs">
+        <label class="label">
+          <span class="label-text">Choose a cover photo</span>
+        </label>
+        <input type="file" accept="image/png, image/jpeg, image/jpg" (change)="onCoverPhotoSelected($event)" class="file-input file-input-bordered w-full" />
+        <label class="label">
+          <span class="label-text-alt">Recommended size: 1200x300px</span>
+          <span class="label-text-alt">Max size: 2MB</span>
+        </label>
+      </div>
+      
+      @if (coverPhotoSizeError) {
+        <div class="alert alert-error mt-2 w-full max-w-xs">
+          <fa-icon [icon]="['fas', 'times']" class="h-6 w-6 shrink-0"></fa-icon>
+          <span>{{coverPhotoError}}</span>
+        </div>
+      }
+      
+      <button 
+        (click)="uploadCoverPhoto()" 
+        class="btn btn-primary mt-4" 
+        [disabled]="!coverPhotoFile || isUploadingCover">
+        @if (isUploadingCover) {
+          <span class="loading loading-spinner loading-sm mr-2"></span>
+        }
+        {{ isUploadingCover ? 'Uploading...' : 'Upload Cover Photo' }}
+      </button>
+      
+      @if (coverPhotoUpdated) {
+        <div class="alert alert-primary mt-4">
+          <fa-icon [icon]="['fas', 'check']" class="h-6 w-6"></fa-icon>
+          <span>Cover photo updated successfully!</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,167 @@
+<div class="w-full">
+  <h2 class="text-2xl font-semibold mb-6 text-center">Review Your Profile</h2>
+  
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="flex justify-center my-8">
+      <fa-icon [icon]="['fas', 'spinner']" class="fa-spin text-primary" size="3x"></fa-icon>
+    </div>
+  }
+  
+  @if (!isLoading) {
+    <div class="space-y-8">
+      <!-- Profile Information -->
+      <div class="bg-base-200 p-6 rounded-lg">
+        <h3 class="text-lg font-semibold mb-4">Profile Information</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p class="text-sm text-gray-500">First Name</p>
+            <p class="font-medium">{{ profile?.firstName || 'Not provided' }}</p>
+          </div>
+          
+          <div>
+            <p class="text-sm text-gray-500">Last Name</p>
+            <p class="font-medium">{{ profile?.lastName || 'Not provided' }}</p>
+          </div>
+          
+          <div>
+            <p class="text-sm text-gray-500">Pronouns</p>
+            <p class="font-medium">{{ profile?.pronouns || 'Not provided' }}</p>
+          </div>
+          
+          <div>
+            <p class="text-sm text-gray-500">Job Title</p>
+            <p class="font-medium">{{ profile?.title || 'Not provided' }}</p>
+          </div>
+          
+          <div>
+            <p class="text-sm text-gray-500">Location</p>
+            <p class="font-medium">{{ profile?.location || 'Not provided' }}</p>
+          </div>
+          
+          <div>
+            <p class="text-sm text-gray-500">Birthdate</p>
+            <p class="font-medium">{{ profile?.birthdate || 'Not provided' }}</p>
+          </div>
+        </div>
+        
+        <div class="mt-4">
+          <p class="text-sm text-gray-500">Bio</p>
+          <p class="font-medium">{{ profile?.bio || 'Not provided' }}</p>
+        </div>
+        
+        <!-- Social Links -->
+        <div class="mt-6">
+          <h4 class="text-md font-medium mb-2">Social Links</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @if (profile?.socials?.facebook) {
+              <div>
+                <p class="text-sm text-gray-500">Facebook</p>
+                <p class="font-medium truncate">{{ profile?.socials?.facebook }}</p>
+              </div>
+            }
+            
+            @if (profile?.socials?.twitter) {
+              <div>
+                <p class="text-sm text-gray-500">Twitter</p>
+                <p class="font-medium truncate">{{ profile?.socials?.twitter }}</p>
+              </div>
+            }
+            
+            @if (profile?.socials?.instagram) {
+              <div>
+                <p class="text-sm text-gray-500">Instagram</p>
+                <p class="font-medium truncate">{{ profile?.socials?.instagram }}</p>
+              </div>
+            }
+            
+            @if (profile?.socials?.linkedin) {
+              <div>
+                <p class="text-sm text-gray-500">LinkedIn</p>
+                <p class="font-medium truncate">{{ profile?.socials?.linkedin }}</p>
+              </div>
+            }
+            
+            @if (profile?.socials?.github) {
+              <div>
+                <p class="text-sm text-gray-500">GitHub</p>
+                <p class="font-medium truncate">{{ profile?.socials?.github }}</p>
+              </div>
+            }
+            
+            @if (profile?.socials?.website) {
+              <div>
+                <p class="text-sm text-gray-500">Website</p>
+                <p class="font-medium truncate">{{ profile?.socials?.website }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      
+      <!-- Photos -->
+      <div class="bg-base-200 p-6 rounded-lg">
+        <h3 class="text-lg font-semibold mb-4">Photos</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <p class="text-sm text-gray-500 mb-2">Profile Picture</p>
+            <div class="avatar">
+              <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                @if (avatarUrl) {
+                  <img [src]="avatarUrl" alt="Profile Avatar" class="w-full h-full object-cover" />
+                }
+                @if (!avatarUrl) {
+                  <div class="text-gray-400 text-center">
+                    <fa-icon [icon]="['fas', 'user']" class="h-12 w-12 mx-auto"></fa-icon>
+                    <p class="text-xs mt-1">No avatar</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <p class="text-sm text-gray-500 mb-2">Cover Photo</p>
+            <div class="w-full h-32 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+              @if (coverPhotoUrl) {
+                <img [src]="coverPhotoUrl" alt="Cover Photo" class="w-full h-full object-cover" />
+              }
+              @if (!coverPhotoUrl) {
+                <div class="text-gray-400 text-center">
+                  <fa-icon [icon]="['fas', 'file-image']" class="h-12 w-12 mx-auto"></fa-icon>
+                  <p class="text-xs mt-1">No cover photo</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tags -->
+      <div class="bg-base-200 p-6 rounded-lg">
+        <h3 class="text-lg font-semibold mb-4">Interests</h3>
+        
+        <div class="flex flex-wrap gap-2">
+          @for (tag of getSelectedTags(); track tag.id) {
+            <div class="badge badge-primary">
+              {{ tag.name }}
+            </div>
+          }
+          
+          @if (getSelectedTags().length === 0) {
+            <div class="text-gray-500">
+              No interests selected
+            </div>
+          }
+        </div>
+      </div>
+      
+      <div class="text-center text-sm text-gray-500 mt-8">
+        <p>Click "Complete" at the bottom to finish setting up your profile.</p>
+        <p class="mt-1">You can always update your profile information later in your account settings.</p>
+      </div>
+    </div>
+  }
+</div>

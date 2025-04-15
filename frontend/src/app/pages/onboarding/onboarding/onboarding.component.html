@@ -1,0 +1,57 @@
+<div class="min-h-screen bg-base-100">
+  <div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-primary">Complete Your Profile</h1>
+      <p class="text-gray-600 mt-2">Just a few more steps to set up your account</p>
+    </div>
+    
+    <!-- Progress Steps -->
+    <div class="flex justify-center mb-12">
+      <ul class="steps steps-horizontal w-full max-w-3xl">
+        @for (step of steps; track step.route; let i = $index) {
+          <li [class.step-primary]="i + 1 <= currentStep" class="step">
+            {{ step.name }}
+          </li>
+        }
+      </ul>
+    </div>
+    
+    <!-- Step Content -->
+    <div class="flex flex-col items-center">
+      <div class="w-full max-w-3xl bg-white rounded-lg shadow-lg p-6">
+        <router-outlet></router-outlet>
+        
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between mt-8">
+          @if (currentStep > 1) {
+            <button 
+              (click)="goToPreviousStep()" 
+              class="btn btn-outline">
+              Back
+            </button>
+          }
+          @if (currentStep === 1) {
+            <div class="flex-grow"></div>
+          }
+          
+          <div class="flex justify-end flex-grow">
+            @if (currentStep < 4) {
+              <button 
+                (click)="goToNextStep()" 
+                class="btn btn-primary">
+                Next
+              </button>
+            }
+            @if (currentStep === 4) {
+              <button 
+                (click)="completeOnboarding()" 
+                class="btn btn-accent">
+                Complete
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
