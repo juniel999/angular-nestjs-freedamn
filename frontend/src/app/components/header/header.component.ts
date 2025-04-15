@@ -26,8 +26,6 @@ export class HeaderComponent {
     this.authService.currentUser$.subscribe(user => {
       this.isLoggedIn = !!user;
       this.username = user?.username || 'Guest';
-
-      console.log(user)
       
       // Set avatar, falling back to generated avatar
       if (user?.avatar && this.isValidAvatarUrl(user.avatar)) {
@@ -49,7 +47,6 @@ export class HeaderComponent {
       this.authService.logout();
       await this.router.navigate(['/signin'], { replaceUrl: true });
     } catch (error) {
-      console.error('Logout error:', error);
       this.toastService.show('Logout failed', 'error');
     }
   }
