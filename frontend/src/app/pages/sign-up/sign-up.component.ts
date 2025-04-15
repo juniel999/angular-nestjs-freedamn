@@ -24,11 +24,12 @@ export class SignUpComponent {
   showPassword = false;
   showConfirmPassword = false;
   errorMessage: string | null = null;
+  isLoading = false;
   
   constructor(
     private router: Router, 
     private authService: AuthService,
-    private toastService: ToastService
+    private toastService: ToastService,
   ) {}
 
   get formControls() {
@@ -56,28 +57,54 @@ export class SignUpComponent {
 
   onSubmit() {
     if (this.signUpForm.valid) {
+      this.isLoading = true;
       console.log('Form submitted successfully', this.signUpForm.value);
-      // Here you would call your auth service to register the user
-      // this.authService.register(this.signUpForm.value).subscribe(...);
+      
+      const username = this.signUpForm.value.username ?? "";
+      const password = this.signUpForm.value.password ?? "";
+      
       this.authService.register({
-        username: this.signUpForm.value.username ?? "",
-        email: this.signUpForm.value.email ?? ""  ,
-        password: this.signUpForm.value.password ?? "",
+        username: username,
+        email: this.signUpForm.value.email ?? "",
+        password: password,
         firstName: this.signUpForm.value.firstname ?? "",
         lastName: this.signUpForm.value.lastname ?? ""
-      } ).subscribe({
+      }).subscribe({
         next: (res) => {
           console.log('Registration successful', res);
-          // Show toast notification with primary color
+          
+          // Show toast notification with success message
           this.toastService.show(
             'Registration successful! Welcome to freedamn.',
             'success'
           );
           
-          // Navigate to home after a short delay
-          setTimeout(() => {
-            this.router.navigate(['/']);
-          }, 1500);
+          // Auto login the user after successful registration
+          this.authService.login(username, password).subscribe({
+            next: (loginRes) => {
+              console.log('Auto login successful', loginRes);
+          
+              
+              // Navigate to home after a short delay
+              setTimeout(() => {
+                this.isLoading = false;
+                this.router.navigate(['/']);
+              }, 1000);
+            },
+            error: (loginError) => {
+              console.error('Auto login failed', loginError);
+              this.isLoading = false;
+              
+              // If auto-login fails, redirect to sign-in page
+              this.toastService.show(
+                'Account created but login failed. Please sign in manually.',
+                'error'
+              );
+              setTimeout(() => {
+                this.router.navigate(['/signin']);
+              }, 1000);
+            }
+          });
         },
         error: (error) => {
           console.error('Registration failed', error);
@@ -86,14 +113,15 @@ export class SignUpComponent {
             `Registration failed: ${error.error.message}`,
             'error'
           );
+          this.isLoading = false;
         }
-      })
+      });
     } else {
       this.signUpForm.markAllAsTouched();
     }
   }
 
   navigateToLogin() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/signin']);
   }
 }

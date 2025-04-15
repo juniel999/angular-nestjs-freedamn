@@ -1,16 +1,15 @@
-import { ApplicationConfig, provideZoneChangeDetection, inject } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { FontAwesomeModule, FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { initializeIcons } from './icons';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, HttpRequest, HttpHandlerFn } from '@angular/common/http';
 
 import { routes } from './app.routes';
-import { AuthService } from './services/auth.service';
 
 // HTTP interceptor function
-const authInterceptorFn = (req: any, next: any) => {
-  const authService = inject(AuthService);
-  const token = authService.getToken();
+const authInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
+  // Access token directly from localStorage instead of injecting AuthService
+  const token = localStorage.getItem('freedamn_token');
   
   if (token && !req.url.includes('/login') && !req.url.includes('/register')) {
     const authReq = req.clone({

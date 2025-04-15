@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:3000/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDk5OSIsInN1YiI6IjY3Zjc3MDg4ZDFjOGEwN2NmNTIzNmVmMSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0MzYxNzg2LCJleHAiOjE3NDQ0NDgxODZ9.2igPOUmMIu-qYOXN53sEYiILkpNrVfIQ49MVlJ_IH44
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imp1bmllbDk5OSIsInN1YiI6IjY3Zjc3MDg4ZDFjOGEwN2NmNTIzNmVmMSIsInJvbGVzIjpbInVzZXIiXSwiaWF0IjoxNzQ0NjQwMjQ3LCJleHAiOjE3NDQ3MjY2NDd9.ZC8fuB4YHE5PCusplkVTfE-AdV7YD7WQoenT1Jak5AM
 @blogId = 67f8cf997b39f11b1d270e19
 @userId = 67f77088d1c8a07cf5236ef1
 @tagId = 67f817d1ab3d3a5c1901ae86
@@ -47,7 +47,7 @@ Content-Type: application/json
 ### ====================== USER ROUTES ======================
 
 ### Get current user
-GET {{baseUrl}}/users/me
+GET {{baseUrl}}/auth/profile
 Authorization: Bearer {{authToken}}
 
 ### Update User Profile

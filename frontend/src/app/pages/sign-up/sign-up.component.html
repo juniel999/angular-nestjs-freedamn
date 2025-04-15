@@ -175,7 +175,16 @@
 
         <!-- Action Buttons -->
         <div class="form-control mt-8">
-          <button type="submit" class="btn btn-primary">Create Account</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+            @if (isLoading) {
+              <span class="inline-block animate-spin mr-2">
+                <fa-icon [icon]="['fas', 'spinner']"></fa-icon>
+              </span>
+              Creating account...
+            } @else {
+              Create Account
+            }
+          </button>
         </div>
       </form>
 
@@ -184,7 +193,7 @@
         <p>
           Already have an account?
           <button
-            [routerLink]="['/']"
+            [routerLink]="['/signin']"
             class="text-primary cursor-pointer font-semibold hover:underline"
           >
             Log in here.
