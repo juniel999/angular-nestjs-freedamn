@@ -1,12 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { OnboardingService, ProfileData, TagData } from '../../../../services/onboarding.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-review-step',
-  imports: [FontAwesomeModule],
+  standalone: true,
+  imports: [FontAwesomeModule, CommonModule],
   templateUrl: './review-step.component.html',
 })
 export class ReviewStepComponent {
@@ -84,6 +86,25 @@ export class ReviewStepComponent {
     
     console.log('Selected tags for display:', selectedTags);
     return selectedTags;
+  }
+  
+  /**
+   * Check if the user has any social links
+   */
+  hasSocialLinks(): boolean {
+    if (!this.profile || !this.profile.socials) {
+      return false;
+    }
+    
+    const socials = this.profile.socials;
+    return !!(
+      socials.facebook || 
+      socials.twitter || 
+      socials.instagram || 
+      socials.linkedin || 
+      socials.github || 
+      socials.website
+    );
   }
   
   completeOnboarding(): void {

@@ -1,119 +1,177 @@
-<div class="w-full">
-  <h2 class="text-2xl font-semibold mb-6 text-center">Review Your Profile</h2>
+<div class="w-full max-w-4xl mx-auto px-4">
+  <h2 class="text-2xl font-semibold mb-4 text-center">Review Your Profile</h2>
+  
+  <div class="text-center mb-6 text-base-content/80">
+    <p>Take a moment to review your profile information before completing your account setup.</p>
+  </div>
   
   <!-- Loading State -->
   @if (isLoading) {
-    <div class="flex justify-center my-8">
-      <fa-icon [icon]="['fas', 'spinner']" class="fa-spin text-primary" size="3x"></fa-icon>
+    <div class="flex justify-center items-center h-64">
+      <div class="text-center">
+        <fa-icon [icon]="['fas', 'spinner']" class="text-accent text-4xl" animation="spin"></fa-icon>
+        <p class="mt-4 text-base-content/70">Loading your profile...</p>
+      </div>
     </div>
   }
   
   @if (!isLoading) {
-    <div class="space-y-8">
+    <div class="space-y-6">
       <!-- Profile Information -->
-      <div class="bg-base-200 p-6 rounded-lg">
-        <h3 class="text-lg font-semibold mb-4">Profile Information</h3>
+      <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold text-base-content">Profile Information</h3>
+          <span class="text-xs text-base-content/60">Personal Details</span>
+        </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <p class="text-sm text-gray-500">First Name</p>
-            <p class="font-medium">{{ profile?.firstName || 'Not provided' }}</p>
+          <div class="flex items-start gap-3">
+            <fa-icon [icon]="['fas', 'id-card']" class="mt-1 text-accent opacity-70"></fa-icon>
+            <div>
+              <p class="text-sm text-base-content/60">First Name</p>
+              <p class="font-medium">{{ profile?.firstName || 'Not provided' }}</p>
+            </div>
           </div>
           
-          <div>
-            <p class="text-sm text-gray-500">Last Name</p>
-            <p class="font-medium">{{ profile?.lastName || 'Not provided' }}</p>
+          <div class="flex items-start gap-3">
+            <fa-icon [icon]="['fas', 'id-card']" class="mt-1 text-accent opacity-70"></fa-icon>
+            <div>
+              <p class="text-sm text-base-content/60">Last Name</p>
+              <p class="font-medium">{{ profile?.lastName || 'Not provided' }}</p>
+            </div>
           </div>
           
-          <div>
-            <p class="text-sm text-gray-500">Pronouns</p>
-            <p class="font-medium">{{ profile?.pronouns || 'Not provided' }}</p>
+          <div class="flex items-start gap-3">
+            <fa-icon [icon]="['fas', 'user']" class="mt-1 text-accent opacity-70"></fa-icon>
+            <div>
+              <p class="text-sm text-base-content/60">Pronouns</p>
+              <p class="font-medium">{{ profile?.pronouns || 'Not provided' }}</p>
+            </div>
           </div>
           
-          <div>
-            <p class="text-sm text-gray-500">Job Title</p>
-            <p class="font-medium">{{ profile?.title || 'Not provided' }}</p>
+          <div class="flex items-start gap-3">
+            <fa-icon [icon]="['fas', 'briefcase']" class="mt-1 text-accent opacity-70"></fa-icon>
+            <div>
+              <p class="text-sm text-base-content/60">Job Title</p>
+              <p class="font-medium">{{ profile?.title || 'Not provided' }}</p>
+            </div>
           </div>
           
-          <div>
-            <p class="text-sm text-gray-500">Location</p>
-            <p class="font-medium">{{ profile?.location || 'Not provided' }}</p>
+          <div class="flex items-start gap-3">
+            <fa-icon [icon]="['fas', 'map-marker-alt']" class="mt-1 text-accent opacity-70"></fa-icon>
+            <div>
+              <p class="text-sm text-base-content/60">Location</p>
+              <p class="font-medium">{{ profile?.location || 'Not provided' }}</p>
+            </div>
           </div>
           
-          <div>
-            <p class="text-sm text-gray-500">Birthdate</p>
-            <p class="font-medium">{{ profile?.birthdate || 'Not provided' }}</p>
+          <div class="flex items-start gap-3">
+            <fa-icon [icon]="['fas', 'calendar-alt']" class="mt-1 text-accent opacity-70"></fa-icon>
+            <div>
+              <p class="text-sm text-base-content/60">Birthdate</p>
+              <p class="font-medium">{{ profile?.birthdate || 'Not provided' }}</p>
+            </div>
           </div>
         </div>
         
-        <div class="mt-4">
-          <p class="text-sm text-gray-500">Bio</p>
-          <p class="font-medium">{{ profile?.bio || 'Not provided' }}</p>
-        </div>
-        
-        <!-- Social Links -->
-        <div class="mt-6">
-          <h4 class="text-md font-medium mb-2">Social Links</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            @if (profile?.socials?.facebook) {
-              <div>
-                <p class="text-sm text-gray-500">Facebook</p>
-                <p class="font-medium truncate">{{ profile?.socials?.facebook }}</p>
-              </div>
-            }
-            
-            @if (profile?.socials?.twitter) {
-              <div>
-                <p class="text-sm text-gray-500">Twitter</p>
-                <p class="font-medium truncate">{{ profile?.socials?.twitter }}</p>
-              </div>
-            }
-            
-            @if (profile?.socials?.instagram) {
-              <div>
-                <p class="text-sm text-gray-500">Instagram</p>
-                <p class="font-medium truncate">{{ profile?.socials?.instagram }}</p>
-              </div>
-            }
-            
-            @if (profile?.socials?.linkedin) {
-              <div>
-                <p class="text-sm text-gray-500">LinkedIn</p>
-                <p class="font-medium truncate">{{ profile?.socials?.linkedin }}</p>
-              </div>
-            }
-            
-            @if (profile?.socials?.github) {
-              <div>
-                <p class="text-sm text-gray-500">GitHub</p>
-                <p class="font-medium truncate">{{ profile?.socials?.github }}</p>
-              </div>
-            }
-            
-            @if (profile?.socials?.website) {
-              <div>
-                <p class="text-sm text-gray-500">Website</p>
-                <p class="font-medium truncate">{{ profile?.socials?.website }}</p>
-              </div>
-            }
+        <div class="mt-6 flex items-start gap-3">
+          <fa-icon [icon]="['fas', 'quote-left']" class="mt-1 text-accent opacity-70"></fa-icon>
+          <div class="flex-1">
+            <p class="text-sm text-base-content/60">Bio</p>
+            <p class="font-medium">{{ profile?.bio || 'Not provided' }}</p>
           </div>
         </div>
       </div>
       
+      <!-- Social Links -->
+      @if (profile?.socials && hasSocialLinks()) {
+        <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-semibold text-base-content">Social Links</h3>
+            <span class="text-xs text-base-content/60">Your Connections</span>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @if (profile?.socials?.facebook) {
+              <div class="flex items-center gap-3">
+                <fa-icon [icon]="['fab', 'facebook']" class="text-accent"></fa-icon>
+                <div class="flex-1 overflow-hidden">
+                  <p class="text-sm text-base-content/60">Facebook</p>
+                  <p class="font-medium truncate">{{ profile?.socials?.facebook }}</p>
+                </div>
+              </div>
+            }
+            
+            @if (profile?.socials?.twitter) {
+              <div class="flex items-center gap-3">
+                <fa-icon [icon]="['fab', 'twitter']" class="text-accent"></fa-icon>
+                <div class="flex-1 overflow-hidden">
+                  <p class="text-sm text-base-content/60">Twitter</p>
+                  <p class="font-medium truncate">{{ profile?.socials?.twitter }}</p>
+                </div>
+              </div>
+            }
+            
+            @if (profile?.socials?.instagram) {
+              <div class="flex items-center gap-3">
+                <fa-icon [icon]="['fab', 'instagram']" class="text-accent"></fa-icon>
+                <div class="flex-1 overflow-hidden">
+                  <p class="text-sm text-base-content/60">Instagram</p>
+                  <p class="font-medium truncate">{{ profile?.socials?.instagram }}</p>
+                </div>
+              </div>
+            }
+            
+            @if (profile?.socials?.linkedin) {
+              <div class="flex items-center gap-3">
+                <fa-icon [icon]="['fab', 'linkedin']" class="text-accent"></fa-icon>
+                <div class="flex-1 overflow-hidden">
+                  <p class="text-sm text-base-content/60">LinkedIn</p>
+                  <p class="font-medium truncate">{{ profile?.socials?.linkedin }}</p>
+                </div>
+              </div>
+            }
+            
+            @if (profile?.socials?.github) {
+              <div class="flex items-center gap-3">
+                <fa-icon [icon]="['fab', 'github']" class="text-accent"></fa-icon>
+                <div class="flex-1 overflow-hidden">
+                  <p class="text-sm text-base-content/60">GitHub</p>
+                  <p class="font-medium truncate">{{ profile?.socials?.github }}</p>
+                </div>
+              </div>
+            }
+            
+            @if (profile?.socials?.website) {
+              <div class="flex items-center gap-3">
+                <fa-icon [icon]="['fas', 'link']" class="text-accent"></fa-icon>
+                <div class="flex-1 overflow-hidden">
+                  <p class="text-sm text-base-content/60">Website</p>
+                  <p class="font-medium truncate">{{ profile?.socials?.website }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      
       <!-- Photos -->
-      <div class="bg-base-200 p-6 rounded-lg">
-        <h3 class="text-lg font-semibold mb-4">Photos</h3>
+      <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold text-base-content">Profile Photos</h3>
+          <span class="text-xs text-base-content/60">Your Visuals</span>
+        </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <p class="text-sm text-gray-500 mb-2">Profile Picture</p>
+            <p class="text-sm text-base-content/60 mb-3">Profile Picture</p>
             <div class="avatar">
-              <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+              <div class="w-32 h-32 rounded-full bg-base-200 flex items-center justify-center overflow-hidden shadow-md">
                 @if (avatarUrl) {
                   <img [src]="avatarUrl" alt="Profile Avatar" class="w-full h-full object-cover" />
                 }
                 @if (!avatarUrl) {
-                  <div class="text-gray-400 text-center">
+                  <div class="text-base-content/50 text-center">
                     <fa-icon [icon]="['fas', 'user']" class="h-12 w-12 mx-auto"></fa-icon>
                     <p class="text-xs mt-1">No avatar</p>
                   </div>
@@ -123,13 +181,13 @@
           </div>
           
           <div>
-            <p class="text-sm text-gray-500 mb-2">Cover Photo</p>
-            <div class="w-full h-32 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+            <p class="text-sm text-base-content/60 mb-3">Cover Photo</p>
+            <div class="w-full h-32 rounded-lg bg-base-200 flex items-center justify-center overflow-hidden shadow-md">
               @if (coverPhotoUrl) {
                 <img [src]="coverPhotoUrl" alt="Cover Photo" class="w-full h-full object-cover" />
               }
               @if (!coverPhotoUrl) {
-                <div class="text-gray-400 text-center">
+                <div class="text-base-content/50 text-center">
                   <fa-icon [icon]="['fas', 'file-image']" class="h-12 w-12 mx-auto"></fa-icon>
                   <p class="text-xs mt-1">No cover photo</p>
                 </div>
@@ -140,40 +198,53 @@
       </div>
       
       <!-- Tags -->
-      <div class="bg-base-200 p-6 rounded-lg">
-        <h3 class="text-lg font-semibold mb-4">Interests</h3>
+      <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold text-base-content">Your Interests</h3>
+          <span class="text-xs text-base-content/60">Topics You Follow</span>
+        </div>
         
         <div class="flex flex-wrap gap-2">
-          @for (tag of getSelectedTags(); track tag.id) {
-            <div class="badge badge-primary">
+          @for (tag of getSelectedTags(); track tag.id || tag.name) {
+            <div class="badge badge-lg badge-primary gap-2 px-4 py-3 shadow-sm">
+              <fa-icon [icon]="['fas', 'hashtag']" class="text-xs"></fa-icon>
               {{ tag.name }}
             </div>
           }
           
           @if (getSelectedTags().length === 0) {
-            <div class="text-gray-500">
+            <div class="flex items-center p-3 text-base-content/60 bg-base-200 rounded-lg">
+              <fa-icon [icon]="['fas', 'info-circle']" class="mr-2"></fa-icon>
               No interests selected
             </div>
           }
         </div>
       </div>
       
-      <div class="text-center text-sm text-gray-500 mt-8">
-        <p>Review your profile information above and click "Complete Onboarding" to finish setup.</p>
-        <p class="mt-1">You can always update your profile information later in your account settings.</p>
-      </div>
-      
-      <!-- Complete Button -->
-      <div class="flex justify-center mt-8">
-        <button 
-          (click)="completeOnboarding()" 
-          class="btn btn-primary btn-lg"
-          [disabled]="isCompleting">
-          @if (isCompleting) {
-            <fa-icon [icon]="['fas', 'spinner']" class="fa-spin mr-2"></fa-icon>
-          }
-          {{ isCompleting ? 'Completing...' : 'Complete Onboarding' }}
-        </button>
+      <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold text-base-content">Ready to Finish?</h3>
+          <span class="text-xs text-base-content/60">Complete Your Setup</span>
+        </div>
+        
+        <p class="text-base-content/70">Your profile is now set up and ready to go. Click the button below to complete the onboarding process.</p>
+        <p class="mt-2 text-base-content/70">You can always update your profile information later from your account settings.</p>
+        
+        <!-- Complete Button -->
+        <div class="flex justify-center mt-6">
+          <button 
+            (click)="completeOnboarding()" 
+            class="btn btn-primary btn-lg gap-2 shadow-md hover:shadow-lg transition-all duration-200"
+            [disabled]="isCompleting">
+            @if (isCompleting) {
+              <fa-icon [icon]="['fas', 'spinner']" animation="spin" class="text-accent"></fa-icon>
+              Completing...
+            } @else {
+              <fa-icon [icon]="['fas', 'check']" class="text-accent"></fa-icon>
+              Complete Onboarding
+            }
+          </button>
+        </div>
       </div>
     </div>
   }

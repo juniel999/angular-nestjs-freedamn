@@ -15,7 +15,15 @@ import {
   faSpinner,
   faFileImage,
   faInfoCircle,
-  faInfo
+  faInfo,
+  faHashtag,
+  faMapMarkerAlt,
+  faCalendarAlt,
+  faBriefcase,
+  faEnvelope,
+  faLink,
+  faIdCard,
+  faQuoteLeft
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faCommentDots,
@@ -23,7 +31,10 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 import {
   faTwitter,
-  faGithub
+  faGithub,
+  faFacebook,
+  faInstagram,
+  faLinkedin
 } from '@fortawesome/free-brands-svg-icons';
 
 export function initializeIcons(library: FaIconLibrary) {
@@ -48,6 +59,17 @@ export function initializeIcons(library: FaIconLibrary) {
     faSpinner,
     faFileImage,
     faInfoCircle,
-    faInfo
+    faInfo,
+    faHashtag,
+    faMapMarkerAlt,
+    faCalendarAlt,
+    faBriefcase,
+    faEnvelope,
+    faLink,
+    faIdCard,
+    faQuoteLeft,
+    faFacebook,
+    faInstagram,
+    faLinkedin
   );
 } 

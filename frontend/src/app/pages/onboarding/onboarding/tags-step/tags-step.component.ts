@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { OnboardingService, TagData } from '../../../../services/onboarding.service';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../../../services/user.service';
-import { Subscription } from 'rxjs';
+import { Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
@@ -24,6 +24,7 @@ export class TagsStepComponent {
   
   // Data
   selectedTags: TagData[] = [];  // Tags added by the user
+  topTags: TagData[] = [];       // Popular tags sorted by usage count
   
   // UI state
   errorMessage = '';
@@ -32,6 +33,7 @@ export class TagsStepComponent {
   ngOnInit(): void {
     this.initForm();
     this.loadUserTags();
+    this.loadTopTags();
   }
   
   ngOnDestroy(): void {
@@ -112,6 +114,61 @@ export class TagsStepComponent {
     });
     
     this.subscriptions.add(sub);
+  }
+  
+  /**
+   * Load top 10 tags sorted by usage count
+   */
+  loadTopTags(): void {
+    // First try with getPopularTags
+    this.onboardingService.getPopularTags(10).subscribe({
+      next: (tags) => {
+        if (tags.length > 0) {
+          this.topTags = tags;
+        } else {
+          // Fallback to just getting all tags if no popular tags are returned
+          this.onboardingService.getAvailableTags().subscribe({
+            next: (allTags) => {
+              this.topTags = allTags.slice(0, 10); // Just take the first 10 tags
+            },
+            error: (err) => {
+              console.error('Error loading fallback tags', err);
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Error loading top tags', err);
+        
+        // Fallback to just getting all tags
+        this.onboardingService.getAvailableTags().subscribe({
+          next: (allTags) => {
+            this.topTags = allTags.slice(0, 10); // Just take the first 10 tags
+          },
+          error: (fallbackErr) => {
+            console.error('Error loading fallback tags', fallbackErr);
+          }
+        });
+      }
+    });
+  }
+  
+  /**
+   * Select a tag from the suggested list
+   */
+  selectTag(tag: TagData): void {
+    // Check if tag is already in the list
+    const isDuplicate = this.selectedTags.some(selectedTag => 
+      selectedTag.name.toLowerCase() === tag.name.toLowerCase()
+    );
+    
+    if (isDuplicate) {
+      this.errorMessage = `"${tag.name}" has already been added.`;
+      return;
+    }
+    
+    // Add the tag to user's preferences
+    this.saveTagToUserPreferences(tag);
   }
   
   /**
