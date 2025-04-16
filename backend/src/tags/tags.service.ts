@@ -39,7 +39,13 @@ export class TagsService {
   }
 
   async addTagsIfNotExist(tagNames: string[]): Promise<Tag[]> {
-    const uniqueTagNames = [...new Set(tagNames.map(name => name.toLowerCase().trim()))];
+    // Filter out null or undefined values first, then process valid tag names
+    const uniqueTagNames = [...new Set(
+      tagNames
+        .filter(name => name !== null && name !== undefined && name.trim() !== '')
+        .map(name => name.toLowerCase().trim())
+    )];
+    
     const tags: Tag[] = [];
 
     for (const name of uniqueTagNames) {

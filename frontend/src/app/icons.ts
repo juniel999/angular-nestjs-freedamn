@@ -13,7 +13,9 @@ import {
   faCheck,
   faTimes,
   faSpinner,
-  faFileImage
+  faFileImage,
+  faInfoCircle,
+  faInfo
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faCommentDots,
@@ -44,6 +46,8 @@ export function initializeIcons(library: FaIconLibrary) {
     faCheck,
     faTimes,
     faSpinner,
-    faFileImage
+    faFileImage,
+    faInfoCircle,
+    faInfo
   );
 } 

@@ -159,8 +159,21 @@
       </div>
       
       <div class="text-center text-sm text-gray-500 mt-8">
-        <p>Click "Complete" at the bottom to finish setting up your profile.</p>
+        <p>Review your profile information above and click "Complete Onboarding" to finish setup.</p>
         <p class="mt-1">You can always update your profile information later in your account settings.</p>
+      </div>
+      
+      <!-- Complete Button -->
+      <div class="flex justify-center mt-8">
+        <button 
+          (click)="completeOnboarding()" 
+          class="btn btn-primary btn-lg"
+          [disabled]="isCompleting">
+          @if (isCompleting) {
+            <fa-icon [icon]="['fas', 'spinner']" class="fa-spin mr-2"></fa-icon>
+          }
+          {{ isCompleting ? 'Completing...' : 'Complete Onboarding' }}
+        </button>
       </div>
     </div>
   }

@@ -42,6 +42,7 @@ export class AuthService {
       username: user.username, 
       sub: user._id,
       roles: user.roles,
+      preferredTags: user.preferredTags || []
     };
     
     // Return JWT token

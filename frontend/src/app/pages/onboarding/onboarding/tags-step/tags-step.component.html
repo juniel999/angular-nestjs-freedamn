@@ -1,61 +1,63 @@
-<div class="w-full">
-  <h2 class="text-2xl font-semibold mb-6 text-center">Select Your Interests</h2>
+<div class="w-full max-w-4xl mx-auto px-4">
+  <h2 class="text-2xl font-semibold mb-4 text-center">Save your Tags & Interests</h2>
   
-  <div class="mb-6">
-    <p class="text-center text-gray-600 mb-2">Select at least 3 topics that interest you</p>
-    <p class="text-center text-sm" [class.text-success]="hasMinimumTags" [class.text-error]="!hasMinimumTags">
-      {{ selectedTags.length }} selected (Minimum: 3)
-    </p>
+  <div class="text-center mb-6 text-base-content/80">
+    <p>Discover relevant discussions, connect with like-minded individuals, and stay updated on topics you care about.</p>
   </div>
   
-  <!-- Search Input -->
-  <form [formGroup]="tagsForm" class="mb-6">
-    <div class="form-control w-full max-w-lg mx-auto">
-      <label class="label">
-        <span class="label-text">Search for topics</span>
-      </label>
-      <input type="text" formControlName="tagInput" class="input input-bordered w-full" placeholder="Type to search..." />
-    </div>
-  </form>
-  
-  <!-- Loading State -->
-  @if (isLoading) {
-    <div class="flex justify-center my-8">
-      <fa-icon [icon]="['fas', 'spinner']" class="fa-spin text-primary" size="3x"></fa-icon>
-    </div>
-  }
-  
-  <!-- Tags Selection Grid -->
-  @if (!isLoading) {
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
-      @for (tag of availableTags; track tag.id) {
-        <div 
-          (click)="toggleTagSelection(tag.id)"
-          class="badge badge-lg p-4 cursor-pointer"
-          [class.badge-primary]="isTagSelected(tag.id)"
-          [class.badge-outline]="!isTagSelected(tag.id)">
-          {{ tag.name }}
+  <!-- Tag Input -->
+  <div class="bg-base-100 rounded-lg shadow-sm border border-base-200 p-5 mb-5">
+    <form [formGroup]="tagsForm" class="mb-2">
+      <div class="form-control w-full">
+        <div class="input-group">
+          <input 
+            type="text" 
+            formControlName="tagInput" 
+            class="input input-bordered w-full mb-2" 
+            placeholder="Type a tag..." 
+            (keydown.enter)="$event.preventDefault(); addTag()"
+          />
+          <button (click)="addTag()" class="btn btn-primary" [disabled]="isSaving">
+            @if (isSaving) {
+              <fa-icon [icon]="['fas', 'spinner']" class="mr-2" animation="spin"></fa-icon>
+            }
+            Save
+          </button>
         </div>
-      }
+        @if (errorMessage) {
+          <span class="text-error text-sm mt-1">{{ errorMessage }}</span>
+        }
+      </div>
+    </form>
+  </div>
+  
+  <!-- Display Added Tags -->
+  @if (selectedTags.length > 0) {
+    <div class="bg-base-100 rounded-lg shadow-sm border border-base-200 p-5">
+      <h3 class="text-lg font-semibold mb-4">Your Interests</h3>
+      <div class="flex flex-wrap gap-2">
+        @for (tag of selectedTags; track $index) {
+          <div 
+            class="badge badge-primary gap-1 cursor-pointer hover:opacity-75" 
+            (click)="removeTag(tag)" 
+            title="Click to remove"
+            [class.opacity-50]="isSaving"
+          >
+            {{ tag.name }}
+            <fa-icon [icon]="['fas', 'times']" class="ml-1"></fa-icon>
+          </div>
+        }
+      </div>
+      <p class="mt-4 text-sm text-base-content/70">The more interests you add, the better we can tailor your experience. Your interests define your personalized feed and community connections.</p>
+    </div>
+  } @else {
+    <div class="alert shadow-sm">
+      <fa-icon [icon]="['fas', 'info']" class="shrink-0 w-6 h-6"></fa-icon>
+      <div>
+        <h3 class="font-bold">Why add interests?</h3>
+        <div class="text-sm">Adding interests helps us personalize your experience, connect you with relevant communities, and keep you engaged with content that matters to you.</div>
+      </div>
     </div>
   }
-  
-  <!-- Save Button -->
-  <div class="flex justify-center mt-6">
-    <button 
-      (click)="saveTags()" 
-      class="btn btn-primary" 
-      [disabled]="!hasMinimumTags || isSaving">
-      @if (isSaving) {
-        <fa-icon [icon]="['fas', 'spinner']" class="fa-spin mr-2"></fa-icon>
-      }
-      {{ isSaving ? 'Saving...' : 'Save Interests' }}
-    </button>
-  </div>
-  
-  <!-- Guide Text -->
-  <div class="mt-8 text-center text-sm text-gray-500">
-    <p>These interests help us personalize your experience and connect you with like-minded users.</p>
-    <p class="mt-2">You can always update these preferences later from your profile settings.</p>
-  </div>
 </div>
+
