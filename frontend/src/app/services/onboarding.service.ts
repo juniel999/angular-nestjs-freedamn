@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, switchMap, of, take, tap } from 'rxjs';
+import { Observable, switchMap, of, take, tap, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -27,6 +27,7 @@ export interface ProfileData {
 export interface TagData {
   id: string;
   name: string;
+  usageCount?: number;
 }
 
 @Injectable({
@@ -164,6 +165,23 @@ export class OnboardingService {
       switchMap(id => 
         this.http.get<{ tags: string[] }>(`${this.apiUrl}/users/${id}/tags`)
       )
+    );
+  }
+
+  /**
+   * Get popular tags sorted by usage count
+   * @param limit Maximum number of tags to return
+   * @returns Observable with popular tags
+   */
+  getPopularTags(limit: number = 10): Observable<TagData[]> {
+    return this.getAvailableTags().pipe(
+      map(tags => {
+        // Sort tags by usageCount if available, otherwise return unsorted
+        return tags
+          .filter(tag => tag.usageCount !== undefined) // Filter out tags without usageCount
+          .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0)) // Sort by usageCount desc
+          .slice(0, limit); // Limit to specified number
+      })
     );
   }
 }
