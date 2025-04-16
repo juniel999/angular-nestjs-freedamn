@@ -1,16 +1,16 @@
-<header class="w-full bg-base-100 shadow-md">
+<header class="w-full bg-gradient-to-r from-base-100 to-base-200 shadow-lg border-b border-primary/10">
   <div class="container max-w-6xl mx-auto px-4 py-3">
     <div class="flex items-center justify-between">
       <!-- Logo and Search Section (Common) -->
       <div class="flex items-center space-x-4 flex-grow md:flex-grow-0">
         <!-- Logo -->
-        <a routerLink="/" class="text-xl font-bold">
+        <a routerLink="/" class="text-xl font-bold flex items-center">
           <span class="text-primary">free</span><span class="text-accent">damn.</span>
         </a>
         
         <!-- Search Input - Hidden on very small screens -->
         <div class="relative mx-2 hidden sm:block w-full md:w-64">
-          <input type="text" placeholder="Search" class="input input-bordered w-full rounded-full" />
+          <input type="text" placeholder="Search" class="input input-sm input-bordered w-full rounded-full pl-4 pr-10" />
           <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <fa-icon [icon]="['fas', 'search']" class="text-gray-400"></fa-icon>
           </div>
@@ -27,52 +27,73 @@
       <!-- Not Logged In Section -->
       @if (!isLoggedIn) {
       <div class="hidden sm:flex items-center space-x-3">
-        <button class="btn btn-ghost" [routerLink]="['/signin']" >Sign In</button>
-        <button class="btn btn-primary" [routerLink]="['/signup']">Sign Up</button>
+        <button class="btn btn-ghost btn-sm hover:bg-base-200" [routerLink]="['/signin']">Sign In</button>
+        <button class="btn btn-primary btn-sm" [routerLink]="['/signup']">Sign Up</button>
       </div>
       }
       
       <!-- Logged In Section -->
       @if (isLoggedIn) {
       <div class="hidden sm:flex items-center space-x-3">
-        <button class="btn btn-primary">
+        <button class="btn btn-primary btn-sm">
           <fa-icon [icon]="['fas', 'plus']" class="mr-1"></fa-icon>
           <span class="hidden md:inline">Compose</span>
         </button>
         
         <!-- Notification Bell -->
         <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost btn-circle">
+          <label tabindex="0" class="btn btn-ghost btn-sm btn-circle">
             <div class="indicator">
-              <fa-icon [icon]="['far', 'bell']" [size]="'2x'"></fa-icon>
-              <span class="badge badge-sm badge-primary indicator-item">3</span>
+              <fa-icon [icon]="['far', 'bell']" [size]="'2xl'"></fa-icon>
+              <span class="badge badge-xs badge-primary indicator-item">3</span>
             </div>
           </label>
+          <ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-3 z-[1]">
+            <li class="menu-title">Notifications</li>
+            <li><a>New message from user</a></li>
+            <li><a>Your post was liked</a></li>
+            <li><a>Someone mentioned you</a></li>
+          </ul>
         </div>
         
-        <!-- User Profile/Dropdown -->
+        <!-- User Profile/Dropdown - Combined username and avatar -->
         <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-            <div class="w-10 rounded-full overflow-hidden">
-              <img [src]="userAvatar" [alt]="username + ' avatar'" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'" />
+          <label tabindex="0" class="flex items-center space-x-2 px-3 py-1 rounded-full cursor-pointer hover:bg-base-200 transition-colors duration-200">
+            <div class="avatar">
+              <div class="w-8 h-8 rounded-full overflow-hidden ring-1 ring-primary/20">
+                <img [src]="userAvatar" [alt]="username + ' avatar'" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'" />
+              </div>
             </div>
+            <span class="text-sm font-medium">{{ username }}</span>
+            <fa-icon [icon]="['fas', 'chevron-down']" class="text-xs text-gray-400"></fa-icon>
           </label>
-          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-            <li class="mb-2 p-2 font-semibold">
-              <div>{{ username }}</div>
+          <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52">
+            <li class="mb-2 p-2 font-semibold border-b border-base-200">
+              <div class="flex flex-col">
+                <span>{{ username }}</span>
+                <span class="text-xs text-gray-500">View your profile</span>
+              </div>
             </li>
-            <li><a><fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile</a></li>
-            <li><a><fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings</a></li>
             <li>
-              <a (click)="logout()" >
-                  <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon>Logout
+              <a>
+                <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>
+                Profile
+              </a>
+            </li>
+            <li>
+              <a>
+                <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>
+                Settings
+              </a>
+            </li>
+            <li>
+              <a (click)="logout()">
+                <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon>
+                Logout
               </a>
             </li>
           </ul>
         </div>
-        
-        <!-- Username - Only visible on larger screens -->
-        <span class="text-sm font-medium hidden md:inline-block">{{ username }}</span>
       </div>
       }
     </div>
@@ -84,10 +105,32 @@
     <div class="drawer-side z-10">
       <label for="mobile-menu" class="drawer-overlay"></label>
       <ul class="menu p-4 w-80 h-full bg-base-100 text-base-content">
+        <!-- Mobile User Info - Only shown when logged in -->
+        @if (isLoggedIn) {
+        <li class="mb-4">
+          <div class="flex items-center p-2 border-b border-base-200">
+            <div class="avatar mr-3">
+              <div class="w-10 h-10 rounded-full">
+                <img [src]="userAvatar" [alt]="username + ' avatar'" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'" />
+              </div>
+            </div>
+            <div>
+              <p class="font-medium">{{ username }}</p>
+              <p class="text-xs text-gray-500">View profile</p>
+            </div>
+          </div>
+        </li>
+        }
+        
         <!-- Search Input for Mobile -->
         <li class="mb-4">
           <div class="form-control">
-            <input type="text" placeholder="Search" class="input input-bordered w-full rounded-full" />
+            <div class="input-group">
+              <input type="text" placeholder="Search" class="input input-bordered w-full rounded-l-full" />
+              <button class="btn btn-square rounded-r-full">
+                <fa-icon [icon]="['fas', 'search']"></fa-icon>
+              </button>
+            </div>
           </div>
         </li>
         
@@ -99,7 +142,7 @@
         
         @if (isLoggedIn) {
         <li><a class="btn btn-primary justify-start"><fa-icon [icon]="['fas', 'plus']" class="mr-2"></fa-icon>Compose</a></li>
-        <li class="mt-2"><a><fa-icon [icon]="['far', 'bell']" [size]="'lg'" class="mr-2"></fa-icon>Notifications</a></li>
+        <li class="mt-2"><a><fa-icon [icon]="['far', 'bell']" class="mr-2"></fa-icon>Notifications</a></li>
         <li><a><fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile</a></li>
         <li><a><fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings</a></li>
         <li>

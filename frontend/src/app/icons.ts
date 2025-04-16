@@ -23,7 +23,8 @@ import {
   faEnvelope,
   faLink,
   faIdCard,
-  faQuoteLeft
+  faQuoteLeft,
+  faChevronDown
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faCommentDots,
@@ -70,6 +71,7 @@ export function initializeIcons(library: FaIconLibrary) {
     faQuoteLeft,
     faFacebook,
     faInstagram,
-    faLinkedin
+    faLinkedin,
+    faChevronDown
   );
 } 
