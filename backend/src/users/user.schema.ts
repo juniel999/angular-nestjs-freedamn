@@ -75,7 +75,7 @@ export class User extends Document {
   roles: string[];
 
   @Prop({ type: [String], default: [] })
-  preferredTags: string[];
+  preferredTags: string[]; // Stores tag names instead of IDs to avoid conflicts when adding existing tags
 
   @Prop({ type: SocialLinks, default: {} })
   socials: SocialLinks;

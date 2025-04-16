@@ -41,16 +41,16 @@ export class UsersService {
     return this.userModel.findById(id).exec();
   }
 
-  async updatePreferredTags(userId: string, tagNames: string[]): Promise<User | null> {
-    // Process the tags first
-    if (tagNames && tagNames.length > 0) {
-      await this.tagsService.addTagsIfNotExist(tagNames);
-    }
+  async updatePreferredTags(userId: string, tagIds: string[]): Promise<User | null> {
+    // Filter out any null, undefined or empty values and normalize tag names
+    const normalizedTagNames = tagIds
+      .filter(tag => tag !== null && tag !== undefined && tag.trim() !== '')
+      .map(tag => tag.toLowerCase().trim());
     
-    // Update the user's preferred tags
+    // Update the user's preferred tags with normalized tag names
     return this.userModel.findByIdAndUpdate(
       userId,
-      { preferredTags: tagNames.map(tag => tag.toLowerCase().trim()) },
+      { preferredTags: normalizedTagNames },
       { new: true }
     ).exec();
   }
@@ -210,9 +210,9 @@ export class UsersService {
       throw new Error('User not found');
     }
     
-    // Consider onboarding complete if the user has at least 3 preferred tags or has completed the onboarding explicitly
-    const hasCompletedOnboarding = user.onboardingCompleted || (user.preferredTags && user.preferredTags.length >= 3);
-    return { completed: hasCompletedOnboarding };
+    // Only consider onboarding complete if the user has explicitly completed it
+    // (not just by having enough tags)
+    return { completed: user.onboardingCompleted === true };
   }
 
   async completeOnboarding(userId: string) {
@@ -222,5 +222,14 @@ export class UsersService {
       { new: true }
     ).exec();
     return { completed: true };
+  }
+
+  async getUserTags(userId: string) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    return { tags: user.preferredTags || [] };
   }
 }

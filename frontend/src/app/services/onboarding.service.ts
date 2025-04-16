@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, switchMap, of, take } from 'rxjs';
+import { Observable, switchMap, of, take, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -119,11 +119,30 @@ export class OnboardingService {
     return this.http.get<TagData[]>(`${this.apiUrl}/tags`);
   }
 
+  /**
+   * Create tags if they don't already exist
+   * @param tags Array of tag names to create
+   * @returns Observable with the created tags
+   */
+  addTagsIfNotExist(tags: string[]): Observable<TagData[]> {
+    return this.http.post<TagData[]>(`${this.apiUrl}/tags/bulk`, { tags });
+  }
+
   updateUserTags(userId?: string, tags?: string[]): Observable<{ tags: string[] }> {
+    console.log('updateUserTags called with tags:', tags);
+    
+    // Make sure we have a valid array of tags
+    const validTags = tags?.filter(tag => tag !== null && tag !== undefined && tag.trim() !== '') || [];
+    console.log('Valid tags after filtering:', validTags);
+    
     return this.getUserId(userId).pipe(
-      switchMap(id => 
-        this.http.post<{ tags: string[] }>(`${this.apiUrl}/users/${id}/tags`, { tags })
-      )
+      switchMap(id => {
+        console.log(`Sending tags update request for user ${id}:`, validTags);
+        return this.http.post<{ tags: string[] }>(`${this.apiUrl}/users/${id}/tags`, { tags: validTags })
+          .pipe(
+            tap(response => console.log('Tags update response:', response))
+          );
+      })
     );
   }
 
@@ -131,6 +150,19 @@ export class OnboardingService {
     return this.getUserId(userId).pipe(
       switchMap(id => 
         this.http.post<{ completed: boolean }>(`${this.apiUrl}/users/${id}/complete-onboarding`, {})
+      )
+    );
+  }
+
+  /**
+   * Get the user's preferred tags
+   * @param userId Optional user ID
+   * @returns Observable with the user's preferred tags
+   */
+  getUserTags(userId?: string): Observable<{ tags: string[] }> {
+    return this.getUserId(userId).pipe(
+      switchMap(id => 
+        this.http.get<{ tags: string[] }>(`${this.apiUrl}/users/${id}/tags`)
       )
     );
   }
