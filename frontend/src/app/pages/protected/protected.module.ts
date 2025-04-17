@@ -5,7 +5,7 @@ import { HomeComponent } from '../home/home.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
-  // Add more protected routes here
+  // Other protected routes
 ];
 
 @NgModule({
@@ -16,4 +16,4 @@ const routes: Routes = [
   ],
   exports: [RouterModule]
 })
-export class ProtectedModule { } 
+export class ProtectedModule { }

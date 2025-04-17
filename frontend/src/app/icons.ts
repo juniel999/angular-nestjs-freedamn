@@ -1,12 +1,12 @@
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { 
-  faHome, 
-  faSearch, 
-  faBell, 
-  faPlus, 
-  faUser, 
-  faCog, 
-  faSignOutAlt, 
+import {
+  faHome,
+  faSearch,
+  faBell,
+  faPlus,
+  faUser,
+  faCog,
+  faSignOutAlt,
   faBars,
   faEye,
   faEyeSlash,
@@ -34,20 +34,26 @@ import {
   faUserFriends,
   faNewspaper,
   faImage,
-  faDotCircle 
+  faDotCircle,
+  faUpload,
+  faTrash,
+  faPaperPlane,
+  faExclamationCircle,
+  faPen,
+  faHeading
 } from '@fortawesome/free-solid-svg-icons';
-import { 
+import {
   faCommentDots,
   faBell as faBellRegular,
   faHeart as faHeartRegular,
-  faBookmark as faBookmarkRegular
+  faBookmark as faBookmarkRegular,
 } from '@fortawesome/free-regular-svg-icons';
 import {
   faTwitter,
   faGithub,
   faFacebook,
   faInstagram,
-  faLinkedin
+  faLinkedin,
 } from '@fortawesome/free-brands-svg-icons';
 
 export function initializeIcons(library: FaIconLibrary) {
@@ -91,12 +97,17 @@ export function initializeIcons(library: FaIconLibrary) {
     faBookmark,
     faBookmarkRegular,
     faFilter,
-    // New icons added
     faStar,
     faCompass,
     faUserFriends,
     faNewspaper,
     faImage,
-    faDotCircle
+    faDotCircle,
+    faUpload,
+    faTrash,
+    faPaperPlane,
+    faExclamationCircle,
+    faPen,
+    faHeading
   );
 }

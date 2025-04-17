@@ -201,7 +201,9 @@
             <!-- Tags -->
             <div class="flex flex-wrap gap-1 mb-3">
               @for (tag of blog.tags.slice(0, 3); track tag) {
-              <span class="badge badge-sm badge-outline">{{ tag }}</span>
+              <span class="badge badge-sm badge-accent text-primary">{{
+                tag
+              }}</span>
               } @if (blog.tags.length > 3) {
               <span class="badge badge-sm">+{{ blog.tags.length - 3 }}</span>
               }
@@ -218,6 +220,8 @@
                 >
                   <fa-icon
                     icon="heart"
+                    size="2x"
+                    class="text-primary"
                     [class.text-error]="hasUserLiked(blog)"
                   ></fa-icon>
                   <span class="text-xs">{{ blog.likes.length || 0 }}</span>
@@ -227,13 +231,21 @@
                   [routerLink]="['/blogs', blog._id]"
                   class="btn btn-xs btn-ghost gap-1 px-2"
                 >
-                  <fa-icon icon="comment"></fa-icon>
-                  <span class="text-xs">{{ blog.comments?.length || 0 }}</span>
+                  <fa-icon
+                    icon="comment"
+                    class="text-primary"
+                    size="2x"
+                  ></fa-icon>
+                  <span class="text-xs">{{ blog?.comments?.length || 0 }}</span>
                 </a>
               </div>
 
               <button class="btn btn-xs btn-ghost px-2">
-                <fa-icon icon="bookmark"></fa-icon>
+                <fa-icon
+                  icon="bookmark"
+                  size="2x"
+                  class="text-primary"
+                ></fa-icon>
               </button>
             </div>
           </div>
