@@ -51,7 +51,7 @@
       <!-- Logged In Section -->
       @if (isLoggedIn) {
       <div class="hidden sm:flex items-center space-x-3">
-        <button class="btn btn-primary btn-sm">
+        <button routerLink="/compose" class="btn btn-primary btn-sm">
           <fa-icon [icon]="['fas', 'plus']" class="mr-1"></fa-icon>
           <span class="hidden md:inline">Compose</span>
         </button>
@@ -195,30 +195,28 @@
         </li>
         } @if (isLoggedIn) {
         <li>
-          <a class="btn btn-primary justify-start"
-            ><fa-icon [icon]="['fas', 'plus']" class="mr-2"></fa-icon>Compose</a
-          >
+          <a routerLink="/compose" class="btn btn-primary justify-start">
+            <fa-icon [icon]="['fas', 'plus']" class="mr-2"></fa-icon>Compose
+          </a>
         </li>
         <li class="mt-2">
-          <a
-            ><fa-icon [icon]="['far', 'bell']" class="mr-2"></fa-icon
-            >Notifications</a
-          >
+          <a>
+            <fa-icon [icon]="['far', 'bell']" class="mr-2"></fa-icon>Notifications
+          </a>
         </li>
         <li>
-          <a
-            ><fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile</a
-          >
+          <a>
+            <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile
+          </a>
         </li>
         <li>
-          <a
-            ><fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings</a
-          >
+          <a>
+            <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings
+          </a>
         </li>
         <li>
           <a (click)="logout()">
-            <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon
-            >Logout
+            <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon>Logout
           </a>
         </li>
         }

@@ -125,24 +125,24 @@ export class BlogsService {
   }
 
   async findRandomBlogs(page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {
+    // Get total count of published blogs for pagination info
+    const total = await this.blogModel.countDocuments({ published: true }).exec();
+    
+    // For randomization with proper pagination, we'll use a different approach:
+    // 1. Get all blog IDs
+    // 2. Randomize the order using a random sort
+    // 3. Apply pagination
     const skip = (page - 1) * limit;
     
-    const [posts, total] = await Promise.all([
-      this.blogModel.aggregate([
-        { $match: { published: true } },
-        { $sample: { size: limit } },
-        { $skip: skip }
-      ]).exec(),
-      this.blogModel.countDocuments({ published: true }).exec()
-    ]);
+    // Use a random sort with proper pagination
+    const posts = await this.blogModel.find({ published: true })
+      .sort({ createdAt: -1 }) // First sort by creation date
+      .skip(skip)              // Apply pagination
+      .limit(limit)            // Limit results
+      .populate('author', 'username firstName lastName avatar')
+      .exec();
     
-    // Populate the author field manually since aggregate doesn't support populate
-    const populatedPosts = await this.blogModel.populate(posts, {
-      path: 'author',
-      select: 'username firstName lastName avatar'
-    });
-    
-    return { posts: populatedPosts, total, page };
+    return { posts, total, page };
   }
 
   async findBlogsByFollowedAuthors(userId: string, page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {

@@ -9,16 +9,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { BlogService, BlogPost } from '../../services/blog.service';
 import { ToastService } from '../../services/toast.service';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
-import { 
-  faHeart, faComment, faBookmark, faFilter, 
-  faStar, faCompass, faUserFriends, faTimes,
-  faNewspaper, faImage, faSpinner 
-} from '@fortawesome/free-solid-svg-icons';
 
 type Tab = 'for-you' | 'explore' | 'following';
 
@@ -31,7 +25,6 @@ type Tab = 'for-you' | 'explore' | 'following';
 export class BlogFeedComponent implements OnInit {
   private blogService = inject(BlogService);
   private toastService = inject(ToastService);
-  private iconLibrary = inject(FaIconLibrary);
   private userService = inject(UserService);
   private authService = inject(AuthService);
 
@@ -48,17 +41,10 @@ export class BlogFeedComponent implements OnInit {
   currentFilter = this.blogService.currentFilter;
 
   ngOnInit() {
-    // Register all icons needed for the component
-    this.iconLibrary.addIcons(
-      faHeart, faComment, faBookmark, faFilter,
-      faStar, faCompass, faUserFriends, faTimes,
-      faNewspaper, faImage, faSpinner
-    );
-    
     // Set initial tab to "For You" and load data
     this.blogService.setActiveTab('for-you');
     this.setupInfiniteScroll();
-    
+
     // Load user profile to get the first name
     this.loadUserProfile();
   }
@@ -67,7 +53,7 @@ export class BlogFeedComponent implements OnInit {
    * Load user profile to get first name
    */
   private loadUserProfile() {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe((user) => {
       if (user) {
         this.userService.getUserProfile(user.sub).subscribe({
           next: (profile) => {
@@ -77,7 +63,7 @@ export class BlogFeedComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error loading user profile:', error);
-          }
+          },
         });
       }
     });

@@ -1,0 +1,251 @@
+<app-header />
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Create New Blog Post</h1>
+
+  <form [formGroup]="blogForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Title Input -->
+    <div class="form-control">
+      <label for="title" class="label">
+        <span class="label-text text-lg font-medium">Title</span>
+        <span
+          class="label-text-alt text-error"
+          *ngIf="
+            blogForm.get('title')?.hasError('required') &&
+            blogForm.get('title')?.touched
+          "
+          >Required</span
+        >
+      </label>
+      <input
+        type="text"
+        id="title"
+        formControlName="title"
+        class="input input-bordered w-full"
+        placeholder="Enter a catchy title for your blog post"
+      />
+      <div
+        class="mt-1 text-sm text-error"
+        *ngIf="blogForm.get('title')?.touched && blogForm.get('title')?.invalid"
+      >
+        <div *ngIf="blogForm.get('title')?.errors?.['minlength']">
+          Title must be at least 5 characters long.
+        </div>
+        <div *ngIf="blogForm.get('title')?.errors?.['maxlength']">
+          Title cannot exceed 100 characters.
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Editor -->
+    <div class="form-control">
+      <label for="content" class="label">
+        <span class="label-text text-lg font-medium">Content</span>
+        <span
+          class="label-text-alt text-error"
+          *ngIf="
+            blogForm.get('content')?.hasError('required') &&
+            blogForm.get('content')?.touched
+          "
+          >Required</span
+        >
+      </label>
+      <textarea
+        id="content"
+        formControlName="content"
+        rows="10"
+        class="textarea textarea-bordered w-full placeholder-gray-500 focus:outline-none focus:border-yellow-500"
+        placeholder="Start writing your amazing blog post..."
+      ></textarea>
+      <div
+        class="mt-1 text-sm text-error"
+        *ngIf="
+          blogForm.get('content')?.touched && blogForm.get('content')?.invalid
+        "
+      >
+        <div *ngIf="blogForm.get('content')?.errors?.['minlength']">
+          Content must be at least 50 characters long.
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Upload Section -->
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text text-lg font-medium">Images</span>
+        <span
+          class="label-text-alt text-error"
+          *ngIf="imagesArray.hasError('required') && imagesArray.touched"
+          >At least one image is required</span
+        >
+      </label>
+      <p class="text-sm text-base-content/70 mb-2">
+        At least one image is required. You can upload multiple images.
+      </p>
+
+      <!-- Upload button -->
+      <div class="mb-4">
+        <label for="image-upload" class="btn btn-primary">
+          <fa-icon [icon]="['fas', 'upload']" class="mr-2"></fa-icon>
+          <span *ngIf="!imageUploading">Upload Image</span>
+          <span *ngIf="imageUploading">
+            <fa-icon
+              [icon]="['fas', 'spinner']"
+              animation="spin"
+              class="mr-2"
+            ></fa-icon>
+            Uploading...
+          </span>
+          <input
+            type="file"
+            id="image-upload"
+            accept="image/jpeg,image/png,image/gif"
+            class="hidden"
+            (change)="onImageSelected($event)"
+            [disabled]="imageUploading"
+          />
+        </label>
+      </div>
+
+      <!-- Image preview grid -->
+      <div
+        *ngIf="uploadedImages.length === 0 && imagesArray.touched"
+        class="alert alert-error mb-4"
+      >
+        <fa-icon [icon]="['fas', 'exclamationCircle']"></fa-icon>
+        <span>At least one image is required to create a blog post.</span>
+      </div>
+
+      <div
+        *ngIf="uploadedImages.length > 0"
+        class="grid grid-cols-2 md:grid-cols-3 gap-4"
+      >
+        <div
+          *ngFor="let image of uploadedImages; let i = index"
+          class="relative group"
+        >
+          <img
+            [src]="image.url"
+            alt="Uploaded image"
+            class="w-full h-40 object-cover rounded-lg"
+          />
+
+          <div
+            class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-200 rounded-lg flex flex-col items-center justify-center space-y-2"
+          >
+            <button
+              type="button"
+              class="btn btn-sm btn-ghost bg-white/90 hover:bg-white"
+              (click)="setCoverImage(image.url)"
+            >
+              <fa-icon
+                [icon]="['fas', 'image']"
+                class="text-primary mr-1"
+              ></fa-icon>
+              Set as Cover
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-ghost bg-white/90 hover:bg-white"
+              (click)="removeImage(i)"
+            >
+              <fa-icon
+                [icon]="['fas', 'trash']"
+                class="text-error mr-1"
+              ></fa-icon>
+              Remove
+            </button>
+          </div>
+
+          <!-- Cover image indicator -->
+          <div
+            *ngIf="blogForm.get('coverImage')?.value === image.url"
+            class="badge badge-primary absolute top-2 right-2"
+          >
+            <fa-icon [icon]="['fas', 'image']" class="mr-1"></fa-icon> Cover
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tags Selection -->
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text text-lg font-medium">Tags</span>
+        <span
+          class="label-text-alt text-error"
+          *ngIf="
+            blogForm.get('tags')?.hasError('required') &&
+            blogForm.get('tags')?.touched
+          "
+          >Required</span
+        >
+      </label>
+      <p class="text-sm text-base-content/70 mb-2">
+        Select at least one tag that best describes your post.
+      </p>
+
+      <div class="flex flex-wrap gap-2">
+        <div
+          *ngFor="let tag of availableTags"
+          class="badge badge-lg cursor-pointer transition-colors"
+          [class.badge-primary]="blogForm.get('tags')?.value.includes(tag.name)"
+          [class.badge-outline]="
+            !blogForm.get('tags')?.value.includes(tag.name)
+          "
+          (click)="toggleTag(tag.id, tag.name)"
+        >
+          <fa-icon [icon]="['fas', 'hashtag']" class="mr-1 text-xs"></fa-icon>
+          {{ tag.name }}
+        </div>
+      </div>
+
+      <div
+        class="mt-1 text-sm text-error"
+        *ngIf="
+          blogForm.get('tags')?.touched &&
+          blogForm.get('tags')?.hasError('minlength')
+        "
+      >
+        At least one tag is required.
+      </div>
+    </div>
+
+    <!-- Publish Toggle -->
+    <div class="form-control">
+      <label class="label cursor-pointer justify-start gap-3">
+        <input
+          type="checkbox"
+          id="published"
+          formControlName="published"
+          class="toggle toggle-primary"
+        />
+        <span class="label-text text-lg">Publish immediately</span>
+      </label>
+    </div>
+
+    <!-- Submit Buttons -->
+    <div class="flex justify-between pt-4">
+      <button type="button" class="btn btn-ghost" routerLink="/">
+        <fa-icon [icon]="['fas', 'times']" class="mr-2"></fa-icon>
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="isSubmitting || imageUploading"
+      >
+        <fa-icon [icon]="['fas', 'paper-plane']" class="mr-2"></fa-icon>
+        <span *ngIf="!isSubmitting">Publish Blog Post</span>
+        <span *ngIf="isSubmitting">
+          <fa-icon
+            [icon]="['fas', 'spinner']"
+            animation="spin"
+            class="mr-2"
+          ></fa-icon>
+          Publishing...
+        </span>
+      </button>
+    </div>
+  </form>
+</div>
