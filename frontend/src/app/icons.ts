@@ -24,11 +24,23 @@ import {
   faLink,
   faIdCard,
   faQuoteLeft,
-  faChevronDown
+  faChevronDown,
+  faHeart,
+  faComment,
+  faBookmark,
+  faFilter,
+  faStar,
+  faCompass,
+  faUserFriends,
+  faNewspaper,
+  faImage,
+  faDotCircle 
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faCommentDots,
-  faBell as faBellRegular
+  faBell as faBellRegular,
+  faHeart as faHeartRegular,
+  faBookmark as faBookmarkRegular
 } from '@fortawesome/free-regular-svg-icons';
 import {
   faTwitter,
@@ -72,6 +84,19 @@ export function initializeIcons(library: FaIconLibrary) {
     faFacebook,
     faInstagram,
     faLinkedin,
-    faChevronDown
+    faChevronDown,
+    faHeart,
+    faHeartRegular,
+    faComment,
+    faBookmark,
+    faBookmarkRegular,
+    faFilter,
+    // New icons added
+    faStar,
+    faCompass,
+    faUserFriends,
+    faNewspaper,
+    faImage,
+    faDotCircle
   );
-} 
+}

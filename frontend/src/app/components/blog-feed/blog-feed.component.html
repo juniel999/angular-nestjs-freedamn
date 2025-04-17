@@ -1,0 +1,253 @@
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <!-- Greeting -->
+  <div class="mb-10">
+    <h1 class="text-4xl md:text-5xl font-bold mb-3">
+      Good day, <span class="text-primary">{{ firstName }}</span> 👋
+    </h1>
+    <p class="text-lg text-base-content opacity-80">
+      Here are some posts that you might be interested in. Enjoy!
+    </p>
+  </div>
+
+  <!-- Tabs -->
+  <div
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+  >
+    <div class="tabs tabs-lifted">
+      <a
+        class="tab tab-bordered text-base transition-all duration-200"
+        [class.tab-active]="currentTab() === 'for-you'"
+        (click)="changeTab('for-you')"
+      >
+        <fa-icon icon="star" class="mr-2 text-sm"></fa-icon>
+        For You
+      </a>
+      <a
+        class="tab tab-bordered text-base transition-all duration-200"
+        [class.tab-active]="currentTab() === 'explore'"
+        (click)="changeTab('explore')"
+      >
+        <fa-icon icon="compass" class="mr-2 text-sm"></fa-icon>
+        Explore
+      </a>
+      <a
+        class="tab tab-bordered text-base transition-all duration-200"
+        [class.tab-active]="currentTab() === 'following'"
+        (click)="changeTab('following')"
+      >
+        <fa-icon icon="user-friends" class="mr-2 text-sm"></fa-icon>
+        Following
+      </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="relative">
+      <button
+        class="btn btn-sm btn-outline gap-2 rounded-full"
+        (click)="toggleFilter()"
+      >
+        <fa-icon icon="filter" class="text-xs"></fa-icon>
+        Filters
+        <div class="badge badge-xs badge-accent" *ngIf="currentFilter()">1</div>
+      </button>
+
+      <!-- Filter dropdown -->
+      @if (filterOpen) {
+      <div
+        class="absolute right-0 mt-2 p-4 bg-base-100 shadow-xl rounded-lg z-10 w-64 border border-base-300"
+      >
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Filter by tag</span>
+          </label>
+          <div class="input-group input-group-sm">
+            <input
+              type="text"
+              [(ngModel)]="filterTag"
+              (keyup)="applyFilter($event)"
+              placeholder="Enter tag..."
+              class="input input-bordered input-sm w-full focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="flex justify-end mt-4">
+            <button class="btn btn-sm btn-ghost" (click)="filterOpen = false">
+              Cancel
+            </button>
+            <button
+              class="btn btn-sm btn-primary ml-2"
+              [disabled]="!filterTag.trim()"
+              (click)="applyFilterByButton()"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Current filter indicator -->
+  @if (currentFilter()) {
+  <div class="flex items-center mb-6">
+    <span class="text-sm text-base-content opacity-70">Filtered by:</span>
+    <div class="badge badge-primary ml-2 gap-1 py-3">
+      <span>{{ currentFilter() }}</span>
+      <button class="ml-1 hover:text-primary-content" (click)="clearFilter()">
+        <fa-icon icon="times" class="text-xs"></fa-icon>
+      </button>
+    </div>
+  </div>
+  }
+
+  <!-- Blog Feed -->
+  <div class="space-y-8">
+    <!-- Loading indicator -->
+    @if (loading() && (!currentBlogs() || !currentBlogs()?.posts?.length)) {
+    <div class="flex justify-center py-12">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+    }
+
+    <!-- No posts message -->
+    @if (!loading() && (!currentBlogs() || !currentBlogs()?.posts?.length)) {
+    <div class="flex flex-col items-center py-12">
+      <div class="text-center max-w-md">
+        <div class="text-5xl mb-4 opacity-30">
+          <fa-icon icon="newspaper"></fa-icon>
+        </div>
+        <h3 class="text-xl font-bold mb-2">No posts found</h3>
+        <p class="text-base-content opacity-70">
+          @if (currentTab() === 'for-you') { Follow topics or users to see
+          personalized content here. } @else if (currentTab() === 'explore') {
+          No blog posts to explore right now. Check back later! } @else if
+          (currentTab() === 'following') { Follow someone to see their posts
+          here! } @else if (currentFilter()) { No posts found with the tag "{{
+            currentFilter()
+          }}". }
+        </p>
+      </div>
+    </div>
+    }
+
+    <!-- Blog posts -->
+    @if (currentBlogs() && currentBlogs()?.posts?.length) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      @for (blog of currentBlogs()!.posts; track blog._id) {
+      <div
+        class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-base-200"
+      >
+        <div class="card-body p-0">
+          <!-- Row 1: Image + Title combo -->
+          <div class="relative w-full">
+            <!-- Cover image or placeholder -->
+            <div class="w-full h-40 bg-base-200">
+              @if (blog.coverImage || (blog.images && blog.images.length > 0)) {
+              <img
+                [src]="blog.coverImage || blog.images[0]"
+                alt="Blog preview"
+                class="w-full h-40 object-cover"
+              />
+              } @else {
+              <div
+                class="w-full h-40 flex items-center justify-center bg-base-200"
+              >
+                <fa-icon icon="image" class="text-2xl opacity-20"></fa-icon>
+              </div>
+              }
+            </div>
+
+            <!-- Title overlay -->
+            <div
+              class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent"
+            >
+              <a [routerLink]="['/blogs', blog._id]" class="hover:underline">
+                <h2 class="card-title text-lg md:text-xl font-bold text-white">
+                  {{ blog.title }}
+                </h2>
+              </a>
+            </div>
+          </div>
+
+          <!-- Row 2: Content, author, stats -->
+          <div class="p-4">
+            <!-- Author info -->
+            <div class="flex items-center mb-3">
+              <div class="avatar">
+                <div class="w-8 h-8 rounded-full">
+                  <img
+                    [src]="
+                      blog.author.avatar || 'assets/images/default-avatar.png'
+                    "
+                    [alt]="blog.author.username"
+                  />
+                </div>
+              </div>
+              <div class="ml-2">
+                <h4 class="font-medium text-sm">
+                  {{ blog.author.firstName }} {{ blog.author.lastName }}
+                </h4>
+                <p class="text-xs text-base-content opacity-70">
+                  {{ formatTimeAgo(blog.createdAt) }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Excerpt -->
+            <p class="text-sm mb-3 line-clamp-2">
+              {{ getExcerpt(blog.content) }}
+            </p>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1 mb-3">
+              @for (tag of blog.tags.slice(0, 3); track tag) {
+              <span class="badge badge-sm badge-outline">{{ tag }}</span>
+              } @if (blog.tags.length > 3) {
+              <span class="badge badge-sm">+{{ blog.tags.length - 3 }}</span>
+              }
+            </div>
+
+            <!-- Reactions -->
+            <div
+              class="flex items-center justify-between border-t border-base-200 pt-3"
+            >
+              <div class="flex items-center gap-3">
+                <button
+                  class="btn btn-xs btn-ghost gap-1 px-2"
+                  (click)="toggleLike(blog, $event)"
+                >
+                  <fa-icon
+                    icon="heart"
+                    [class.text-error]="hasUserLiked(blog)"
+                  ></fa-icon>
+                  <span class="text-xs">{{ blog.likes.length || 0 }}</span>
+                </button>
+
+                <a
+                  [routerLink]="['/blogs', blog._id]"
+                  class="btn btn-xs btn-ghost gap-1 px-2"
+                >
+                  <fa-icon icon="comment"></fa-icon>
+                  <span class="text-xs">{{ blog.comments?.length || 0 }}</span>
+                </a>
+              </div>
+
+              <button class="btn btn-xs btn-ghost px-2">
+                <fa-icon icon="bookmark"></fa-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- Infinite scroll marker -->
+    <div #feedContainer class="py-6 h-12 flex justify-center">
+      @if (loading() && currentBlogs()?.posts?.length) {
+      <span class="loading loading-dots loading-md"></span>
+      }
+    </div>
+  </div>
+</div>

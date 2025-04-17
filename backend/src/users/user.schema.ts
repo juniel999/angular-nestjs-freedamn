@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export class SocialLinks {
   @Prop()
@@ -79,6 +79,9 @@ export class User extends Document {
 
   @Prop({ type: SocialLinks, default: {} })
   socials: SocialLinks;
+
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }], default: [] })
+  following: User[]; // Users that this user is following
 }
 
-export const UserSchema = SchemaFactory.createForClass(User); 
+export const UserSchema = SchemaFactory.createForClass(User);
