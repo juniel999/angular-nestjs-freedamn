@@ -291,7 +291,7 @@ export class TagsStepComponent {
         ...this.selectedTags.slice(clickedTagIndex + 1)
       ];
       this.selectedTags = updatedTags;
-    } else {
+    } else { 
       // Fallback to name-based removal if exact object reference isn't found
       const tagToRemoveName = tag.name.toLowerCase().trim();
       this.selectedTags = this.selectedTags.filter(t => 

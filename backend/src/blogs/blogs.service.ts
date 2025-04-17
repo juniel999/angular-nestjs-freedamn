@@ -4,12 +4,15 @@ import { Model, Types } from 'mongoose';
 import { Blog } from './blog.schema';
 import { User } from '../users/user.schema';
 import { TagsService } from '../tags/tags.service';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class BlogsService {
   constructor(
     @InjectModel(Blog.name) private blogModel: Model<Blog>,
-    private tagsService: TagsService
+    @InjectModel(User.name) private userModel: Model<User>,
+    private tagsService: TagsService,
+    private cloudinaryService: CloudinaryService
   ) {}
 
   async create(createBlogDto: any, user: any): Promise<Blog> {
@@ -25,7 +28,7 @@ export class BlogsService {
     return createdBlog.save();
   }
 
-  async findAll(page = 1, limit = 10, sort = 'newest'): Promise<{ blogs: Blog[], total: number }> {
+  async findAll(page = 1, limit = 10, sort = 'newest', filter?: string): Promise<{ posts: Blog[], total: number, page: number }> {
     const skip = (page - 1) * limit;
     let sortOptions = {};
     
@@ -41,18 +44,24 @@ export class BlogsService {
       default:
         sortOptions = { createdAt: -1 };
     }
+
+    // Build query based on filters
+    const query: any = { published: true };
+    if (filter) {
+      query.tags = { $in: [filter.toLowerCase().trim()] };
+    }
     
-    const [blogs, total] = await Promise.all([
-      this.blogModel.find({ published: true })
+    const [posts, total] = await Promise.all([
+      this.blogModel.find(query)
         .sort(sortOptions)
         .skip(skip)
         .limit(limit)
         .populate('author', 'username firstName lastName avatar')
         .exec(),
-      this.blogModel.countDocuments({ published: true }).exec()
+      this.blogModel.countDocuments(query).exec()
     ]);
     
-    return { blogs, total };
+    return { posts, total, page };
   }
 
   async findByTag(name: string): Promise<Blog[]> {
@@ -94,23 +103,79 @@ export class BlogsService {
       .exec();
   }
 
-  async findUserFeedByTags(userTags: string[]): Promise<Blog[]> {
-    if (!userTags || userTags.length === 0) {
-      return this.blogModel.find({ published: true })
-        .sort({ createdAt: -1 })
-        .limit(20)
-        .populate('author', 'username firstName lastName avatar')
-        .exec();
+  async findUserFeedByTags(userTags: string[], page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {
+    const skip = (page - 1) * limit;
+    let query: any = { published: true };
+    
+    if (userTags && userTags.length > 0) {
+      query.tags = { $in: userTags.map(tag => tag.toLowerCase().trim()) };
     }
     
-    return this.blogModel.find({ 
-      tags: { $in: userTags.map(tag => tag.toLowerCase().trim()) },
+    const [posts, total] = await Promise.all([
+      this.blogModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('author', 'username firstName lastName avatar')
+        .exec(),
+      this.blogModel.countDocuments(query).exec()
+    ]);
+    
+    return { posts, total, page };
+  }
+
+  async findRandomBlogs(page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {
+    const skip = (page - 1) * limit;
+    
+    const [posts, total] = await Promise.all([
+      this.blogModel.aggregate([
+        { $match: { published: true } },
+        { $sample: { size: limit } },
+        { $skip: skip }
+      ]).exec(),
+      this.blogModel.countDocuments({ published: true }).exec()
+    ]);
+    
+    // Populate the author field manually since aggregate doesn't support populate
+    const populatedPosts = await this.blogModel.populate(posts, {
+      path: 'author',
+      select: 'username firstName lastName avatar'
+    });
+    
+    return { posts: populatedPosts, total, page };
+  }
+
+  async findBlogsByFollowedAuthors(userId: string, page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {
+    const skip = (page - 1) * limit;
+    
+    // Get the user with their following list
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    
+    // If user doesn't follow anyone, return empty array
+    if (!user.following || user.following.length === 0) {
+      return { posts: [], total: 0, page };
+    }
+    
+    // Find blogs by followed authors
+    const query = { 
+      author: { $in: user.following },
       published: true
-    })
-    .sort({ createdAt: -1 })
-    .limit(20)
-    .populate('author', 'username firstName lastName avatar')
-    .exec();
+    };
+    
+    const [posts, total] = await Promise.all([
+      this.blogModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('author', 'username firstName lastName avatar')
+        .exec(),
+      this.blogModel.countDocuments(query).exec()
+    ]);
+    
+    return { posts, total, page };
   }
 
   async findOne(id: string): Promise<Blog | null> {
@@ -215,4 +280,13 @@ export class BlogsService {
     
     return updatedBlog;
   }
-} 
+
+  async uploadImage(file: Express.Multer.File): Promise<{ url: string }> {
+    try {
+      const url = await this.cloudinaryService.uploadImage(file, 'blog-images');
+      return { url };
+    } catch (error) {
+      throw new Error(`Failed to upload image: ${error.message}`);
+    }
+  }
+}

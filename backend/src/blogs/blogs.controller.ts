@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { BlogsService } from './blogs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('blogs')
 export class BlogsController {
@@ -16,12 +17,14 @@ export class BlogsController {
   findAll(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
-    @Query('sort') sort?: string
+    @Query('sort') sort?: string,
+    @Query('filter') filter?: string
   ) {
     return this.blogsService.findAll(
       page ? parseInt(page.toString()) : 1,
       limit ? parseInt(limit.toString()) : 10,
-      sort || 'newest'
+      sort || 'newest',
+      filter
     );
   }
 
@@ -41,9 +44,54 @@ export class BlogsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('feed')
-  getUserFeed(@Request() req) {
-    return this.blogsService.findUserFeedByTags(req.user.preferredTags);
+  @Get('for-you')
+  forYou(
+    @Request() req,
+    @Query('page') page?: number,
+    @Query('tags') tags?: string
+  ) {
+    const userTags = tags ? tags.split(',') : req.user.preferredTags;
+    return this.blogsService.findUserFeedByTags(
+      userTags,
+      page ? parseInt(page.toString()) : 1
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('explore')
+  explore(@Query('page') page?: number) {
+    return this.blogsService.findRandomBlogs(
+      page ? parseInt(page.toString()) : 1
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('following')
+  following(
+    @Request() req,
+    @Query('page') page?: number
+  ) {
+    return this.blogsService.findBlogsByFollowedAuthors(
+      req.user._id || req.user.userId,
+      page ? parseInt(page.toString()) : 1
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadImage(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png|gif)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File
+  ) {
+    return this.blogsService.uploadImage(file);
   }
 
   @Get(':id')
@@ -76,4 +124,4 @@ export class BlogsController {
     const userId = req.user._id || req.user.userId;
     return this.blogsService.unlike(id, userId);
   }
-} 
+}

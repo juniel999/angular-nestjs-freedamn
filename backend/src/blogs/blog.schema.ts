@@ -22,6 +22,9 @@ export class Blog extends Document {
   @Prop()
   coverImage?: string;
 
+  @Prop({ type: [String], default: [] })
+  images: string[]; // Array of Cloudinary image URLs
+
   @Prop({ default: 0 })
   viewCount: number;
 
@@ -40,4 +43,4 @@ BlogSchema.virtual('comments', {
 
 // Ensure virtuals are included when converting to JSON
 BlogSchema.set('toJSON', { virtuals: true });
-BlogSchema.set('toObject', { virtuals: true }); 
+BlogSchema.set('toObject', { virtuals: true });
