@@ -115,7 +115,7 @@
               </a>
             </li>
             <li>
-              <a>
+              <a routerLink="/settings">
                 <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>
                 Settings
               </a>
@@ -201,7 +201,8 @@
         </li>
         <li class="mt-2">
           <a>
-            <fa-icon [icon]="['far', 'bell']" class="mr-2"></fa-icon>Notifications
+            <fa-icon [icon]="['far', 'bell']" class="mr-2"></fa-icon
+            >Notifications
           </a>
         </li>
         <li>
@@ -210,13 +211,14 @@
           </a>
         </li>
         <li>
-          <a>
+          <a routerLink="/settings">
             <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings
           </a>
         </li>
         <li>
           <a (click)="logout()">
-            <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon>Logout
+            <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon
+            >Logout
           </a>
         </li>
         }

@@ -1,7 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
 @plugin "daisyui" {
-    themes: bumblebee --default;
+  themes: bumblebee --default;
 }
 
 /* Override DaisyUI default label and placeholder styles */
@@ -16,6 +16,6 @@ input::placeholder {
 
 /* Set focus border color to primary */
 input:focus {
-  border-color:#E5B400 !important;
+  border-color: #e5b400 !important;
   outline-color: transparent !important;
 }

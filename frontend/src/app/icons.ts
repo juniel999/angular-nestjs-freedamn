@@ -40,7 +40,8 @@ import {
   faPaperPlane,
   faExclamationCircle,
   faPen,
-  faHeading
+  faHeading,
+  faGlobe,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCommentDots,
@@ -108,6 +109,7 @@ export function initializeIcons(library: FaIconLibrary) {
     faPaperPlane,
     faExclamationCircle,
     faPen,
-    faHeading
+    faHeading,
+    faGlobe
   );
 }

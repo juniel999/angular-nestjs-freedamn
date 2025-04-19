@@ -1,0 +1,245 @@
+<div class="max-w-3xl">
+  <h2 class="text-xl font-semibold mb-4">Account Settings</h2>
+
+  <div *ngIf="isLoading" class="flex justify-center my-4">
+    <div class="loading loading-spinner loading-lg text-primary"></div>
+  </div>
+
+  <div *ngIf="!isLoading" class="bg-base-100 p-6 rounded-lg shadow-sm">
+    <form
+      [formGroup]="accountForm"
+      (ngSubmit)="changePassword()"
+      class="space-y-6"
+    >
+      <!-- Account Information -->
+      <div>
+        <h3 class="text-lg font-medium mb-4">Account Information</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Username -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Username</span>
+            </label>
+            <input
+              type="text"
+              formControlName="username"
+              class="input input-bordered w-full bg-base-200 cursor-not-allowed"
+              readonly
+            />
+            <label class="label">
+              <span class="label-text-alt text-gray-500"
+                >Username cannot be changed</span
+              >
+            </label>
+          </div>
+
+          <!-- Email -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text">Email</span>
+            </label>
+            <input
+              type="email"
+              formControlName="email"
+              class="input input-bordered w-full bg-base-200 cursor-not-allowed"
+              readonly
+            />
+            <label class="label">
+              <span class="label-text-alt text-gray-500"
+                >Email cannot be changed</span
+              >
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div>
+        <h3 class="text-lg font-medium mb-4">Change Password</h3>
+
+        <!-- Current Password -->
+        <div class="form-control w-full mb-4">
+          <label class="label">
+            <span class="label-text"
+              >Current Password <span class="text-error">*</span></span
+            >
+          </label>
+          <div class="relative">
+            <input
+              [type]="showCurrentPassword ? 'text' : 'password'"
+              formControlName="currentPassword"
+              class="input input-bordered w-full pr-10"
+              [class.input-error]="
+                getFormControl('currentPassword')?.invalid &&
+                getFormControl('currentPassword')?.touched
+              "
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center pr-3"
+              (click)="togglePasswordVisibility('currentPassword')"
+            >
+              <fa-icon
+                [icon]="
+                  showCurrentPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']
+                "
+              ></fa-icon>
+            </button>
+          </div>
+          <label
+            *ngIf="
+              getFormControl('currentPassword')?.invalid &&
+              getFormControl('currentPassword')?.touched
+            "
+            class="label"
+          >
+            <span class="label-text-alt text-error"
+              >Current password is required</span
+            >
+          </label>
+        </div>
+
+        <!-- New Password -->
+        <div class="form-control w-full mb-4">
+          <label class="label">
+            <span class="label-text"
+              >New Password <span class="text-error">*</span></span
+            >
+          </label>
+          <div class="relative">
+            <input
+              [type]="showNewPassword ? 'text' : 'password'"
+              formControlName="newPassword"
+              class="input input-bordered w-full pr-10"
+              [class.input-error]="
+                getFormControl('newPassword')?.invalid &&
+                getFormControl('newPassword')?.touched
+              "
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center pr-3"
+              (click)="togglePasswordVisibility('newPassword')"
+            >
+              <fa-icon
+                [icon]="showNewPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']"
+              ></fa-icon>
+            </button>
+          </div>
+
+          <label
+            *ngIf="
+              getFormControl('newPassword')?.hasError('required') &&
+              getFormControl('newPassword')?.touched
+            "
+            class="label"
+          >
+            <span class="label-text-alt text-error"
+              >New password is required</span
+            >
+          </label>
+
+          <label
+            *ngIf="
+              getFormControl('newPassword')?.hasError('minlength') &&
+              getFormControl('newPassword')?.touched
+            "
+            class="label"
+          >
+            <span class="label-text-alt text-error"
+              >Password must be at least 8 characters</span
+            >
+          </label>
+
+          <label
+            *ngIf="
+              getFormControl('newPassword')?.hasError('weakPassword') &&
+              getFormControl('newPassword')?.touched
+            "
+            class="label"
+          >
+            <span class="label-text-alt text-error"
+              >Password must include uppercase, lowercase, number, and special
+              character</span
+            >
+          </label>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-control w-full mb-4">
+          <label class="label">
+            <span class="label-text"
+              >Confirm New Password <span class="text-error">*</span></span
+            >
+          </label>
+          <div class="relative">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              class="input input-bordered w-full pr-10"
+              [class.input-error]="
+                (getFormControl('confirmPassword')?.invalid &&
+                  getFormControl('confirmPassword')?.touched) ||
+                accountForm.hasError('passwordMismatch')
+              "
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex items-center pr-3"
+              (click)="togglePasswordVisibility('confirmPassword')"
+            >
+              <fa-icon
+                [icon]="
+                  showConfirmPassword ? ['fas', 'eye-slash'] : ['fas', 'eye']
+                "
+              ></fa-icon>
+            </button>
+          </div>
+
+          <label
+            *ngIf="
+              getFormControl('confirmPassword')?.hasError('required') &&
+              getFormControl('confirmPassword')?.touched
+            "
+            class="label"
+          >
+            <span class="label-text-alt text-error"
+              >Please confirm your password</span
+            >
+          </label>
+
+          <label
+            *ngIf="
+              accountForm.hasError('passwordMismatch') &&
+              !getFormControl('confirmPassword')?.hasError('required') &&
+              getFormControl('confirmPassword')?.touched
+            "
+            class="label"
+          >
+            <span class="label-text-alt text-error"
+              >Passwords do not match</span
+            >
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="accountForm.invalid || isSaving"
+        >
+          <fa-icon
+            *ngIf="isSaving"
+            [icon]="['fas', 'spinner']"
+            animation="spin"
+            class="mr-2"
+          ></fa-icon>
+          {{ isSaving ? "Updating..." : "Update Password" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

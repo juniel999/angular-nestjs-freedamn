@@ -1,0 +1,159 @@
+<div class="max-w-3xl">
+  <h2 class="text-xl font-semibold mb-4">User Information</h2>
+
+  <div *ngIf="isLoading" class="flex justify-center my-4">
+    <div class="loading loading-spinner loading-lg text-primary"></div>
+  </div>
+
+  <form *ngIf="!isLoading" [formGroup]="profileForm" class="space-y-4">
+    <!-- First and Last Name -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text"
+            >First Name <span class="text-error">*</span></span
+          >
+        </label>
+        <input
+          type="text"
+          formControlName="firstName"
+          class="input input-bordered w-full"
+          [class.input-error]="
+            profileForm.get('firstName')?.invalid &&
+            profileForm.get('firstName')?.touched
+          "
+        />
+        <label
+          *ngIf="
+            profileForm.get('firstName')?.invalid &&
+            profileForm.get('firstName')?.touched
+          "
+          class="label"
+        >
+          <span class="label-text-alt text-error">First name is required</span>
+        </label>
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text"
+            >Last Name <span class="text-error">*</span></span
+          >
+        </label>
+        <input
+          type="text"
+          formControlName="lastName"
+          class="input input-bordered w-full"
+          [class.input-error]="
+            profileForm.get('lastName')?.invalid &&
+            profileForm.get('lastName')?.touched
+          "
+        />
+        <label
+          *ngIf="
+            profileForm.get('lastName')?.invalid &&
+            profileForm.get('lastName')?.touched
+          "
+          class="label"
+        >
+          <span class="label-text-alt text-error">Last name is required</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Pronouns and Title -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Pronouns</span>
+        </label>
+        <select
+          formControlName="pronouns"
+          class="select select-bordered w-full"
+        >
+          <option value="">Select pronouns (optional)</option>
+          <option *ngFor="let option of pronounOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Title</span>
+        </label>
+        <input
+          type="text"
+          formControlName="title"
+          placeholder="e.g. Software Engineer, Designer, Writer"
+          class="input input-bordered w-full"
+        />
+      </div>
+    </div>
+
+    <!-- Location and Birthdate -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Location</span>
+        </label>
+        <input
+          type="text"
+          formControlName="location"
+          placeholder="e.g. New York, USA"
+          class="input input-bordered w-full"
+        />
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label">
+          <span class="label-text">Birth Date</span>
+        </label>
+        <input
+          type="date"
+          formControlName="birthdate"
+          class="input input-bordered w-full"
+        />
+      </div>
+    </div>
+
+    <!-- Bio -->
+    <div class="form-control w-full">
+      <label class="label">
+        <span class="label-text">Bio</span>
+        <span class="label-text-alt"
+          >{{ profileForm.get("bio")?.value?.length || 0 }}/500</span
+        >
+      </label>
+      <textarea
+        formControlName="bio"
+        class="textarea textarea-bordered w-full h-32"
+        [class.textarea-error]="profileForm.get('bio')?.invalid"
+        placeholder="Tell others about yourself..."
+      ></textarea>
+      <label *ngIf="profileForm.get('bio')?.invalid" class="label">
+        <span class="label-text-alt text-error"
+          >Bio cannot exceed 500 characters</span
+        >
+      </label>
+    </div>
+
+    <!-- Save button for explicit saves (optional) -->
+    <div class="flex justify-end">
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="profileForm.invalid || isSaving"
+        (click)="saveProfile(profileForm.value)"
+      >
+        <fa-icon
+          *ngIf="isSaving"
+          [icon]="['fas', 'spinner']"
+          animation="spin"
+          class="mr-2"
+        ></fa-icon>
+        {{ isSaving ? "Saving..." : "Save Changes" }}
+      </button>
+    </div>
+  </form>
+</div>

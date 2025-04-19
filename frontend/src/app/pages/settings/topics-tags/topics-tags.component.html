@@ -1,0 +1,118 @@
+<div class="max-w-3xl">
+  <h2 class="text-xl font-semibold mb-4">Topics & Tags</h2>
+
+  <div *ngIf="isLoading" class="flex justify-center my-4">
+    <div class="loading loading-spinner loading-lg text-primary"></div>
+  </div>
+
+  <div *ngIf="!isLoading" class="space-y-6">
+    <!-- User's Selected Tags -->
+    <div class="bg-base-100 p-4 rounded-lg shadow-sm">
+      <h3 class="text-lg font-medium mb-3">Your Topics</h3>
+
+      <div *ngIf="userTags.length === 0" class="text-center py-4 text-gray-500">
+        <p>You haven't selected any topics yet.</p>
+      </div>
+
+      <div *ngIf="userTags.length > 0" class="flex flex-wrap gap-2">
+        <div
+          *ngFor="let tag of userTags"
+          class="badge badge-lg badge-primary gap-2 cursor-pointer hover:bg-primary-focus transition-colors"
+        >
+          <fa-icon [icon]="['fas', 'hashtag']" [size]="'xs'"></fa-icon>
+          <span>{{ tag.name }}</span>
+          <button class="btn-circle btn-xs" (click)="removeTag(tag)">
+            <fa-icon [icon]="['fas', 'times']" [size]="'xs'"></fa-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create New Tag -->
+    <div class="bg-base-100 p-4 rounded-lg shadow-sm">
+      <h3 class="text-lg font-medium mb-3">Create New Topic</h3>
+
+      <div class="flex gap-2">
+        <input
+          type="text"
+          [formControl]="newTagInput"
+          placeholder="Enter new topic name"
+          class="input input-bordered flex-grow"
+          (keyup.enter)="createAndAddTag()"
+        />
+        <button
+          class="btn btn-primary"
+          [disabled]="!newTagInput.value || isSaving"
+          (click)="createAndAddTag()"
+        >
+          <fa-icon
+            *ngIf="isSaving"
+            [icon]="['fas', 'spinner']"
+            animation="spin"
+            class="mr-2"
+          ></fa-icon>
+          Create
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Available Tags -->
+    <div class="bg-base-100 p-4 rounded-lg shadow-sm">
+      <h3 class="text-lg font-medium mb-3">Search Available Topics</h3>
+
+      <div class="form-control mb-4">
+        <div class="input-group">
+          <input
+            type="text"
+            [formControl]="tagSearchInput"
+            placeholder="Search topics..."
+            class="input input-bordered w-full"
+          />
+          <button class="btn btn-square">
+            <fa-icon [icon]="['fas', 'search']"></fa-icon>
+          </button>
+        </div>
+      </div>
+
+      <div
+        *ngIf="filteredTags.length === 0"
+        class="text-center py-4 text-gray-500"
+      >
+        <p>No matching topics found.</p>
+      </div>
+
+      <div *ngIf="filteredTags.length > 0" class="flex flex-wrap gap-2">
+        <button
+          *ngFor="let tag of filteredTags | slice : 0 : 20"
+          class="badge badge-lg badge-outline gap-2 hover:bg-base-300 transition-colors"
+          (click)="addTag(tag)"
+          [disabled]="isSaving"
+        >
+          <fa-icon [icon]="['fas', 'plus']" [size]="'xs'"></fa-icon>
+          <span>{{ tag.name }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Popular Tags -->
+    <div
+      *ngIf="popularTags.length > 0"
+      class="bg-base-100 p-4 rounded-lg shadow-sm"
+    >
+      <h3 class="text-lg font-medium mb-3">Popular Topics</h3>
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          *ngFor="let tag of popularTags"
+          class="badge badge-lg badge-accent badge-outline gap-2 hover:bg-accent/20 transition-colors"
+          (click)="addTag(tag)"
+          [disabled]="isSaving"
+        >
+          <fa-icon [icon]="['fas', 'plus']" [size]="'xs'"></fa-icon>
+          <span>{{ tag.name }}</span>
+          <span class="text-xs">({{ tag.usageCount }})</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

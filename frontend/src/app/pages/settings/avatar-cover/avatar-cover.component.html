@@ -1,0 +1,136 @@
+<div class="max-w-3xl">
+  <h2 class="text-xl font-semibold mb-4">Avatar & Cover Photo</h2>
+
+  <div *ngIf="isLoading" class="flex justify-center my-4">
+    <div class="loading loading-spinner loading-lg text-primary"></div>
+  </div>
+
+  <div *ngIf="!isLoading" class="space-y-8">
+    <!-- Avatar Section -->
+    <div class="bg-base-100 p-6 rounded-lg shadow-sm">
+      <h3 class="text-lg font-medium mb-4">Profile Avatar</h3>
+
+      <div class="flex flex-col items-center md:flex-row md:items-start gap-6">
+        <!-- Avatar Preview -->
+        <div class="avatar">
+          <div
+            class="w-40 h-40 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300"
+          >
+            <img
+              [src]="
+                avatarPreview ||
+                avatarUrl ||
+                'https://ui-avatars.com/api/?name=User&background=random'
+              "
+              alt="Avatar preview"
+              class="object-cover"
+            />
+          </div>
+        </div>
+
+        <!-- Upload Controls -->
+        <div class="flex-1 space-y-4">
+          <div>
+            <p class="mb-2 text-sm">
+              Upload a square image for best results. Max size 5MB.
+            </p>
+
+            <input
+              type="file"
+              id="avatar-upload"
+              class="file-input file-input-bordered w-full max-w-xs"
+              accept="image/*"
+              (change)="onAvatarSelected($event)"
+            />
+          </div>
+
+          <div *ngIf="avatarPreview" class="flex items-center gap-2">
+            <button
+              class="btn btn-primary"
+              [disabled]="isAvatarUploading"
+              (click)="uploadAvatar()"
+            >
+              <fa-icon
+                *ngIf="isAvatarUploading"
+                [icon]="['fas', 'spinner']"
+                animation="spin"
+                class="mr-2"
+              ></fa-icon>
+              {{ isAvatarUploading ? "Uploading..." : "Upload Avatar" }}
+            </button>
+
+            <button
+              class="btn btn-ghost"
+              (click)="cancelAvatarUpload()"
+              [disabled]="isAvatarUploading"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cover Photo Section -->
+    <div class="bg-base-100 p-6 rounded-lg shadow-sm">
+      <h3 class="text-lg font-medium mb-4">Cover Photo</h3>
+
+      <!-- Cover Preview -->
+      <div class="w-full h-48 bg-base-300 rounded-lg overflow-hidden mb-4">
+        <img
+          *ngIf="coverPreview || coverUrl"
+          [src]="coverPreview || coverUrl"
+          alt="Cover preview"
+          class="w-full h-full object-cover"
+        />
+        <div
+          *ngIf="!coverPreview && !coverUrl"
+          class="flex items-center justify-center h-full"
+        >
+          <p class="text-gray-500">No cover photo uploaded</p>
+        </div>
+      </div>
+
+      <!-- Upload Controls -->
+      <div class="space-y-4">
+        <div>
+          <p class="mb-2 text-sm">
+            Recommended size 1500x500 pixels. Max size 5MB.
+          </p>
+
+          <input
+            type="file"
+            id="cover-upload"
+            class="file-input file-input-bordered w-full max-w-xs"
+            accept="image/*"
+            (change)="onCoverSelected($event)"
+          />
+        </div>
+
+        <div *ngIf="coverPreview" class="flex items-center gap-2">
+          <button
+            class="btn btn-primary"
+            [disabled]="isCoverUploading"
+            (click)="uploadCover()"
+          >
+            <fa-icon
+              *ngIf="isCoverUploading"
+              [icon]="['fas', 'spinner']"
+              animation="spin"
+              class="mr-2"
+            ></fa-icon>
+            {{ isCoverUploading ? "Uploading..." : "Upload Cover Photo" }}
+          </button>
+
+          <button
+            class="btn btn-ghost"
+            (click)="cancelCoverUpload()"
+            [disabled]="isCoverUploading"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
