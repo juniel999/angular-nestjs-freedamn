@@ -14,10 +14,16 @@ export const routes: Routes = [
         (m) => m.ProtectedModule
       ),
   },
-  { 
-    path: 'compose', 
+  {
+    path: 'compose',
     component: BlogComposeComponent,
-    canActivate: [onboardingCompletedGuard]
+    canActivate: [onboardingCompletedGuard],
+  },
+  {
+    path: 'settings',
+    loadChildren: () =>
+      import('./pages/settings/settings.module').then((m) => m.SettingsModule),
+    canActivate: [onboardingCompletedGuard],
   },
   { path: 'signup', component: SignUpComponent },
   { path: 'signin', component: SignInComponent },
@@ -30,5 +36,5 @@ export const routes: Routes = [
     canActivate: [onboardingGuard],
   },
   // Default fallback route
-  { path: '**', redirectTo: '/' }
+  { path: '**', redirectTo: '/' },
 ];
