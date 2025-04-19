@@ -4,26 +4,35 @@ import { SignInComponent } from './pages/sign-in/sign-in.component';
 import { BlogComposeComponent } from './pages/blog-compose/blog-compose.component';
 import { onboardingGuard } from './guards/onboarding.guard';
 import { onboardingCompletedGuard } from './guards/onboarding-completed.guard';
+import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 
 export const routes: Routes = [
   {
     path: '',
-    canActivate: [onboardingCompletedGuard],
-    loadChildren: () =>
-      import('./pages/protected/protected.module').then(
-        (m) => m.ProtectedModule
-      ),
-  },
-  {
-    path: 'compose',
-    component: BlogComposeComponent,
-    canActivate: [onboardingCompletedGuard],
-  },
-  {
-    path: 'settings',
-    loadChildren: () =>
-      import('./pages/settings/settings.module').then((m) => m.SettingsModule),
-    canActivate: [onboardingCompletedGuard],
+    component: MainLayoutComponent,
+    children: [
+      {
+        path: '',
+        canActivate: [onboardingCompletedGuard],
+        loadChildren: () =>
+          import('./pages/protected/protected.module').then(
+            (m) => m.ProtectedModule
+          ),
+      },
+      {
+        path: 'compose',
+        component: BlogComposeComponent,
+        canActivate: [onboardingCompletedGuard],
+      },
+      {
+        path: 'settings',
+        loadChildren: () =>
+          import('./pages/settings/settings.module').then(
+            (m) => m.SettingsModule
+          ),
+        canActivate: [onboardingCompletedGuard],
+      },
+    ],
   },
   { path: 'signup', component: SignUpComponent },
   { path: 'signin', component: SignInComponent },
@@ -35,6 +44,5 @@ export const routes: Routes = [
       ),
     canActivate: [onboardingGuard],
   },
-  // Default fallback route
   { path: '**', redirectTo: '/' },
 ];
