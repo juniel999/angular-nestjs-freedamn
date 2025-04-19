@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { OnboardingService } from '../../../services/onboarding.service';
 import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
@@ -6,28 +6,32 @@ import { take } from 'rxjs/operators';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { UserService } from '../../../services/user.service';
+import { AvatarUpdateService } from '../../../services/avatar-update.service';
 
 @Component({
   selector: 'app-avatar-cover',
   templateUrl: './avatar-cover.component.html',
   imports: [FontAwesomeModule, ReactiveFormsModule, CommonModule],
 })
-export class AvatarCoverComponent implements OnInit {
-  avatarUrl: string = '';
-  coverUrl: string = '';
+export class AvatarCoverComponent {
+  avatarUrl = signal('');
+  coverUrl = signal('');
   isLoading: boolean = false;
   isAvatarUploading: boolean = false;
   isCoverUploading: boolean = false;
 
-  avatarPreview: string | null = null;
-  coverPreview: string | null = null;
+  avatarPreview = signal<string | null>(null);
+  coverPreview = signal<string | null>(null);
 
   userId: string = '';
 
   constructor(
     private onboardingService: OnboardingService,
     private authService: AuthService,
-    private toastService: ToastService
+    private userService: UserService,
+    private toastService: ToastService,
+    private avatarUpdateService: AvatarUpdateService
   ) {}
 
   ngOnInit(): void {
@@ -44,8 +48,8 @@ export class AvatarCoverComponent implements OnInit {
     this.isLoading = true;
     this.onboardingService.getUserProfile().subscribe({
       next: (profile) => {
-        this.avatarUrl = profile?.avatar || '';
-        this.coverUrl = profile?.coverphoto || '';
+        this.avatarUrl.set(profile?.avatar || '');
+        this.coverUrl.set(profile?.coverphoto || '');
         this.isLoading = false;
       },
       error: (error) => {
@@ -79,7 +83,8 @@ export class AvatarCoverComponent implements OnInit {
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
-      this.avatarPreview = e.target?.result as string;
+      console.log('this is the target', e.target?.result as string);
+      this.avatarPreview.set(e.target?.result as string);
     };
     reader.readAsDataURL(file);
   }
@@ -107,7 +112,7 @@ export class AvatarCoverComponent implements OnInit {
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
-      this.coverPreview = e.target?.result as string;
+      this.coverPreview.set(e.target?.result as string);
     };
     reader.readAsDataURL(file);
   }
@@ -125,10 +130,11 @@ export class AvatarCoverComponent implements OnInit {
 
     this.isAvatarUploading = true;
 
-    this.onboardingService.uploadAvatar(this.userId, avatarFile).subscribe({
+    this.userService.uploadAvatar(this.userId, avatarFile).subscribe({
       next: (response) => {
-        this.avatarUrl = response.url;
-        this.avatarPreview = null;
+        this.avatarUrl.set(response);
+        this.avatarPreview.set(response);
+        this.avatarUpdateService.updateAvatar(response);
         this.toastService.show('Avatar updated successfully', 'success');
         this.isAvatarUploading = false;
 
@@ -156,10 +162,10 @@ export class AvatarCoverComponent implements OnInit {
 
     this.isCoverUploading = true;
 
-    this.onboardingService.uploadCoverPhoto(this.userId, coverFile).subscribe({
+    this.userService.uploadCoverPhoto(this.userId, coverFile).subscribe({
       next: (response) => {
-        this.coverUrl = response.url;
-        this.coverPreview = null;
+        this.coverUrl.set(response);
+        this.coverPreview.set(response);
         this.toastService.show('Cover photo updated successfully', 'success');
         this.isCoverUploading = false;
 
@@ -175,7 +181,7 @@ export class AvatarCoverComponent implements OnInit {
   }
 
   cancelAvatarUpload(): void {
-    this.avatarPreview = null;
+    this.avatarPreview.set(null);
     const avatarInput = document.getElementById(
       'avatar-upload'
     ) as HTMLInputElement;
@@ -185,7 +191,7 @@ export class AvatarCoverComponent implements OnInit {
   }
 
   cancelCoverUpload(): void {
-    this.coverPreview = null;
+    this.coverPreview.set(null);
     const coverInput = document.getElementById(
       'cover-upload'
     ) as HTMLInputElement;

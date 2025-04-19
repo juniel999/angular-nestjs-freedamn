@@ -86,13 +86,13 @@
                 class="w-8 h-8 rounded-full overflow-hidden ring-1 ring-primary/20"
               >
                 <img
-                  [src]="userAvatar"
-                  [alt]="username + ' avatar'"
+                  [src]="userAvatar()"
+                  [alt]="username() + ' avatar'"
                   onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'"
                 />
               </div>
             </div>
-            <span class="text-sm font-medium">{{ username }}</span>
+            <span class="text-sm font-medium">{{ username() }}</span>
             <fa-icon
               [icon]="['fas', 'chevron-down']"
               class="text-xs text-gray-400"
@@ -102,12 +102,6 @@
             tabindex="0"
             class="menu dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52"
           >
-            <li class="mb-2 p-2 font-semibold border-b border-base-200">
-              <div class="flex flex-col">
-                <span>{{ username }}</span>
-                <span class="text-xs text-gray-500">View your profile</span>
-              </div>
-            </li>
             <li>
               <a>
                 <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>
@@ -149,14 +143,14 @@
             <div class="avatar mr-3">
               <div class="w-10 h-10 rounded-full">
                 <img
-                  [src]="userAvatar"
-                  [alt]="username + ' avatar'"
+                  [src]="userAvatar()"
+                  [alt]="username() + ' avatar'"
                   onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'"
                 />
               </div>
             </div>
             <div>
-              <p class="font-medium">{{ username }}</p>
+              <p class="font-medium">{{ username() }}</p>
               <p class="text-xs text-gray-500">View profile</p>
             </div>
           </div>
