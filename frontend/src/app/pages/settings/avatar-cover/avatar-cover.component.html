@@ -1,11 +1,12 @@
 <div class="max-w-3xl">
   <h2 class="text-xl font-semibold mb-4">Avatar & Cover Photo</h2>
 
-  <div *ngIf="isLoading" class="flex justify-center my-4">
+  @if (isLoading) {
+  <div class="flex justify-center my-4">
     <div class="loading loading-spinner loading-lg text-primary"></div>
   </div>
-
-  <div *ngIf="!isLoading" class="space-y-8">
+  } @if (!isLoading) {
+  <div class="space-y-8">
     <!-- Avatar Section -->
     <div class="bg-base-100 p-6 rounded-lg shadow-sm">
       <h3 class="text-lg font-medium mb-4">Profile Avatar</h3>
@@ -17,14 +18,12 @@
             class="w-40 h-40 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300"
           >
             <img
-              [src]="
-                avatarPreview ||
-                avatarUrl ||
-                'https://ui-avatars.com/api/?name=User&background=random'
-              "
+              [src]="avatarPreview() || avatarUrl()"
               alt="Avatar preview"
               class="object-cover"
             />
+            {{ avatarUrl() }}
+            {{ avatarPreview() }}
           </div>
         </div>
 
@@ -44,7 +43,8 @@
             />
           </div>
 
-          <div *ngIf="avatarPreview" class="flex items-center gap-2">
+          @if (avatarPreview()) {
+          <div class="flex items-center gap-2">
             <button
               class="btn btn-primary"
               [disabled]="isAvatarUploading"
@@ -67,6 +67,7 @@
               Cancel
             </button>
           </div>
+          }
         </div>
       </div>
     </div>
@@ -77,18 +78,17 @@
 
       <!-- Cover Preview -->
       <div class="w-full h-48 bg-base-300 rounded-lg overflow-hidden mb-4">
+        @if (coverPreview() || coverUrl()) {
         <img
-          *ngIf="coverPreview || coverUrl"
-          [src]="coverPreview || coverUrl"
+          [src]="coverPreview() || coverUrl()"
           alt="Cover preview"
           class="w-full h-full object-cover"
         />
-        <div
-          *ngIf="!coverPreview && !coverUrl"
-          class="flex items-center justify-center h-full"
-        >
+        } @else {
+        <div class="flex items-center justify-center h-full">
           <p class="text-gray-500">No cover photo uploaded</p>
         </div>
+        }
       </div>
 
       <!-- Upload Controls -->
@@ -107,7 +107,8 @@
           />
         </div>
 
-        <div *ngIf="coverPreview" class="flex items-center gap-2">
+        @if (coverPreview()) {
+        <div class="flex items-center gap-2">
           <button
             class="btn btn-primary"
             [disabled]="isCoverUploading"
@@ -130,7 +131,9 @@
             Cancel
           </button>
         </div>
+        }
       </div>
     </div>
   </div>
+  }
 </div>

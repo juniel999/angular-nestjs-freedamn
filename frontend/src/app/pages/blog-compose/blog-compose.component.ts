@@ -13,18 +13,11 @@ import { ToastService } from '../../services/toast.service';
 import { UserService } from '../../services/user.service';
 import { finalize } from 'rxjs/operators';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { HeaderComponent } from '../../components/header/header.component';
 
 @Component({
   selector: 'app-blog-compose',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    FontAwesomeModule,
-    HeaderComponent,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule],
   templateUrl: './blog-compose.component.html',
 })
 export class BlogComposeComponent implements OnInit {

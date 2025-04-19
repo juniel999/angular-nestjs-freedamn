@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { filter } from 'rxjs/operators';
-import { HeaderComponent } from '../../components/header/header.component';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  imports: [FontAwesomeModule, RouterModule, HeaderComponent],
+  imports: [FontAwesomeModule, RouterModule],
 })
 export class SettingsComponent implements OnInit {
   activeLink: string = 'user-info';
