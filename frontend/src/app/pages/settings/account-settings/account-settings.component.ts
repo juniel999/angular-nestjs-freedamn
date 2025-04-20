@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormGroup,
@@ -18,19 +19,18 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
   templateUrl: './account-settings.component.html',
   imports: [FontAwesomeModule, ReactiveFormsModule, CommonModule],
 })
-export class AccountSettingsComponent implements OnInit {
+export class AccountSettingsComponent {
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private fb = inject(FormBuilder);
+
   accountForm!: FormGroup;
+  readonly currentUser = toSignal(this.authService.currentUser$);
   isLoading: boolean = false;
-  isSaving: boolean = false;
+  isSaving = signal(false);
   showCurrentPassword: boolean = false;
   showNewPassword: boolean = false;
   showConfirmPassword: boolean = false;
-
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private toastService: ToastService
-  ) {}
 
   ngOnInit(): void {
     this.initForm();
@@ -92,33 +92,29 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
 
-    this.isSaving = true;
+    const user = this.currentUser();
+    if (!user?.sub) {
+      this.toastService.show('Please log in to change password', 'error');
+      return;
+    }
 
+    this.isSaving.set(true);
     const { currentPassword, newPassword } = this.accountForm.value;
 
-    // This would connect to your backend API
     this.authService.changePassword(currentPassword, newPassword).subscribe({
-      next: () => {
-        this.toastService.show('Password updated successfully', 'success');
-        this.accountForm.patchValue({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
+      next: (response) => {
+        this.toastService.show(response.message, 'success');
+        this.accountForm.reset({
+          username: user.username,
+          email: user.email,
         });
-        this.accountForm.markAsPristine();
-        this.isSaving = false;
+        this.isSaving.set(false);
       },
       error: (error) => {
-        console.error('Error changing password', error);
-
-        // Handle specific error cases
-        if (error.status === 401) {
-          this.toastService.show('Current password is incorrect', 'error');
-        } else {
-          this.toastService.show('Failed to update password', 'error');
-        }
-
-        this.isSaving = false;
+        const errorMessage =
+          error?.error?.message || 'Failed to update password';
+        this.toastService.show(errorMessage, 'error');
+        this.isSaving.set(false);
       },
     });
   }

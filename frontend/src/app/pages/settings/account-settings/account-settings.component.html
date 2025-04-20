@@ -1,11 +1,12 @@
 <div class="max-w-3xl">
   <h2 class="text-xl font-semibold mb-4">Account Settings</h2>
 
-  <div *ngIf="isLoading" class="flex justify-center my-4">
+  @if (isLoading) {
+  <div class="flex justify-center my-4">
     <div class="loading loading-spinner loading-lg text-primary"></div>
   </div>
-
-  <div *ngIf="!isLoading" class="bg-base-100 p-6 rounded-lg shadow-sm">
+  } @if (!isLoading) {
+  <div class="bg-base-100 p-6 rounded-lg shadow-sm">
     <form
       [formGroup]="accountForm"
       (ngSubmit)="changePassword()"
@@ -87,17 +88,14 @@
               ></fa-icon>
             </button>
           </div>
-          <label
-            *ngIf="
-              getFormControl('currentPassword')?.invalid &&
-              getFormControl('currentPassword')?.touched
-            "
-            class="label"
-          >
+          @if ( getFormControl('currentPassword')?.invalid &&
+          getFormControl('currentPassword')?.touched ) {
+          <label class="label">
             <span class="label-text-alt text-error"
               >Current password is required</span
             >
           </label>
+          }
         </div>
 
         <!-- New Password -->
@@ -128,42 +126,29 @@
             </button>
           </div>
 
-          <label
-            *ngIf="
-              getFormControl('newPassword')?.hasError('required') &&
-              getFormControl('newPassword')?.touched
-            "
-            class="label"
-          >
+          @if ( getFormControl('newPassword')?.hasError('required') &&
+          getFormControl('newPassword')?.touched ) {
+          <label class="label">
             <span class="label-text-alt text-error"
               >New password is required</span
             >
           </label>
-
-          <label
-            *ngIf="
-              getFormControl('newPassword')?.hasError('minlength') &&
-              getFormControl('newPassword')?.touched
-            "
-            class="label"
-          >
+          } @if ( getFormControl('newPassword')?.hasError('minlength') &&
+          getFormControl('newPassword')?.touched ) {
+          <label class="label">
             <span class="label-text-alt text-error"
               >Password must be at least 8 characters</span
             >
           </label>
-
-          <label
-            *ngIf="
-              getFormControl('newPassword')?.hasError('weakPassword') &&
-              getFormControl('newPassword')?.touched
-            "
-            class="label"
-          >
+          } @if ( getFormControl('newPassword')?.hasError('weakPassword') &&
+          getFormControl('newPassword')?.touched ) {
+          <label class="label">
             <span class="label-text-alt text-error"
               >Password must include uppercase, lowercase, number, and special
               character</span
             >
           </label>
+          }
         </div>
 
         <!-- Confirm Password -->
@@ -197,30 +182,22 @@
             </button>
           </div>
 
-          <label
-            *ngIf="
-              getFormControl('confirmPassword')?.hasError('required') &&
-              getFormControl('confirmPassword')?.touched
-            "
-            class="label"
-          >
+          @if ( getFormControl('confirmPassword')?.hasError('required') &&
+          getFormControl('confirmPassword')?.touched ) {
+          <label class="label">
             <span class="label-text-alt text-error"
               >Please confirm your password</span
             >
           </label>
-
-          <label
-            *ngIf="
-              accountForm.hasError('passwordMismatch') &&
-              !getFormControl('confirmPassword')?.hasError('required') &&
-              getFormControl('confirmPassword')?.touched
-            "
-            class="label"
-          >
+          } @if ( accountForm.hasError('passwordMismatch') &&
+          !getFormControl('confirmPassword')?.hasError('required') &&
+          getFormControl('confirmPassword')?.touched ) {
+          <label class="label">
             <span class="label-text-alt text-error"
               >Passwords do not match</span
             >
           </label>
+          }
         </div>
       </div>
 
@@ -229,17 +206,19 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="accountForm.invalid || isSaving"
+          [disabled]="accountForm.invalid || isSaving()"
         >
+          @if (isSaving()) {
           <fa-icon
-            *ngIf="isSaving"
             [icon]="['fas', 'spinner']"
             animation="spin"
             class="mr-2"
           ></fa-icon>
-          {{ isSaving ? "Updating..." : "Update Password" }}
+          }
+          {{ isSaving() ? "Updating..." : "Update Password" }}
         </button>
       </div>
     </form>
   </div>
+  }
 </div>
