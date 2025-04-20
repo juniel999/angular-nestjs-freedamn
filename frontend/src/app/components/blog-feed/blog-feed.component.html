@@ -1,14 +1,45 @@
 <div class="max-w-6xl mx-auto px-4 py-6">
   <!-- Greeting -->
   <div class="mb-10">
+    @if (isLoadingProfile) {
+    <div
+      class="h-16 sm:h-18 md:h-20 w-64 sm:w-80 md:w-96 bg-base-300 animate-pulse rounded-lg"
+    ></div>
+    <div
+      class="h-4 sm:h-4.5 md:h-5 mt-2 w-48 sm:w-72 md:w-96 bg-base-300 animate-pulse rounded-lg"
+    ></div>
+    } @else {
     <h1 class="text-4xl md:text-5xl font-bold mb-3">
       Good day, <span class="text-primary">{{ firstName }}</span> 👋
     </h1>
     <p class="text-lg text-base-content opacity-80">
       Here are some posts that you might be interested in. Enjoy!
     </p>
+    }
   </div>
 
+  <!-- Loading indicator -->
+  @if (isLoadingProfile) {
+  <!-- Tabs skeleton -->
+  <div
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+  >
+    <div class="tabs tabs-lifted">
+      <div class="h-10 w-24 sm:w-28 bg-base-300 animate-pulse rounded-lg"></div>
+      <div
+        class="h-10 w-24 sm:w-28 bg-base-300 animate-pulse rounded-lg ml-1"
+      ></div>
+      <div
+        class="h-10 w-24 sm:w-28 bg-base-300 animate-pulse rounded-lg ml-1"
+      ></div>
+    </div>
+
+    <!-- Filter button skeleton -->
+    <div class="relative">
+      <div class="h-8 w-20 bg-base-300 animate-pulse rounded-full"></div>
+    </div>
+  </div>
+  } @else {
   <!-- Tabs -->
   <div
     class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
@@ -98,19 +129,48 @@
       </button>
     </div>
   </div>
-  }
-
+  } }
   <!-- Blog Feed -->
   <div class="space-y-8">
-    <!-- Loading indicator -->
-    @if (loading() && (!currentBlogs() || !currentBlogs()?.posts?.length)) {
-    <div class="flex justify-center py-12">
-      <span class="loading loading-spinner loading-lg text-primary"></span>
-    </div>
-    }
+    <!-- Initial loading state -->
+    @if (loading() && !currentBlogs()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      @for (item of [1,2,3,4]; track item) {
+      <div class="card bg-base-100 border border-base-200 overflow-hidden">
+        <!-- Image skeleton -->
+        <div class="w-full h-40 bg-base-300 animate-pulse"></div>
 
-    <!-- No posts message -->
-    @if (!loading() && (!currentBlogs() || !currentBlogs()?.posts?.length)) {
+        <!-- Content skeleton -->
+        <div class="p-4">
+          <!-- Author skeleton -->
+          <div class="flex items-center mb-3">
+            <div class="w-8 h-8 rounded-full bg-base-300 animate-pulse"></div>
+            <div class="ml-2">
+              <div class="h-4 w-24 bg-base-300 animate-pulse rounded"></div>
+              <div
+                class="h-3 w-16 bg-base-300 animate-pulse rounded mt-1"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Text skeleton -->
+          <div class="space-y-2 mb-3">
+            <div class="h-4 w-full bg-base-300 animate-pulse rounded"></div>
+            <div class="h-4 w-3/4 bg-base-300 animate-pulse rounded"></div>
+          </div>
+
+          <!-- Tags skeleton -->
+          <div class="flex gap-1 mb-3">
+            <div class="h-5 w-12 bg-base-300 animate-pulse rounded-full"></div>
+            <div class="h-5 w-16 bg-base-300 animate-pulse rounded-full"></div>
+            <div class="h-5 w-14 bg-base-300 animate-pulse rounded-full"></div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    } @else if (!currentBlogs() || currentBlogs()?.posts?.length === 0) {
+    <!-- Empty state -->
     <div class="flex flex-col items-center py-12">
       <div class="text-center max-w-md">
         <div class="text-5xl mb-4 opacity-30">
@@ -128,10 +188,8 @@
         </p>
       </div>
     </div>
-    }
-
-    <!-- Blog posts -->
-    @if (currentBlogs() && currentBlogs()?.posts?.length) {
+    } @else {
+    <!-- Blog posts grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       @for (blog of currentBlogs()!.posts; track blog._id) {
       <div

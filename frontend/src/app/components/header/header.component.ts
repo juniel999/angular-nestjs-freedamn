@@ -13,7 +13,7 @@ import { AvatarUpdateService } from '../../services/avatar-update.service';
 })
 export class HeaderComponent implements OnInit {
   username = signal('');
-  userAvatar = signal('');
+  userAvatar = signal(localStorage.getItem('avatar') || '');
   isLoggedIn = false;
   userId = '';
 
@@ -46,6 +46,11 @@ export class HeaderComponent implements OnInit {
             'https://ui-avatars.com/api/?name=Guest&background=random&name=' +
               this.username().charAt(0).toUpperCase()
         );
+
+        // Set the avatar in local storage
+        if (!localStorage.getItem('avatar')) {
+          localStorage.setItem('avatar', this.userAvatar());
+        }
       });
     }
   }
