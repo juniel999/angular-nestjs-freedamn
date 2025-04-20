@@ -1,19 +1,23 @@
 <div class="container max-w-6xl mx-auto px-4 py-8">
-  <div class="text-2xl font-bold mb-6">
-    <h1 class="text-primary">Edit Profile</h1>
+  <div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-primary bg-clip-text">Settings</h1>
+    <p class="text-base-content/60 mt-2">Manage your profile and preferences</p>
   </div>
 
-  <div class="flex flex-col md:flex-row gap-6">
+  <div class="flex flex-col md:flex-row gap-8">
     <!-- Navigation Sidebar -->
-    <div class="w-full md:w-64 rounded-lg overflow-hidden">
-      <nav class="flex flex-col">
+    <div class="w-full md:w-72">
+      <nav class="flex flex-col gap-2 bg-base-200 rounded-xl p-3 shadow-lg">
         <a
           routerLink="/settings/user-info"
           [class.bg-primary]="activeLink === 'user-info'"
           [class.text-primary-content]="activeLink === 'user-info'"
-          class="px-4 py-3 hover:bg-base-300 transition-colors duration-200 flex items-center gap-3"
+          class="px-4 py-3 rounded-lg hover:bg-base-300 transition-all duration-200 flex items-center gap-3 group"
         >
-          <fa-icon [icon]="['fas', 'user']"></fa-icon>
+          <fa-icon
+            [icon]="['fas', 'user']"
+            class="text-base-content/70 group-hover:text-primary"
+          ></fa-icon>
           <span>User Information</span>
         </a>
 
@@ -21,9 +25,12 @@
           routerLink="/settings/socials"
           [class.bg-primary]="activeLink === 'socials'"
           [class.text-primary-content]="activeLink === 'socials'"
-          class="px-4 py-3 hover:bg-base-300 transition-colors duration-200 flex items-center gap-3"
+          class="px-4 py-3 rounded-lg hover:bg-base-300 transition-all duration-200 flex items-center gap-3 group"
         >
-          <fa-icon [icon]="['fas', 'link']"></fa-icon>
+          <fa-icon
+            [icon]="['fas', 'link']"
+            class="text-base-content/70 group-hover:text-primary"
+          ></fa-icon>
           <span>Social Links</span>
         </a>
 
@@ -31,9 +38,12 @@
           routerLink="/settings/topics-tags"
           [class.bg-primary]="activeLink === 'topics-tags'"
           [class.text-primary-content]="activeLink === 'topics-tags'"
-          class="px-4 py-3 hover:bg-base-300 transition-colors duration-200 flex items-center gap-3"
+          class="px-4 py-3 rounded-lg hover:bg-base-300 transition-all duration-200 flex items-center gap-3 group"
         >
-          <fa-icon [icon]="['fas', 'hashtag']"></fa-icon>
+          <fa-icon
+            [icon]="['fas', 'hashtag']"
+            class="text-base-content/70 group-hover:text-primary"
+          ></fa-icon>
           <span>Topics & Tags</span>
         </a>
 
@@ -41,9 +51,12 @@
           routerLink="/settings/avatar-cover"
           [class.bg-primary]="activeLink === 'avatar-cover'"
           [class.text-primary-content]="activeLink === 'avatar-cover'"
-          class="px-4 py-3 hover:bg-base-300 transition-colors duration-200 flex items-center gap-3"
+          class="px-4 py-3 rounded-lg hover:bg-base-300 transition-all duration-200 flex items-center gap-3 group"
         >
-          <fa-icon [icon]="['fas', 'image']"></fa-icon>
+          <fa-icon
+            [icon]="['fas', 'image']"
+            class="text-base-content/70 group-hover:text-primary"
+          ></fa-icon>
           <span>Avatar & Cover Photo</span>
         </a>
 
@@ -51,16 +64,19 @@
           routerLink="/settings/account"
           [class.bg-primary]="activeLink === 'account'"
           [class.text-primary-content]="activeLink === 'account'"
-          class="px-4 py-3 hover:bg-base-300 transition-colors duration-200 flex items-center gap-3"
+          class="px-4 py-3 rounded-lg hover:bg-base-300 transition-all duration-200 flex items-center gap-3 group"
         >
-          <fa-icon [icon]="['fas', 'cog']"></fa-icon>
+          <fa-icon
+            [icon]="['fas', 'cog']"
+            class="text-base-content/70 group-hover:text-primary"
+          ></fa-icon>
           <span>Account Settings</span>
         </a>
       </nav>
     </div>
 
     <!-- Content Area -->
-    <div class="flex-1 rounded-lg p-6">
+    <div class="flex-1 rounded-xl-xl p-6">
       <router-outlet></router-outlet>
     </div>
   </div>
