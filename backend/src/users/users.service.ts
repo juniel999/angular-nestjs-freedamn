@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, SocialLinks } from './user.schema';
@@ -12,20 +17,22 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private tagsService: TagsService,
-    private cloudinaryService: CloudinaryService
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   async findOne(username: string): Promise<User | null> {
     // Try case-insensitive match
     try {
-      const user = await this.userModel.findOne({ 
-        username: { $regex: new RegExp(`^${username}$`, 'i') } 
-      }).exec();
-      
+      const user = await this.userModel
+        .findOne({
+          username: { $regex: new RegExp(`^${username}$`, 'i') },
+        })
+        .exec();
+
       if (user) {
         return user;
       }
-      
+
       return null;
     } catch (error) {
       // Fallback to exact match if regex fails
@@ -41,26 +48,31 @@ export class UsersService {
     return this.userModel.findById(id).exec();
   }
 
-  async updatePreferredTags(userId: string, tagIds: string[]): Promise<User | null> {
+  async updatePreferredTags(
+    userId: string,
+    tagIds: string[],
+  ): Promise<User | null> {
     // Filter out any null, undefined or empty values and normalize tag names
     const normalizedTagNames = tagIds
-      .filter(tag => tag !== null && tag !== undefined && tag.trim() !== '')
-      .map(tag => tag.toLowerCase().trim());
-    
+      .filter((tag) => tag !== null && tag !== undefined && tag.trim() !== '')
+      .map((tag) => tag.toLowerCase().trim());
+
     // Update the user's preferred tags with normalized tag names
-    return this.userModel.findByIdAndUpdate(
-      userId,
-      { preferredTags: normalizedTagNames },
-      { new: true }
-    ).exec();
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { preferredTags: normalizedTagNames },
+        { new: true },
+      )
+      .exec();
   }
 
   async create(
-    username: string, 
-    email: string, 
+    username: string,
+    email: string,
     password: string,
     firstName: string,
-    lastName: string
+    lastName: string,
   ): Promise<User> {
     // Check if required fields are provided
     if (!firstName || !lastName) {
@@ -80,10 +92,10 @@ export class UsersService {
 
     // Use a fixed salt round for consistency
     const saltRounds = 10;
-    
+
     // Generate hash with explicit salt rounds
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
+
     // Create user with required fields and default values for optional fields
     const newUser = new this.userModel({
       username,
@@ -94,7 +106,7 @@ export class UsersService {
       preferredTags: [],
       isActive: true,
       roles: ['user'],
-      socials: {}
+      socials: {},
     });
 
     return newUser.save();
@@ -103,25 +115,28 @@ export class UsersService {
   async updateAvatar(userId: string, file: Express.Multer.File): Promise<User> {
     // Find the user first to get the current avatar URL
     const user = await this.userModel.findById(userId).exec();
-    
+
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
-    
+
     // Upload new image to Cloudinary
-    const newAvatarUrl = await this.cloudinaryService.uploadImage(file, 'user-avatars');
-    
+    const newAvatarUrl = await this.cloudinaryService.uploadImage(
+      file,
+      'user-avatars',
+    );
+
     // Update user with new avatar URL
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
-      { avatar: newAvatarUrl },
-      { new: true }
-    ).exec();
-    
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(userId, { avatar: newAvatarUrl }, { new: true })
+      .exec();
+
     if (!updatedUser) {
-      throw new NotFoundException(`User with id ${userId} not found after update`);
+      throw new NotFoundException(
+        `User with id ${userId} not found after update`,
+      );
     }
-    
+
     // Delete the old avatar image if it exists
     if (user.avatar) {
       try {
@@ -131,32 +146,42 @@ export class UsersService {
         // Continue execution even if deletion fails
       }
     }
-    
+
     return updatedUser;
   }
 
-  async updateCoverPhoto(userId: string, file: Express.Multer.File): Promise<User> {
+  async updateCoverPhoto(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<User> {
     // Find the user first to get the current cover photo URL
     const user = await this.userModel.findById(userId).exec();
-    
+
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
-    
+
     // Upload new image to Cloudinary
-    const newCoverPhotoUrl = await this.cloudinaryService.uploadImage(file, 'user-coverphoto');
-    
+    const newCoverPhotoUrl = await this.cloudinaryService.uploadImage(
+      file,
+      'user-coverphoto',
+    );
+
     // Update user with new cover photo URL
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
-      { coverphoto: newCoverPhotoUrl },
-      { new: true }
-    ).exec();
-    
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { coverphoto: newCoverPhotoUrl },
+        { new: true },
+      )
+      .exec();
+
     if (!updatedUser) {
-      throw new NotFoundException(`User with id ${userId} not found after update`);
+      throw new NotFoundException(
+        `User with id ${userId} not found after update`,
+      );
     }
-    
+
     // Delete the old cover photo image if it exists
     if (user.coverphoto) {
       try {
@@ -166,30 +191,34 @@ export class UsersService {
         // Continue execution even if deletion fails
       }
     }
-    
+
     return updatedUser;
   }
 
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<User> {
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      userId,
-      updateProfileDto,
-      { new: true }
-    ).exec();
-    
+  async updateProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<User> {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(userId, updateProfileDto, { new: true })
+      .exec();
+
     if (!updatedUser) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
-    
+
     return updatedUser;
   }
 
   async getUserProfile(userId: string) {
-    const user = await this.userModel.findById(userId).select('-password').exec();
+    const user = await this.userModel
+      .findById(userId)
+      .select('-password')
+      .exec();
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     return {
       firstName: user.firstName,
       lastName: user.lastName,
@@ -200,7 +229,7 @@ export class UsersService {
       bio: user.bio,
       socials: user.socials,
       avatar: user.avatar,
-      coverphoto: user.coverphoto
+      coverphoto: user.coverphoto,
     };
   }
 
@@ -209,18 +238,16 @@ export class UsersService {
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     // Only consider onboarding complete if the user has explicitly completed it
     // (not just by having enough tags)
     return { completed: user.onboardingCompleted === true };
   }
 
   async completeOnboarding(userId: string) {
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      { onboardingCompleted: true },
-      { new: true }
-    ).exec();
+    const user = await this.userModel
+      .findByIdAndUpdate(userId, { onboardingCompleted: true }, { new: true })
+      .exec();
     return { completed: true };
   }
 
@@ -229,7 +256,13 @@ export class UsersService {
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     return { tags: user.preferredTags || [] };
+  }
+
+  async updatePassword(userId: string, hashedPassword: string) {
+    await this.userModel.findByIdAndUpdate(userId, {
+      password: hashedPassword,
+    });
   }
 }

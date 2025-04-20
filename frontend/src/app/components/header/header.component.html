@@ -85,11 +85,7 @@
               <div
                 class="w-8 h-8 rounded-full overflow-hidden ring-1 ring-primary/20"
               >
-                <img
-                  [src]="userAvatar()"
-                  [alt]="username() + ' avatar'"
-                  onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'"
-                />
+                <img [src]="userAvatar()" [alt]="username() + ' avatar'" />
               </div>
             </div>
             <span class="text-sm font-medium">{{ username() }}</span>

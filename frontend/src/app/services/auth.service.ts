@@ -7,6 +7,11 @@ export interface LoginResponse {
   access_token: string;
 }
 
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export interface RegisterRequest {
   username: string;
   email: string;
@@ -70,14 +75,23 @@ export class AuthService {
   }
 
   changePassword(
-    currentPassword: string,
+    oldPassword: string,
     newPassword: string
-  ): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/auth/change-password`, {
-      currentPassword,
+  ): Observable<{ message: string }> {
+    const payload: ChangePasswordRequest = {
+      oldPassword,
       newPassword,
-    });
+    };
+
+    return this.http
+      .post<{ message: string }>(`${this.apiUrl}/auth/change-password`, payload)
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          throw error;
+        })
+      );
   }
+
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
