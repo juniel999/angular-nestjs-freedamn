@@ -43,7 +43,7 @@ export class HeaderComponent implements OnInit {
       this.userService.getUserProfile(this.userId).subscribe((userProfile) => {
         this.userAvatar.set(
           userProfile?.avatar ||
-            'https://ui-avatars.com/api/?name=Guest&background=random&name=' +
+            'https://ui-avatars.com/api/?name=Guest&background=E5B400&name=' +
               this.username().charAt(0).toUpperCase()
         );
 
