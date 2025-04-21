@@ -1,89 +1,133 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import {
   OnboardingService,
   TagData,
 } from '../../../services/onboarding.service';
 import { ToastService } from '../../../services/toast.service';
+import { CommonModule } from '@angular/common';
 import {
-  Observable,
-  Subject,
+  Subscription,
   debounceTime,
   distinctUntilChanged,
-  switchMap,
-  of,
   forkJoin,
+  finalize,
+  catchError,
+  of,
+  switchMap,
 } from 'rxjs';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-topics-tags',
+  standalone: true,
+  imports: [ReactiveFormsModule, CommonModule, FontAwesomeModule],
   templateUrl: './topics-tags.component.html',
-  imports: [FontAwesomeModule, ReactiveFormsModule, CommonModule],
 })
-export class TopicsTagsComponent implements OnInit {
-  userTags: TagData[] = [];
-  availableTags: TagData[] = [];
-  popularTags: TagData[] = [];
-  filteredTags: TagData[] = [];
-  isLoading: boolean = false;
-  isSaving: boolean = false;
+export class TopicsTagsComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private userService = inject(UserService);
+  private onboardingService = inject(OnboardingService);
+  private toastService = inject(ToastService);
 
-  newTagInput = new FormControl('');
-  tagSearchInput = new FormControl('');
+  private subscriptions = new Subscription();
 
-  private searchSubject = new Subject<string>();
+  // Form for the tag input
+  tagsForm!: FormGroup;
 
-  constructor(
-    private userService: UserService,
-    private onboardingService: OnboardingService,
-    private toastService: ToastService
-  ) {}
+  // Data
+  selectedTags: TagData[] = []; // User's selected tags
+  topTags: TagData[] = []; // Popular tags sorted by usage count
+  availableTags: TagData[] = []; // All available tags
+  filteredTags: TagData[] = []; // Tags filtered by search
+
+  // UI state
+  errorMessage = '';
+  isLoading = false;
+  isSaving = false;
 
   ngOnInit(): void {
-    this.loadUserAndAvailableTags();
+    this.initForm();
+    this.loadData();
 
     // Setup search with debounce
-    this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged())
+    const sub = this.tagsForm
+      .get('tagSearch')!
+      .valueChanges.pipe(debounceTime(300), distinctUntilChanged())
       .subscribe((searchTerm) => {
         this.filterAvailableTags(searchTerm);
       });
 
-    this.tagSearchInput.valueChanges.subscribe((value) => {
-      this.searchSubject.next(value || '');
+    this.subscriptions.add(sub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  initForm(): void {
+    this.tagsForm = this.fb.group({
+      tagInput: [{ value: '', disabled: false }],
+      tagSearch: [{ value: '', disabled: false }],
     });
   }
 
-  loadUserAndAvailableTags(): void {
+  loadData(): void {
     this.isLoading = true;
-    forkJoin({
+    this.errorMessage = '';
+
+    const sub = forkJoin({
       userTags: this.userService.getUserPreferredTags(),
       allTags: this.userService.getAllTags(),
       popularTags: this.onboardingService.getPopularTags(20),
     }).subscribe({
       next: (results) => {
-        this.userTags = results.userTags;
-        this.availableTags = results.allTags.filter(
-          (tag) => !this.userTags.some((userTag) => userTag.id === tag.id)
-        );
-        this.popularTags = results.popularTags.filter(
-          (tag) => !this.userTags.some((userTag) => userTag.id === tag.id)
-        );
+        // Make sure every tag has a valid ID
+        this.selectedTags = results.userTags.map((tag, idx) => {
+          if (!tag.id) {
+            tag.id = `user-tag-${idx}-${Date.now()}`;
+          }
+          return tag;
+        });
+
+        this.availableTags = results.allTags
+          .filter(
+            (tag) => !this.selectedTags.some((userTag) => userTag.id === tag.id)
+          )
+          .map((tag, idx) => {
+            if (!tag.id) {
+              tag.id = `avail-tag-${idx}-${Date.now()}`;
+            }
+            return tag;
+          });
+
+        this.topTags = results.popularTags
+          .filter(
+            (tag) => !this.selectedTags.some((userTag) => userTag.id === tag.id)
+          )
+          .map((tag, idx) => {
+            if (!tag.id) {
+              tag.id = `pop-tag-${idx}-${Date.now()}`;
+            }
+            return tag;
+          });
+
         this.filteredTags = [...this.availableTags];
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading tags', error);
+        this.errorMessage = 'Failed to load tags. Please try again.';
         this.toastService.show('Failed to load tags', 'error');
         this.isLoading = false;
       },
     });
+
+    this.subscriptions.add(sub);
   }
 
-  filterAvailableTags(searchTerm: string): void {
+  filterAvailableTags(searchTerm: string | null): void {
     if (!searchTerm || searchTerm.trim() === '') {
       this.filteredTags = [...this.availableTags];
       return;
@@ -95,96 +139,384 @@ export class TopicsTagsComponent implements OnInit {
     );
   }
 
-  addTag(tag: TagData): void {
-    this.isSaving = true;
-    this.userService.addPreferredTag(tag.id).subscribe({
-      next: () => {
-        // Add to user tags and remove from available tags
-        this.userTags.push(tag);
-        this.availableTags = this.availableTags.filter((t) => t.id !== tag.id);
-        this.popularTags = this.popularTags.filter((t) => t.id !== tag.id);
-        this.filterAvailableTags(this.tagSearchInput.value || '');
-        this.toastService.show(`Added "${tag.name}" to your topics`, 'success');
-        this.isSaving = false;
-      },
-      error: (error) => {
-        console.error('Error adding tag', error);
-        this.toastService.show('Failed to add topic', 'error');
-        this.isSaving = false;
-      },
-    });
-  }
+  /**
+   * Select a tag from the suggested list
+   */
+  selectTag(tag: TagData): void {
+    if (this.isSaving) {
+      return; // Don't proceed if already saving
+    }
 
-  removeTag(tag: TagData): void {
-    this.isSaving = true;
-    this.userService.removePreferredTag(tag.id).subscribe({
-      next: () => {
-        // Remove from user tags and add to available tags
-        this.userTags = this.userTags.filter((t) => t.id !== tag.id);
-        this.availableTags.push(tag);
-        this.filterAvailableTags(this.tagSearchInput.value || '');
-        this.toastService.show(
-          `Removed "${tag.name}" from your topics`,
-          'success'
-        );
-        this.isSaving = false;
-      },
-      error: (error) => {
-        console.error('Error removing tag', error);
-        this.toastService.show('Failed to remove topic', 'error');
-        this.isSaving = false;
-      },
-    });
-  }
+    // Check if tag is already in the list
+    const isDuplicate = this.selectedTags.some(
+      (selectedTag) => selectedTag.id === tag.id
+    );
 
-  createAndAddTag(): void {
-    const newTagName = this.newTagInput.value?.trim();
-    if (!newTagName) {
+    if (isDuplicate) {
+      this.errorMessage = `"${tag.name}" has already been added.`;
       return;
     }
 
-    this.isSaving = true;
+    // Add the tag to user's preferences
+    this.addTag(tag);
+  }
 
-    // First check if tag already exists in available tags
+  /**
+   * Add a new tag via the input field
+   */
+  addNewTag(): void {
+    if (this.isSaving) {
+      return; // Don't proceed if already saving
+    }
+
+    const tagName = this.tagsForm.get('tagInput')?.value?.trim();
+
+    // Validate empty tags
+    if (!tagName || tagName.length === 0) {
+      this.errorMessage = 'Please enter a tag before saving.';
+      return;
+    }
+
+    // Check if tag is already in the list
+    const isDuplicate = this.selectedTags.some(
+      (tag) => tag.name.toLowerCase() === tagName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      this.errorMessage = `"${tagName}" has already been added.`;
+      return;
+    }
+
+    // Check if the tag already exists in available tags
     const existingTag = this.availableTags.find(
-      (tag) => tag.name.toLowerCase() === newTagName.toLowerCase()
+      (tag) => tag.name.toLowerCase() === tagName.toLowerCase()
     );
 
     if (existingTag) {
-      // Tag exists, just add it to user's preferred tags
+      // Tag exists, just add it
       this.addTag(existingTag);
-      this.newTagInput.setValue('');
       return;
     }
 
-    // Tag doesn't exist, create it and add to user's preferred tags
-    this.onboardingService.addTagsIfNotExist([newTagName]).subscribe({
-      next: (createdTags) => {
-        if (createdTags && createdTags.length > 0) {
-          const newTag = createdTags[0];
-          this.userService.addPreferredTag(newTag.id).subscribe({
-            next: () => {
-              this.userTags.push(newTag);
-              this.toastService.show(
-                `Created and added "${newTagName}" to your topics`,
-                'success'
-              );
-              this.newTagInput.setValue('');
+    this.isSaving = true;
+    this.errorMessage = '';
+
+    // Disable the form controls while saving
+    this.tagsForm.get('tagInput')?.disable();
+    this.tagsForm.get('tagSearch')?.disable();
+
+    try {
+      // Create the tag in the database
+      const sub = this.onboardingService
+        .addTagsIfNotExist([tagName])
+        .pipe(
+          catchError((err) => {
+            console.error('Error creating tag', err);
+            this.errorMessage = 'Failed to create tag. Please try again.';
+            this.toastService.show('Failed to create new topic', 'error');
+            return of([]);
+          }),
+          finalize(() => {
+            if (this.errorMessage) {
               this.isSaving = false;
-            },
-            error: (error) => {
-              console.error('Error adding new tag', error);
-              this.toastService.show('Failed to add new topic', 'error');
+              this.tagsForm.get('tagInput')?.enable();
+              this.tagsForm.get('tagSearch')?.enable();
+            }
+          })
+        )
+        .subscribe((createdTags) => {
+          if (createdTags && createdTags.length > 0) {
+            const newTag = createdTags[0];
+
+            if (!newTag || !newTag.name) {
+              console.error('Invalid created tag', newTag);
+              this.errorMessage = 'Invalid tag created. Please try again.';
+              this.toastService.show('Failed to create valid tag', 'error');
               this.isSaving = false;
-            },
-          });
-        }
-      },
-      error: (error) => {
-        console.error('Error creating tag', error);
-        this.toastService.show('Failed to create new topic', 'error');
-        this.isSaving = false;
-      },
-    });
+              this.tagsForm.get('tagInput')?.enable();
+              this.tagsForm.get('tagSearch')?.enable();
+              return;
+            }
+
+            // Ensure the tag has a valid ID
+            if (!newTag.id) {
+              newTag.id = `new-tag-${Date.now()}`;
+            }
+
+            console.log('New tag created:', newTag);
+
+            // Use direct name-based approach to update user's tags
+            this.onboardingService
+              .getUserTags()
+              .pipe(
+                catchError((error) => {
+                  console.error('Error getting user tags for update', error);
+                  this.errorMessage = 'Failed to retrieve your current topics.';
+                  this.toastService.show(
+                    'Failed to update your topics',
+                    'error'
+                  );
+                  return of({ tags: [] });
+                }),
+                switchMap((response) => {
+                  const currentTags: string[] = [...(response.tags || [])];
+
+                  // Add the new tag name if it doesn't exist
+                  if (!currentTags.includes(newTag.name)) {
+                    currentTags.push(newTag.name);
+                  }
+
+                  console.log('Updating user tags to:', currentTags);
+
+                  // Update the user's tags directly
+                  return this.onboardingService
+                    .updateUserTags(undefined, currentTags)
+                    .pipe(
+                      catchError((err) => {
+                        console.error('Error updating user tags', err);
+                        this.errorMessage = 'Failed to update your topics.';
+                        this.toastService.show(
+                          'Failed to update your topics',
+                          'error'
+                        );
+                        return of(null);
+                      })
+                    );
+                }),
+                finalize(() => {
+                  this.isSaving = false;
+                  this.tagsForm.get('tagInput')?.enable();
+                  this.tagsForm.get('tagSearch')?.enable();
+                })
+              )
+              .subscribe((result) => {
+                if (result) {
+                  console.log('Tags updated successfully:', result);
+
+                  // Success - add to local list
+                  this.selectedTags.push(newTag);
+                  this.tagsForm.get('tagInput')?.setValue('');
+                  this.errorMessage = '';
+                  this.toastService.show(
+                    `Created and added "${newTag.name}" to your topics`,
+                    'success'
+                  );
+                }
+              });
+          } else {
+            this.isSaving = false;
+            this.tagsForm.get('tagInput')?.enable();
+            this.tagsForm.get('tagSearch')?.enable();
+          }
+        });
+
+      this.subscriptions.add(sub);
+    } catch (error) {
+      console.error('Unexpected error in addNewTag', error);
+      this.errorMessage = 'An unexpected error occurred. Please try again.';
+      this.toastService.show('Failed to add new topic', 'error');
+      this.isSaving = false;
+      this.tagsForm.get('tagInput')?.enable();
+      this.tagsForm.get('tagSearch')?.enable();
+    }
+  }
+
+  /**
+   * Add an existing tag to user's preferences
+   */
+  addTag(tag: TagData): void {
+    if (!tag || !tag.name || this.isSaving) {
+      return; // Don't proceed if invalid tag or already saving
+    }
+
+    // Ensure the tag has a valid ID
+    if (!tag.id) {
+      tag.id = `add-tag-${Date.now()}`;
+    }
+
+    this.isSaving = true;
+    this.errorMessage = '';
+
+    // Disable the form controls while saving
+    this.tagsForm.get('tagInput')?.disable();
+    this.tagsForm.get('tagSearch')?.disable();
+
+    console.log('Adding tag:', tag.name);
+
+    try {
+      // Use direct name-based approach
+      const sub = this.onboardingService
+        .getUserTags()
+        .pipe(
+          catchError((error) => {
+            console.error('Error getting current user tags', error);
+            this.errorMessage = 'Failed to retrieve your current topics.';
+            this.toastService.show(
+              'Failed to retrieve your current topics',
+              'error'
+            );
+            return of({ tags: [] });
+          }),
+          switchMap((response) => {
+            const currentTags: string[] = [...(response.tags || [])];
+
+            // Add the tag name if it doesn't exist
+            if (!currentTags.includes(tag.name)) {
+              currentTags.push(tag.name);
+            }
+
+            console.log('Updating user tags to:', currentTags);
+
+            // Update the user's tags directly
+            return this.onboardingService.updateUserTags(
+              undefined,
+              currentTags
+            );
+          }),
+          catchError((error) => {
+            console.error('Error updating user tags', error);
+            this.errorMessage = 'Failed to add topic to your preferences.';
+            this.toastService.show('Failed to add topic', 'error');
+            return of(null);
+          }),
+          finalize(() => {
+            this.isSaving = false;
+            this.tagsForm.get('tagInput')?.enable();
+            this.tagsForm.get('tagSearch')?.enable();
+          })
+        )
+        .subscribe((result) => {
+          if (result) {
+            console.log('Tags updated successfully:', result);
+
+            // Add to user tags and remove from available tags and popular tags
+            this.selectedTags.push(tag);
+            this.availableTags = this.availableTags.filter(
+              (t) => t.id !== tag.id
+            );
+            this.topTags = this.topTags.filter((t) => t.id !== tag.id);
+
+            // Update filtered tags
+            this.filterAvailableTags(
+              this.tagsForm.get('tagSearch')?.value || ''
+            );
+
+            // Clear input field
+            this.tagsForm.get('tagInput')?.setValue('');
+            this.errorMessage = '';
+
+            this.toastService.show(
+              `Added "${tag.name}" to your topics`,
+              'success'
+            );
+          }
+        });
+
+      this.subscriptions.add(sub);
+    } catch (error) {
+      console.error('Unexpected error in addTag', error);
+      this.errorMessage = 'An unexpected error occurred. Please try again.';
+      this.toastService.show('Failed to add topic', 'error');
+      this.isSaving = false;
+      this.tagsForm.get('tagInput')?.enable();
+      this.tagsForm.get('tagSearch')?.enable();
+    }
+  }
+
+  /**
+   * Remove a tag from the user's preferences
+   */
+  removeTag(tag: TagData): void {
+    if (!tag || !tag.name || this.isSaving) {
+      return; // Don't proceed if invalid tag or already saving
+    }
+
+    // Ensure the tag has a valid ID
+    if (!tag.id) {
+      tag.id = `remove-tag-${Date.now()}`;
+    }
+
+    this.isSaving = true;
+    this.errorMessage = '';
+
+    // Disable the form controls while processing
+    this.tagsForm.get('tagInput')?.disable();
+    this.tagsForm.get('tagSearch')?.disable();
+
+    console.log('Removing tag:', tag.name);
+
+    try {
+      // Direct name-based approach
+      const sub = this.onboardingService
+        .getUserTags()
+        .pipe(
+          catchError((error) => {
+            console.error('Error getting current user tags', error);
+            this.errorMessage = 'Failed to retrieve your current topics.';
+            this.toastService.show(
+              'Failed to retrieve your current topics',
+              'error'
+            );
+            return of({ tags: [] });
+          }),
+          switchMap((response) => {
+            const currentTags: string[] = [...(response.tags || [])];
+
+            // Filter out the tag to remove (case-insensitive comparison)
+            const updatedTags = currentTags.filter(
+              (t) => t.toLowerCase() !== tag.name.toLowerCase()
+            );
+
+            console.log('Updating user tags to:', updatedTags);
+
+            // Update the user's tags directly
+            return this.onboardingService.updateUserTags(
+              undefined,
+              updatedTags
+            );
+          }),
+          catchError((error) => {
+            console.error('Error updating user tags for removal', error);
+            this.errorMessage = 'Failed to remove topic from your preferences.';
+            this.toastService.show('Failed to remove topic', 'error');
+            return of(null);
+          }),
+          finalize(() => {
+            this.isSaving = false;
+            this.tagsForm.get('tagInput')?.enable();
+            this.tagsForm.get('tagSearch')?.enable();
+          })
+        )
+        .subscribe((result) => {
+          if (result) {
+            console.log('Tags updated successfully after removal:', result);
+
+            // Update local data
+            this.selectedTags = this.selectedTags.filter(
+              (t) => t.id !== tag.id
+            );
+            this.availableTags.push(tag);
+
+            // Update filtered tags
+            this.filterAvailableTags(
+              this.tagsForm.get('tagSearch')?.value || ''
+            );
+
+            this.toastService.show(
+              `Removed "${tag.name}" from your topics`,
+              'success'
+            );
+          }
+        });
+
+      this.subscriptions.add(sub);
+    } catch (error) {
+      console.error('Unexpected error in removeTag', error);
+      this.errorMessage = 'An unexpected error occurred. Please try again.';
+      this.toastService.show('Failed to remove topic', 'error');
+      this.isSaving = false;
+      this.tagsForm.get('tagInput')?.enable();
+      this.tagsForm.get('tagSearch')?.enable();
+    }
   }
 }

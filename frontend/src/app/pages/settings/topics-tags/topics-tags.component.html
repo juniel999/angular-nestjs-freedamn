@@ -1,118 +1,167 @@
-<div class="max-w-3xl">
-  <h2 class="text-xl font-semibold mb-4">Topics & Tags</h2>
+<div class="w-full max-w-4xl mx-auto px-4">
+  <h2 class="text-2xl font-semibold mb-4">Topics & Tags</h2>
 
-  <div *ngIf="isLoading" class="flex justify-center my-4">
-    <div class="loading loading-spinner loading-lg text-primary"></div>
+  <div class="text-center mb-6 text-base-content/80">
+    <p>
+      Discover relevant discussions, connect with like-minded individuals, and
+      stay updated on topics you care about.
+    </p>
   </div>
 
-  <div *ngIf="!isLoading" class="space-y-6">
-    <!-- User's Selected Tags -->
-    <div class="bg-base-100 p-4 rounded-lg shadow-sm">
-      <h3 class="text-lg font-medium mb-3">Your Topics</h3>
-
-      <div *ngIf="userTags.length === 0" class="text-center py-4 text-gray-500">
-        <p>You haven't selected any topics yet.</p>
-      </div>
-
-      <div *ngIf="userTags.length > 0" class="flex flex-wrap gap-2">
-        <div
-          *ngFor="let tag of userTags"
-          class="badge badge-lg badge-primary gap-2 cursor-pointer hover:bg-primary-focus transition-colors"
-        >
-          <fa-icon [icon]="['fas', 'hashtag']" [size]="'xs'"></fa-icon>
-          <span>{{ tag.name }}</span>
-          <button class="btn-circle btn-xs" (click)="removeTag(tag)">
-            <fa-icon [icon]="['fas', 'times']" [size]="'xs'"></fa-icon>
-          </button>
-        </div>
-      </div>
+  <!-- Loading State -->
+  @if (isLoading) {
+  <div class="flex justify-center my-8">
+    <div class="loading loading-spinner loading-lg text-primary"></div>
+  </div>
+  } @if (!isLoading) {
+  <!-- Popular Tags -->
+  @if (topTags.length > 0) {
+  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold text-base-content">Popular Topics</h3>
+      <span class="text-xs text-base-content/60">Click to add</span>
     </div>
-
-    <!-- Create New Tag -->
-    <div class="bg-base-100 p-4 rounded-lg shadow-sm">
-      <h3 class="text-lg font-medium mb-3">Create New Topic</h3>
-
-      <div class="flex gap-2">
-        <input
-          type="text"
-          [formControl]="newTagInput"
-          placeholder="Enter new topic name"
-          class="input input-bordered flex-grow"
-          (keyup.enter)="createAndAddTag()"
-        />
-        <button
-          class="btn btn-primary"
-          [disabled]="!newTagInput.value || isSaving"
-          (click)="createAndAddTag()"
-        >
-          <fa-icon
-            *ngIf="isSaving"
-            [icon]="['fas', 'spinner']"
-            animation="spin"
-            class="mr-2"
-          ></fa-icon>
-          Create
-        </button>
-      </div>
+    <div class="flex flex-wrap gap-2">
+      @for (tag of topTags; track tag.id || $index) {
+      <button
+        class="badge badge-lg bg-base-200 border-0 text-base-content gap-2 px-4 py-3 cursor-pointer hover:bg-primary hover:text-primary-content transition-all duration-200 transform hover:scale-105 shadow-sm"
+        (click)="selectTag(tag)"
+        [disabled]="isSaving"
+        type="button"
+      >
+        <fa-icon
+          [icon]="['fas', 'hashtag']"
+          class="text-xs opacity-70"
+        ></fa-icon>
+        {{ tag.name }}
+      </button>
+      }
     </div>
+  </div>
+  }
 
-    <!-- Search Available Tags -->
-    <div class="bg-base-100 p-4 rounded-lg shadow-sm">
-      <h3 class="text-lg font-medium mb-3">Search Available Topics</h3>
-
-      <div class="form-control mb-4">
+  <!-- Tag Input -->
+  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold">Add Your Interests</h3>
+      <span class="text-xs text-base-content/60">Enter a tag and save</span>
+    </div>
+    <form [formGroup]="tagsForm" class="mb-2">
+      <div class="form-control w-full">
         <div class="input-group">
           <input
             type="text"
-            [formControl]="tagSearchInput"
-            placeholder="Search topics..."
-            class="input input-bordered w-full"
+            formControlName="tagInput"
+            class="input input-bordered w-full shadow-sm focus:shadow"
+            placeholder="Type a tag..."
+            (keydown.enter)="$event.preventDefault(); addNewTag()"
           />
-          <button class="btn btn-square">
+          <button
+            (click)="addNewTag()"
+            class="btn btn-primary shadow-sm"
+            [disabled]="isSaving"
+            type="button"
+          >
+            @if (isSaving) {
+            <fa-icon
+              [icon]="['fas', 'spinner']"
+              class="mr-2"
+              animation="spin"
+            ></fa-icon>
+            } Save
+          </button>
+        </div>
+        @if (errorMessage) {
+        <span class="text-error text-sm mt-2">{{ errorMessage }}</span>
+        }
+      </div>
+    </form>
+  </div>
+
+  <!-- Display Added Tags -->
+  @if (selectedTags.length > 0) {
+  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold">Your Interests</h3>
+      <span class="text-xs text-base-content/60">Click to remove</span>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      @for (tag of selectedTags; track tag.id || $index) {
+      <button
+        class="badge badge-lg badge-primary gap-2 px-4 py-3 cursor-pointer hover:opacity-80 transition-all duration-200 shadow-sm"
+        (click)="removeTag(tag)"
+        title="Click to remove"
+        [disabled]="isSaving"
+        type="button"
+      >
+        <fa-icon [icon]="['fas', 'hashtag']" class="text-xs"></fa-icon>
+        {{ tag.name }}
+        <fa-icon [icon]="['fas', 'times']" class="ml-1"></fa-icon>
+      </button>
+      }
+    </div>
+    <p class="mt-4 text-sm text-base-content/70">
+      The more interests you add, the better we can tailor your experience. Your
+      interests define your personalized feed and community connections.
+    </p>
+  </div>
+  } @else {
+  <div class="alert shadow-lg bg-base-100 border border-base-200 mb-5">
+    <fa-icon
+      [icon]="['fas', 'info']"
+      class="shrink-0 w-6 h-6 text-base-content/80"
+    ></fa-icon>
+    <div>
+      <h3 class="font-bold">Why add interests?</h3>
+      <div class="text-sm">
+        Adding interests helps us personalize your experience, connect you with
+        relevant communities, and keep you engaged with content that matters to
+        you.
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Search Available Tags -->
+  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold">Explore More Topics</h3>
+      <span class="text-xs text-base-content/60">Click to add</span>
+    </div>
+    <form [formGroup]="tagsForm" class="mb-4">
+      <div class="form-control w-full">
+        <div class="input-group">
+          <input
+            type="text"
+            formControlName="tagSearch"
+            class="input input-bordered w-full shadow-sm focus:shadow"
+            placeholder="Search topics..."
+          />
+          <button class="btn btn-square shadow-sm" type="button">
             <fa-icon [icon]="['fas', 'search']"></fa-icon>
           </button>
         </div>
       </div>
-
-      <div
-        *ngIf="filteredTags.length === 0"
-        class="text-center py-4 text-gray-500"
+    </form>
+    @if (filteredTags.length === 0) {
+    <div class="text-center py-4 text-base-content/70">
+      <p>No matching topics found.</p>
+    </div>
+    } @else {
+    <div class="flex flex-wrap gap-2">
+      @for (tag of filteredTags.slice(0, 20); track tag.id || $index) {
+      <button
+        class="badge badge-lg bg-base-200 border-0 text-base-content gap-2 px-4 py-3 cursor-pointer hover:bg-primary hover:text-primary-content transition-all duration-200 transform hover:scale-105 shadow-sm"
+        (click)="selectTag(tag)"
+        [disabled]="isSaving"
+        type="button"
       >
-        <p>No matching topics found.</p>
-      </div>
-
-      <div *ngIf="filteredTags.length > 0" class="flex flex-wrap gap-2">
-        <button
-          *ngFor="let tag of filteredTags | slice : 0 : 20"
-          class="badge badge-lg badge-outline gap-2 hover:bg-base-300 transition-colors"
-          (click)="addTag(tag)"
-          [disabled]="isSaving"
-        >
-          <fa-icon [icon]="['fas', 'plus']" [size]="'xs'"></fa-icon>
-          <span>{{ tag.name }}</span>
-        </button>
-      </div>
+        <fa-icon [icon]="['fas', 'plus']" class="text-xs opacity-70"></fa-icon>
+        {{ tag.name }}
+      </button>
+      }
     </div>
-
-    <!-- Popular Tags -->
-    <div
-      *ngIf="popularTags.length > 0"
-      class="bg-base-100 p-4 rounded-lg shadow-sm"
-    >
-      <h3 class="text-lg font-medium mb-3">Popular Topics</h3>
-
-      <div class="flex flex-wrap gap-2">
-        <button
-          *ngFor="let tag of popularTags"
-          class="badge badge-lg badge-accent badge-outline gap-2 hover:bg-accent/20 transition-colors"
-          (click)="addTag(tag)"
-          [disabled]="isSaving"
-        >
-          <fa-icon [icon]="['fas', 'plus']" [size]="'xs'"></fa-icon>
-          <span>{{ tag.name }}</span>
-          <span class="text-xs">({{ tag.usageCount }})</span>
-        </button>
-      </div>
-    </div>
+    }
   </div>
+  }
 </div>
