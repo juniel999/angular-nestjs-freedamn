@@ -1,49 +1,58 @@
 <div class="w-full max-w-4xl mx-auto px-4">
-  <h2 class="text-2xl font-semibold mb-4">Topics & Tags</h2>
-
-  <div class="text-center mb-6 text-base-content/80">
-    <p>
-      Discover relevant discussions, connect with like-minded individuals, and
-      stay updated on topics you care about.
-    </p>
-  </div>
+  <h2 class="text-xl font-semibold mb-4">Your Topics & Tags</h2>
 
   <!-- Loading State -->
   @if (isLoading) {
   <div class="flex justify-center my-8">
     <div class="loading loading-spinner loading-lg text-primary"></div>
   </div>
-  } @if (!isLoading) {
-  <!-- Popular Tags -->
-  @if (topTags.length > 0) {
+  } @else {
+  <!-- Explore More Topics -->
   <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="text-lg font-semibold text-base-content">Popular Topics</h3>
+      <h3 class="text-lg font-semibold">Explore Topics</h3>
       <span class="text-xs text-base-content/60">Click to add</span>
     </div>
+    <form [formGroup]="tagsForm" class="mb-4">
+      <div class="form-control w-full">
+        <div class="input-group">
+          <input
+            type="text"
+            formControlName="tagSearch"
+            class="input input-bordered w-full shadow-sm focus:shadow"
+            placeholder="Search topics..."
+          />
+          <button class="btn btn-square shadow-sm" type="button">
+            <fa-icon [icon]="['fas', 'search']"></fa-icon>
+          </button>
+        </div>
+      </div>
+    </form>
+    @if (filteredTags.length === 0) {
+    <div class="text-center py-4 text-base-content/70">
+      <p>No matching topics found.</p>
+    </div>
+    } @else {
     <div class="flex flex-wrap gap-2">
-      @for (tag of topTags; track tag.id || $index) {
+      @for (tag of filteredTags.slice(0, 10); track tag.id || $index) {
       <button
         class="badge badge-lg bg-base-200 border-0 text-base-content gap-2 px-4 py-3 cursor-pointer hover:bg-primary hover:text-primary-content transition-all duration-200 transform hover:scale-105 shadow-sm"
         (click)="selectTag(tag)"
         [disabled]="isSaving"
         type="button"
       >
-        <fa-icon
-          [icon]="['fas', 'hashtag']"
-          class="text-xs opacity-70"
-        ></fa-icon>
+        <fa-icon [icon]="['fas', 'plus']" class="text-xs opacity-70"></fa-icon>
         {{ tag.name }}
       </button>
       }
     </div>
+    }
   </div>
-  }
 
   <!-- Tag Input -->
   <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="text-lg font-semibold">Add Your Interests</h3>
+      <h3 class="text-lg font-semibold">Add Your Interest</h3>
       <span class="text-xs text-base-content/60">Enter a tag and save</span>
     </div>
     <form [formGroup]="tagsForm" class="mb-2">
@@ -80,7 +89,7 @@
 
   <!-- Display Added Tags -->
   @if (selectedTags.length > 0) {
-  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
+  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
     <div class="flex items-center justify-between mb-3">
       <h3 class="text-lg font-semibold">Your Interests</h3>
       <span class="text-xs text-base-content/60">Click to remove</span>
@@ -106,7 +115,7 @@
     </p>
   </div>
   } @else {
-  <div class="alert shadow-lg bg-base-100 border border-base-200 mb-5">
+  <div class="alert shadow-lg bg-base-100 border border-base-200">
     <fa-icon
       [icon]="['fas', 'info']"
       class="shrink-0 w-6 h-6 text-base-content/80"
@@ -120,48 +129,5 @@
       </div>
     </div>
   </div>
-  }
-
-  <!-- Search Available Tags -->
-  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-lg font-semibold">Explore More Topics</h3>
-      <span class="text-xs text-base-content/60">Click to add</span>
-    </div>
-    <form [formGroup]="tagsForm" class="mb-4">
-      <div class="form-control w-full">
-        <div class="input-group">
-          <input
-            type="text"
-            formControlName="tagSearch"
-            class="input input-bordered w-full shadow-sm focus:shadow"
-            placeholder="Search topics..."
-          />
-          <button class="btn btn-square shadow-sm" type="button">
-            <fa-icon [icon]="['fas', 'search']"></fa-icon>
-          </button>
-        </div>
-      </div>
-    </form>
-    @if (filteredTags.length === 0) {
-    <div class="text-center py-4 text-base-content/70">
-      <p>No matching topics found.</p>
-    </div>
-    } @else {
-    <div class="flex flex-wrap gap-2">
-      @for (tag of filteredTags.slice(0, 20); track tag.id || $index) {
-      <button
-        class="badge badge-lg bg-base-200 border-0 text-base-content gap-2 px-4 py-3 cursor-pointer hover:bg-primary hover:text-primary-content transition-all duration-200 transform hover:scale-105 shadow-sm"
-        (click)="selectTag(tag)"
-        [disabled]="isSaving"
-        type="button"
-      >
-        <fa-icon [icon]="['fas', 'plus']" class="text-xs opacity-70"></fa-icon>
-        {{ tag.name }}
-      </button>
-      }
-    </div>
-    }
-  </div>
-  }
+  } }
 </div>

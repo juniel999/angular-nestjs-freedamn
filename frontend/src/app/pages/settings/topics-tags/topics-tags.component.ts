@@ -38,7 +38,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
 
   // Data
   selectedTags: TagData[] = []; // User's selected tags
-  topTags: TagData[] = []; // Popular tags sorted by usage count
   availableTags: TagData[] = []; // All available tags
   filteredTags: TagData[] = []; // Tags filtered by search
 
@@ -80,7 +79,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
     const sub = forkJoin({
       userTags: this.userService.getUserPreferredTags(),
       allTags: this.userService.getAllTags(),
-      popularTags: this.onboardingService.getPopularTags(20),
     }).subscribe({
       next: (results) => {
         // Make sure every tag has a valid ID
@@ -102,22 +100,14 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
             return tag;
           });
 
-        this.topTags = results.popularTags
-          .filter(
-            (tag) => !this.selectedTags.some((userTag) => userTag.id === tag.id)
-          )
-          .map((tag, idx) => {
-            if (!tag.id) {
-              tag.id = `pop-tag-${idx}-${Date.now()}`;
-            }
-            return tag;
-          });
-
+        // Sort available tags by usageCount if available
+        this.availableTags.sort(
+          (a, b) => (b.usageCount || 0) - (a.usageCount || 0)
+        );
         this.filteredTags = [...this.availableTags];
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading tags', error);
         this.errorMessage = 'Failed to load tags. Please try again.';
         this.toastService.show('Failed to load tags', 'error');
         this.isLoading = false;
@@ -211,7 +201,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
         .addTagsIfNotExist([tagName])
         .pipe(
           catchError((err) => {
-            console.error('Error creating tag', err);
             this.errorMessage = 'Failed to create tag. Please try again.';
             this.toastService.show('Failed to create new topic', 'error');
             return of([]);
@@ -229,7 +218,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
             const newTag = createdTags[0];
 
             if (!newTag || !newTag.name) {
-              console.error('Invalid created tag', newTag);
               this.errorMessage = 'Invalid tag created. Please try again.';
               this.toastService.show('Failed to create valid tag', 'error');
               this.isSaving = false;
@@ -243,14 +231,11 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
               newTag.id = `new-tag-${Date.now()}`;
             }
 
-            console.log('New tag created:', newTag);
-
             // Use direct name-based approach to update user's tags
             this.onboardingService
               .getUserTags()
               .pipe(
                 catchError((error) => {
-                  console.error('Error getting user tags for update', error);
                   this.errorMessage = 'Failed to retrieve your current topics.';
                   this.toastService.show(
                     'Failed to update your topics',
@@ -266,14 +251,11 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
                     currentTags.push(newTag.name);
                   }
 
-                  console.log('Updating user tags to:', currentTags);
-
                   // Update the user's tags directly
                   return this.onboardingService
                     .updateUserTags(undefined, currentTags)
                     .pipe(
                       catchError((err) => {
-                        console.error('Error updating user tags', err);
                         this.errorMessage = 'Failed to update your topics.';
                         this.toastService.show(
                           'Failed to update your topics',
@@ -291,8 +273,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
               )
               .subscribe((result) => {
                 if (result) {
-                  console.log('Tags updated successfully:', result);
-
                   // Success - add to local list
                   this.selectedTags.push(newTag);
                   this.tagsForm.get('tagInput')?.setValue('');
@@ -312,7 +292,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
 
       this.subscriptions.add(sub);
     } catch (error) {
-      console.error('Unexpected error in addNewTag', error);
       this.errorMessage = 'An unexpected error occurred. Please try again.';
       this.toastService.show('Failed to add new topic', 'error');
       this.isSaving = false;
@@ -341,15 +320,12 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
     this.tagsForm.get('tagInput')?.disable();
     this.tagsForm.get('tagSearch')?.disable();
 
-    console.log('Adding tag:', tag.name);
-
     try {
       // Use direct name-based approach
       const sub = this.onboardingService
         .getUserTags()
         .pipe(
           catchError((error) => {
-            console.error('Error getting current user tags', error);
             this.errorMessage = 'Failed to retrieve your current topics.';
             this.toastService.show(
               'Failed to retrieve your current topics',
@@ -365,8 +341,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
               currentTags.push(tag.name);
             }
 
-            console.log('Updating user tags to:', currentTags);
-
             // Update the user's tags directly
             return this.onboardingService.updateUserTags(
               undefined,
@@ -374,7 +348,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
             );
           }),
           catchError((error) => {
-            console.error('Error updating user tags', error);
             this.errorMessage = 'Failed to add topic to your preferences.';
             this.toastService.show('Failed to add topic', 'error');
             return of(null);
@@ -387,14 +360,11 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
         )
         .subscribe((result) => {
           if (result) {
-            console.log('Tags updated successfully:', result);
-
-            // Add to user tags and remove from available tags and popular tags
+            // Add to user tags and remove from available tags
             this.selectedTags.push(tag);
             this.availableTags = this.availableTags.filter(
               (t) => t.id !== tag.id
             );
-            this.topTags = this.topTags.filter((t) => t.id !== tag.id);
 
             // Update filtered tags
             this.filterAvailableTags(
@@ -414,7 +384,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
 
       this.subscriptions.add(sub);
     } catch (error) {
-      console.error('Unexpected error in addTag', error);
       this.errorMessage = 'An unexpected error occurred. Please try again.';
       this.toastService.show('Failed to add topic', 'error');
       this.isSaving = false;
@@ -443,15 +412,12 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
     this.tagsForm.get('tagInput')?.disable();
     this.tagsForm.get('tagSearch')?.disable();
 
-    console.log('Removing tag:', tag.name);
-
     try {
       // Direct name-based approach
       const sub = this.onboardingService
         .getUserTags()
         .pipe(
           catchError((error) => {
-            console.error('Error getting current user tags', error);
             this.errorMessage = 'Failed to retrieve your current topics.';
             this.toastService.show(
               'Failed to retrieve your current topics',
@@ -467,8 +433,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
               (t) => t.toLowerCase() !== tag.name.toLowerCase()
             );
 
-            console.log('Updating user tags to:', updatedTags);
-
             // Update the user's tags directly
             return this.onboardingService.updateUserTags(
               undefined,
@@ -476,7 +440,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
             );
           }),
           catchError((error) => {
-            console.error('Error updating user tags for removal', error);
             this.errorMessage = 'Failed to remove topic from your preferences.';
             this.toastService.show('Failed to remove topic', 'error');
             return of(null);
@@ -489,8 +452,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
         )
         .subscribe((result) => {
           if (result) {
-            console.log('Tags updated successfully after removal:', result);
-
             // Update local data
             this.selectedTags = this.selectedTags.filter(
               (t) => t.id !== tag.id
@@ -511,7 +472,6 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
 
       this.subscriptions.add(sub);
     } catch (error) {
-      console.error('Unexpected error in removeTag', error);
       this.errorMessage = 'An unexpected error occurred. Please try again.';
       this.toastService.show('Failed to remove topic', 'error');
       this.isSaving = false;
