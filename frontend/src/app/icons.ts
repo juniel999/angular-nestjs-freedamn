@@ -42,6 +42,7 @@ import {
   faPen,
   faHeading,
   faGlobe,
+  faArrowUpRightFromSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCommentDots,
@@ -110,6 +111,7 @@ export function initializeIcons(library: FaIconLibrary) {
     faExclamationCircle,
     faPen,
     faHeading,
-    faGlobe
+    faGlobe,
+    faArrowUpRightFromSquare
   );
 }

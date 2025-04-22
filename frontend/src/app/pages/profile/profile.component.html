@@ -121,32 +121,53 @@
           @if (userProfile()?.socials) {
           <div class="flex flex-wrap gap-2">
             @if (userProfile()?.socials?.github) {
-            <a
-              [href]="userProfile()?.socials?.github"
-              target="_blank"
-              class="btn btn-primary btn-sm"
-            >
-              <i class="fab fa-github"></i>
-              GitHub
-            </a>
+            <app-social-link-button
+              [link]="userProfile()?.socials?.github!"
+              icon="github"
+              label="GitHub"
+            ></app-social-link-button>
             } @if (userProfile()?.socials?.twitter) {
-            <a
-              [href]="userProfile()?.socials?.twitter"
-              target="_blank"
-              class="btn btn-primary btn-sm"
-            >
-              <i class="fab fa-twitter"></i>
-              Twitter
-            </a>
+            <app-social-link-button
+              [link]="userProfile()?.socials?.twitter!"
+              icon="twitter"
+              label="Twitter"
+            ></app-social-link-button>
             } @if (userProfile()?.socials?.linkedin) {
-            <a
-              [href]="userProfile()?.socials?.linkedin"
-              target="_blank"
-              class="btn btn-outline btn-sm"
-            >
-              <i class="fab fa-linkedin"></i>
-              LinkedIn
-            </a>
+            <app-social-link-button
+              [link]="userProfile()?.socials?.linkedin!"
+              icon="linkedin"
+              label="LinkedIn"
+            ></app-social-link-button>
+            } @if (userProfile()?.socials?.facebook) {
+            <app-social-link-button
+              [link]="userProfile()?.socials?.facebook!"
+              icon="facebook"
+              label="Facebook"
+            ></app-social-link-button>
+            } @if (userProfile()?.socials?.instagram) {
+            <app-social-link-button
+              [link]="userProfile()?.socials?.instagram!"
+              icon="instagram"
+              label="Instagram"
+            ></app-social-link-button>
+            } @if (userProfile()?.socials?.youtube) {
+            <app-social-link-button
+              [link]="userProfile()?.socials?.youtube!"
+              icon="youtube"
+              label="YouTube"
+            ></app-social-link-button>
+            } @if (userProfile()?.socials?.tiktok) {
+            <app-social-link-button
+              [link]="userProfile()?.socials?.tiktok!"
+              icon="tiktok"
+              label="TikTok"
+            ></app-social-link-button>
+            } @if (userProfile()?.socials?.website) {
+            <app-social-link-button
+              [link]="userProfile()?.socials?.website!"
+              [isWebsite]="true"
+              label="Website"
+            ></app-social-link-button>
             }
           </div>
           } @else {
@@ -156,7 +177,9 @@
 
         <!-- Liked Topics/Tags -->
         <div class="bg-base-100 shadow-lg rounded-box p-6">
-          <h2 class="text-xl font-semibold mb-4">Liked Topics</h2>
+          <h2 class="text-xl font-semibold mb-4 text-primary-content">
+            Liked Topics
+          </h2>
           @if (userTags().length) {
           <div class="flex flex-wrap gap-2">
             @for (tag of userTags(); track tag._id) {
