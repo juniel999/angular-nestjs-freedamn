@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, switchMap, of, take, tap, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { TagData } from '../types/tag.type';
 
 export interface ProfileData {
   firstName?: string;
@@ -24,22 +25,13 @@ export interface ProfileData {
   };
 }
 
-export interface TagData {
-  id: string;
-  name: string;
-  usageCount?: number;
-}
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OnboardingService {
   private apiUrl = environment.apiUrl;
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) { }
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Get the current user ID or use the provided one
@@ -50,10 +42,10 @@ export class OnboardingService {
     if (userId) {
       return of(userId);
     }
-    
+
     return this.authService.currentUser$.pipe(
       take(1),
-      switchMap(user => {
+      switchMap((user) => {
         if (!user) {
           throw new Error('No authenticated user found');
         }
@@ -64,24 +56,32 @@ export class OnboardingService {
 
   getOnboardingStatus(userId?: string): Observable<{ completed: boolean }> {
     return this.getUserId(userId).pipe(
-      switchMap(id => 
-        this.http.get<{ completed: boolean }>(`${this.apiUrl}/users/${id}/onboarding-status`)
+      switchMap((id) =>
+        this.http.get<{ completed: boolean }>(
+          `${this.apiUrl}/users/${id}/onboarding-status`
+        )
       )
     );
   }
 
   getUserProfile(userId?: string): Observable<ProfileData> {
     return this.getUserId(userId).pipe(
-      switchMap(id => 
+      switchMap((id) =>
         this.http.get<ProfileData>(`${this.apiUrl}/users/${id}/profile`)
       )
     );
   }
 
-  updateUserProfile(userId?: string, profileData?: ProfileData): Observable<ProfileData> {
+  updateUserProfile(
+    userId?: string,
+    profileData?: ProfileData
+  ): Observable<ProfileData> {
     return this.getUserId(userId).pipe(
-      switchMap(id => 
-        this.http.patch<ProfileData>(`${this.apiUrl}/users/me/profile`, profileData)
+      switchMap((id) =>
+        this.http.patch<ProfileData>(
+          `${this.apiUrl}/users/me/profile`,
+          profileData
+        )
       )
     );
   }
@@ -90,13 +90,16 @@ export class OnboardingService {
     if (!file) {
       throw new Error('No file provided for upload');
     }
-    
+
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return this.getUserId(userId).pipe(
-      switchMap(id => 
-        this.http.post<{ url: string }>(`${this.apiUrl}/users/${id}/avatar`, formData)
+      switchMap((id) =>
+        this.http.post<{ url: string }>(
+          `${this.apiUrl}/users/${id}/avatar`,
+          formData
+        )
       )
     );
   }
@@ -105,13 +108,16 @@ export class OnboardingService {
     if (!file) {
       throw new Error('No file provided for upload');
     }
-    
+
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return this.getUserId(userId).pipe(
-      switchMap(id => 
-        this.http.post<{ url: string }>(`${this.apiUrl}/users/${id}/cover-photo`, formData)
+      switchMap((id) =>
+        this.http.post<{ url: string }>(
+          `${this.apiUrl}/users/${id}/cover-photo`,
+          formData
+        )
       )
     );
   }
@@ -129,19 +135,28 @@ export class OnboardingService {
     return this.http.post<TagData[]>(`${this.apiUrl}/tags/bulk`, { tags });
   }
 
-  updateUserTags(userId?: string, tags?: string[]): Observable<{ tags: string[] }> {
+  updateUserTags(
+    userId?: string,
+    tags?: string[]
+  ): Observable<{ tags: string[] }> {
     console.log('updateUserTags called with tags:', tags);
-    
+
     // Make sure we have a valid array of tags
-    const validTags = tags?.filter(tag => tag !== null && tag !== undefined && tag.trim() !== '') || [];
+    const validTags =
+      tags?.filter(
+        (tag) => tag !== null && tag !== undefined && tag.trim() !== ''
+      ) || [];
     console.log('Valid tags after filtering:', validTags);
-    
+
     return this.getUserId(userId).pipe(
-      switchMap(id => {
+      switchMap((id) => {
         console.log(`Sending tags update request for user ${id}:`, validTags);
-        return this.http.post<{ tags: string[] }>(`${this.apiUrl}/users/${id}/tags`, { tags: validTags })
+        return this.http
+          .post<{ tags: string[] }>(`${this.apiUrl}/users/${id}/tags`, {
+            tags: validTags,
+          })
           .pipe(
-            tap(response => console.log('Tags update response:', response))
+            tap((response) => console.log('Tags update response:', response))
           );
       })
     );
@@ -149,8 +164,11 @@ export class OnboardingService {
 
   completeOnboarding(userId?: string): Observable<{ completed: boolean }> {
     return this.getUserId(userId).pipe(
-      switchMap(id => 
-        this.http.post<{ completed: boolean }>(`${this.apiUrl}/users/${id}/complete-onboarding`, {})
+      switchMap((id) =>
+        this.http.post<{ completed: boolean }>(
+          `${this.apiUrl}/users/${id}/complete-onboarding`,
+          {}
+        )
       )
     );
   }
@@ -162,7 +180,7 @@ export class OnboardingService {
    */
   getUserTags(userId?: string): Observable<{ tags: string[] }> {
     return this.getUserId(userId).pipe(
-      switchMap(id => 
+      switchMap((id) =>
         this.http.get<{ tags: string[] }>(`${this.apiUrl}/users/${id}/tags`)
       )
     );
@@ -175,10 +193,10 @@ export class OnboardingService {
    */
   getPopularTags(limit: number = 10): Observable<TagData[]> {
     return this.getAvailableTags().pipe(
-      map(tags => {
+      map((tags) => {
         // Sort tags by usageCount if available, otherwise return unsorted
         return tags
-          .filter(tag => tag.usageCount !== undefined) // Filter out tags without usageCount
+          .filter((tag) => tag.usageCount !== undefined) // Filter out tags without usageCount
           .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0)) // Sort by usageCount desc
           .slice(0, limit); // Limit to specified number
       })

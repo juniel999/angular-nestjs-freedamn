@@ -1,10 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
-import {
-  OnboardingService,
-  TagData,
-} from '../../../services/onboarding.service';
+import { OnboardingService } from '../../../services/onboarding.service';
 import { ToastService } from '../../../services/toast.service';
 import {
   Subscription,
@@ -17,6 +14,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { TagData } from '../../../types/tag.type';
 
 @Component({
   selector: 'app-topics-tags',
@@ -82,19 +80,20 @@ export class TopicsTagsComponent {
       next: (results) => {
         // Make sure every tag has a valid ID
         this.selectedTags = results.userTags.map((tag, idx) => {
-          if (!tag.id) {
-            tag.id = `user-tag-${idx}-${Date.now()}`;
+          if (!tag._id) {
+            tag._id = `user-tag-${idx}-${Date.now()}`;
           }
           return tag;
         });
 
         this.availableTags = results.allTags
           .filter(
-            (tag) => !this.selectedTags.some((userTag) => userTag.id === tag.id)
+            (tag) =>
+              !this.selectedTags.some((userTag) => userTag._id === tag._id)
           )
           .map((tag, idx) => {
-            if (!tag.id) {
-              tag.id = `avail-tag-${idx}-${Date.now()}`;
+            if (!tag._id) {
+              tag._id = `avail-tag-${idx}-${Date.now()}`;
             }
             return tag;
           });
@@ -230,8 +229,8 @@ export class TopicsTagsComponent {
             }
 
             // Ensure the tag has a valid ID
-            if (!newTag.id) {
-              newTag.id = `new-tag-${Date.now()}`;
+            if (!newTag._id) {
+              newTag._id = `new-tag-${Date.now()}`;
             }
 
             // Use direct name-based approach to update user's tags
@@ -326,8 +325,8 @@ export class TopicsTagsComponent {
     }
 
     // Ensure the tag has a valid ID
-    if (!tag.id) {
-      tag.id = `add-tag-${Date.now()}`;
+    if (!tag._id) {
+      tag._id = `add-tag-${Date.now()}`;
     }
 
     this.isSaving = true;
@@ -380,7 +379,7 @@ export class TopicsTagsComponent {
             // Add to user tags and remove from available tags
             this.selectedTags.push(tag);
             this.availableTags = this.availableTags.filter(
-              (t) => t.id !== tag.id
+              (t) => t._id !== tag._id
             );
 
             // Update filtered tags
@@ -418,8 +417,8 @@ export class TopicsTagsComponent {
     }
 
     // Ensure the tag has a valid ID
-    if (!tag.id) {
-      tag.id = `remove-tag-${Date.now()}`;
+    if (!tag._id) {
+      tag._id = `remove-tag-${Date.now()}`;
     }
 
     this.isSaving = true;
@@ -471,7 +470,7 @@ export class TopicsTagsComponent {
           if (result) {
             // Update local data
             this.selectedTags = this.selectedTags.filter(
-              (t) => t.id !== tag.id
+              (t) => t._id !== tag._id
             );
             this.availableTags.push(tag);
 

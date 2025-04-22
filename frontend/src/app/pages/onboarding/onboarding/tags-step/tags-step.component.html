@@ -1,34 +1,40 @@
 <div class="w-full max-w-4xl mx-auto px-4">
-  <h2 class="text-2xl font-semibold mb-4 text-center">Save your Tags & Interests</h2>
-  
+  <h2 class="text-2xl font-semibold mb-4 text-center">
+    Save your Tags & Interests
+  </h2>
+
   <div class="text-center mb-6 text-base-content/80">
-    <p>Discover relevant discussions, connect with like-minded individuals, and stay updated on topics you care about.</p>
+    <p>
+      Discover relevant discussions, connect with like-minded individuals, and
+      stay updated on topics you care about.
+    </p>
   </div>
-  
+
   <!-- Top Tags -->
   @if (topTags.length > 0) {
-    <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-semibold text-base-content">Popular Topics</h3>
-        <span class="text-xs text-base-content/60">Click to add</span>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        @for (tag of topTags; track tag.id || tag.name) {
-          <div 
-            class="badge badge-lg bg-base-200 border-0 text-base-content gap-2 px-4 py-3 cursor-pointer 
-                  hover:bg-primary hover:text-primary-content transition-all duration-200 
-                  transform hover:scale-105 shadow-sm"
-            (click)="selectTag(tag)"
-            [class.opacity-50]="isSaving"
-          >
-            <fa-icon [icon]="['fas', 'hashtag']" class="text-xs opacity-70"></fa-icon>
-            {{ tag.name }}
-          </div>
-        }
-      </div>
+  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold text-base-content">Popular Topics</h3>
+      <span class="text-xs text-base-content/60">Click to add</span>
     </div>
+    <div class="flex flex-wrap gap-2">
+      @for (tag of topTags; track tag._id || tag.name) {
+      <div
+        class="badge badge-lg bg-base-200 border-0 text-base-content gap-2 px-4 py-3 cursor-pointer hover:bg-primary hover:text-primary-content transition-all duration-200 transform hover:scale-105 shadow-sm"
+        (click)="selectTag(tag)"
+        [class.opacity-50]="isSaving"
+      >
+        <fa-icon
+          [icon]="['fas', 'hashtag']"
+          class="text-xs opacity-70"
+        ></fa-icon>
+        {{ tag.name }}
+      </div>
+      }
+    </div>
+  </div>
   }
-  
+
   <!-- Tag Input -->
   <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5 mb-5">
     <div class="flex items-center justify-between mb-3">
@@ -38,59 +44,74 @@
     <form [formGroup]="tagsForm" class="mb-2">
       <div class="form-control w-full">
         <div class="input-group">
-          <input 
-            type="text" 
-            formControlName="tagInput" 
-            class="input input-bordered w-full shadow-sm focus:shadow" 
-            placeholder="Type a tag..." 
+          <input
+            type="text"
+            formControlName="tagInput"
+            class="input input-bordered w-full shadow-sm focus:shadow"
+            placeholder="Type a tag..."
             (keydown.enter)="$event.preventDefault(); addTag()"
           />
-          <button (click)="addTag()" class="btn btn-primary shadow-sm" [disabled]="isSaving">
+          <button
+            (click)="addTag()"
+            class="btn btn-primary shadow-sm"
+            [disabled]="isSaving"
+          >
             @if (isSaving) {
-              <fa-icon [icon]="['fas', 'spinner']" class="mr-2" animation="spin"></fa-icon>
-            }
-            Save
+            <fa-icon
+              [icon]="['fas', 'spinner']"
+              class="mr-2"
+              animation="spin"
+            ></fa-icon>
+            } Save
           </button>
         </div>
         @if (errorMessage) {
-          <span class="text-error text-sm mt-2">{{ errorMessage }}</span>
+        <span class="text-error text-sm mt-2">{{ errorMessage }}</span>
         }
       </div>
     </form>
   </div>
-  
+
   <!-- Display Added Tags -->
   @if (selectedTags.length > 0) {
-    <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-semibold">Your Interests</h3>
-        <span class="text-xs text-base-content/60">Click to remove</span>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        @for (tag of selectedTags; track tag.id || tag.name) {
-          <div 
-            class="badge badge-lg badge-primary gap-2 px-4 py-3 cursor-pointer 
-                   hover:opacity-80 transition-all duration-200 shadow-sm"
-            (click)="removeTag(tag)" 
-            title="Click to remove"
-            [class.opacity-50]="isSaving"
-          >
-            <fa-icon [icon]="['fas', 'hashtag']" class="text-xs"></fa-icon>
-            {{ tag.name }}
-            <fa-icon [icon]="['fas', 'times']" class="ml-1"></fa-icon>
-          </div>
-        }
-      </div>
-      <p class="mt-4 text-sm text-base-content/70">The more interests you add, the better we can tailor your experience. Your interests define your personalized feed and community connections.</p>
+  <div class="bg-base-100 rounded-lg shadow-lg border border-base-200 p-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold">Your Interests</h3>
+      <span class="text-xs text-base-content/60">Click to remove</span>
     </div>
+    <div class="flex flex-wrap gap-2">
+      @for (tag of selectedTags; track tag._id || tag.name) {
+      <div
+        class="badge badge-lg badge-primary gap-2 px-4 py-3 cursor-pointer hover:opacity-80 transition-all duration-200 shadow-sm"
+        (click)="removeTag(tag)"
+        title="Click to remove"
+        [class.opacity-50]="isSaving"
+      >
+        <fa-icon [icon]="['fas', 'hashtag']" class="text-xs"></fa-icon>
+        {{ tag.name }}
+        <fa-icon [icon]="['fas', 'times']" class="ml-1"></fa-icon>
+      </div>
+      }
+    </div>
+    <p class="mt-4 text-sm text-base-content/70">
+      The more interests you add, the better we can tailor your experience. Your
+      interests define your personalized feed and community connections.
+    </p>
+  </div>
   } @else {
-    <div class="alert shadow-lg bg-base-100 border border-base-200">
-      <fa-icon [icon]="['fas', 'info']" class="shrink-0 w-6 h-6 text-base-content/80"></fa-icon>
-      <div>
-        <h3 class="font-bold">Why add interests?</h3>
-        <div class="text-sm">Adding interests helps us personalize your experience, connect you with relevant communities, and keep you engaged with content that matters to you.</div>
+  <div class="alert shadow-lg bg-base-100 border border-base-200">
+    <fa-icon
+      [icon]="['fas', 'info']"
+      class="shrink-0 w-6 h-6 text-base-content/80"
+    ></fa-icon>
+    <div>
+      <h3 class="font-bold">Why add interests?</h3>
+      <div class="text-sm">
+        Adding interests helps us personalize your experience, connect you with
+        relevant communities, and keep you engaged with content that matters to
+        you.
       </div>
     </div>
+  </div>
   }
 </div>
-

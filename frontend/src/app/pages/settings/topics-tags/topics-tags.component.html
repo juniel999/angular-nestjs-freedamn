@@ -15,7 +15,7 @@
     </div>
     <form [formGroup]="tagsForm" class="mb-4">
       <div class="form-control w-full">
-        <div class="input-group">
+        <div class="input-group flex gap-1">
           <input
             type="text"
             formControlName="tagSearch"
@@ -34,7 +34,7 @@
     </div>
     } @else {
     <div class="flex flex-wrap gap-2">
-      @for (tag of filteredTags.slice(0, 10); track tag.id || $index) {
+      @for (tag of filteredTags.slice(0, 10); track tag._id || $index) {
       <button
         class="badge badge-lg bg-base-200 border-0 text-base-content gap-2 px-4 py-3 cursor-pointer hover:bg-primary hover:text-primary-content transition-all duration-200 transform hover:scale-105 shadow-sm"
         (click)="selectTag(tag)"
@@ -95,7 +95,7 @@
       <span class="text-xs text-base-content/60">Click to remove</span>
     </div>
     <div class="flex flex-wrap gap-2">
-      @for (tag of selectedTags; track tag.id || $index) {
+      @for (tag of selectedTags; track tag._id || $index) {
       <button
         class="badge badge-lg badge-primary gap-2 px-4 py-3 cursor-pointer hover:opacity-80 transition-all duration-200 shadow-sm"
         (click)="removeTag(tag)"

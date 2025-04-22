@@ -2,9 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
-import { UserType } from '../types/user.type';
+import { SocialLinks, UserStats, UserType } from '../types/user.type';
 import { Observable, switchMap, of, take, map, forkJoin } from 'rxjs';
-import { TagData } from './onboarding.service';
+import { TagData } from '../types/tag.type';
 
 @Injectable({
   providedIn: 'root',
@@ -37,6 +37,94 @@ export class UserService {
   }
 
   /**
+   * Get user statistics (posts count, followers count, following count)
+   */
+  getUserStats(userId: string): Observable<UserStats> {
+    return forkJoin({
+      posts: this.getUserPosts(userId),
+      followers: this.getUserFollowers(userId),
+      following: this.getUserFollowing(userId),
+    }).pipe(
+      map(({ posts, followers, following }) => ({
+        postsCount: posts.count,
+        followersCount: followers.count,
+        followingCount: following.count,
+      }))
+    );
+  }
+  /**
+   * Get user posts
+   */
+  getUserPosts(userId: string): Observable<{ posts: any[]; count: number }> {
+    return this.http.get<{ posts: any[]; count: number }>(
+      `${this.apiUrl}/users/${userId}/posts`
+    );
+  }
+  /**
+   * Get user saved posts
+   */
+  getUserSavedPosts(
+    userId: string
+  ): Observable<{ posts: any[]; count: number }> {
+    return this.http.get<{ posts: any[]; count: number }>(
+      `${this.apiUrl}/users/${userId}/saved-posts`
+    );
+  }
+  /**
+   * Get user followers
+   */
+  getUserFollowers(
+    userId: string
+  ): Observable<{ followers: UserType[]; count: number }> {
+    return this.http.get<{ followers: UserType[]; count: number }>(
+      `${this.apiUrl}/users/${userId}/followers`
+    );
+  }
+  /**
+   * Get users that a user is following
+   */
+  getUserFollowing(
+    userId: string
+  ): Observable<{ following: UserType[]; count: number }> {
+    return this.http.get<{ following: UserType[]; count: number }>(
+      `${this.apiUrl}/users/${userId}/following`
+    );
+  }
+
+  /**
+   * Get user social links
+   */
+  getUserSocials(userId: string): Observable<SocialLinks> {
+    return this.http.get<SocialLinks>(`${this.apiUrl}/users/${userId}/socials`);
+  }
+
+  /**
+   * Update user social links
+   */
+  updateUserSocials(
+    userId: string,
+    socials: SocialLinks
+  ): Observable<SocialLinks> {
+    return this.http.patch<SocialLinks>(
+      `${this.apiUrl}/users/${userId}/socials`,
+      { socials }
+    );
+  }
+
+  /**
+   * Update user profile
+   */
+  updateUserProfile(
+    userId: string,
+    profileData: Partial<UserType>
+  ): Observable<UserType> {
+    return this.http.patch<UserType>(
+      `${this.apiUrl}/users/${userId}/profile`,
+      profileData
+    );
+  }
+
+  /**
    * Add a tag to a user's preferred tags
    * @param tagId The ID of the tag to add
    * @param userId Optional user ID (defaults to current user)
@@ -50,7 +138,6 @@ export class UserService {
     return this.http.get<any>(`${this.apiUrl}/tags/${tagId}`).pipe(
       switchMap((tag) => {
         const tagName = tag.name;
-
         return this.getUserId(userId).pipe(
           switchMap((id) => {
             // Get the user's current tags
@@ -248,6 +335,19 @@ export class UserService {
             })
           );
       })
+    );
+  }
+
+  /**
+   * Update user liked tags
+   */
+  updateUserLikedTags(
+    userId: string,
+    tags: string[]
+  ): Observable<{ tags: string[] }> {
+    return this.http.patch<{ tags: string[] }>(
+      `${this.apiUrl}/users/${userId}/liked-tags`,
+      { tags }
     );
   }
 

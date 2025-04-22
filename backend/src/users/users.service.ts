@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { TagsService } from '../tags/tags.service';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateSocialsDto } from './dto/update-socials.dto';
 
 @Injectable()
 export class UsersService {
@@ -220,8 +221,11 @@ export class UsersService {
     }
 
     return {
+      id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
+      email: user.email,
+      username: user.username,
       pronouns: user.pronouns,
       title: user.title,
       location: user.location,
@@ -230,6 +234,8 @@ export class UsersService {
       socials: user.socials,
       avatar: user.avatar,
       coverphoto: user.coverphoto,
+      roles: user.roles,
+      isActive: user.isActive,
     };
   }
 
@@ -264,5 +270,84 @@ export class UsersService {
     await this.userModel.findByIdAndUpdate(userId, {
       password: hashedPassword,
     });
+  }
+
+  // NEW METHODS FOR USER PROFILE PAGE
+
+  // Get a user's posts - This method would depend on your Blog/Post implementation
+  // We'll mock this for now
+  async getUserPosts(userId: string) {
+    // This would typically include a lookup to a posts collection
+    // For now, return mock data
+    return {
+      posts: [],
+      count: 0,
+    };
+  }
+
+  // Get a user's saved posts - This would depend on your Blog/Post implementation
+  // We'll mock this for now
+  async getUserSavedPosts(userId: string) {
+    // This would typically include a lookup to a saved posts collection
+    // For now, return mock data
+    return {
+      posts: [],
+      count: 0,
+    };
+  }
+
+  // Get a user's followers
+  async getUserFollowers(userId: string) {
+    // We'd typically query users where userId is in their following array
+    // For now, return mock data
+    return {
+      followers: [],
+      count: 0,
+    };
+  }
+
+  // Get users that a user is following
+  async getUserFollowing(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .populate('following', '-password')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    return {
+      following: user.following || [],
+      count: user.following?.length || 0,
+    };
+  }
+
+  // Get a user's social links
+  async getUserSocials(userId: string) {
+    const user = await this.userModel.findById(userId).exec();
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    return user.socials || {};
+  }
+
+  // Update a user's social links
+  async updateUserSocials(userId: string, updateSocialsDto: UpdateSocialsDto) {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { socials: updateSocialsDto.socials },
+        { new: true },
+      )
+      .exec();
+
+    if (!updatedUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    return updatedUser.socials;
   }
 }

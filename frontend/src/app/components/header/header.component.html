@@ -103,7 +103,7 @@
             class="menu dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52"
           >
             <li>
-              <a>
+              <a routerLink="/profile">
                 <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>
                 Profile
               </a>
@@ -149,7 +149,7 @@
                 />
               </div>
             </div>
-            <div>
+            <div routerLink="/profile">
               <p class="font-medium">{{ username() }}</p>
               <p class="text-xs text-gray-500">View profile</p>
             </div>
@@ -200,7 +200,7 @@
           </a>
         </li>
         <li>
-          <a>
+          <a routerLink="/profile">
             <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile
           </a>
         </li>
