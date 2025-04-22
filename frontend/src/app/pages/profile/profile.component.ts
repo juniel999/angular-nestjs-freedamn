@@ -8,10 +8,17 @@ import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { UserStats, UserType } from '../../types/user.type';
 import { TagData } from '../../types/tag.type';
+import { SocialLinkButtonComponent } from '../../components/social-link-button/social-link-button.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, FontAwesomeModule, RouterModule],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FontAwesomeModule,
+    RouterModule,
+    SocialLinkButtonComponent,
+  ],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
