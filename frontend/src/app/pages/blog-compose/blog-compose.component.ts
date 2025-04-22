@@ -13,6 +13,7 @@ import { ToastService } from '../../services/toast.service';
 import { UserService } from '../../services/user.service';
 import { finalize } from 'rxjs/operators';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { TagData } from '../../types/tag.type';
 
 @Component({
   selector: 'app-blog-compose',
@@ -22,7 +23,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 })
 export class BlogComposeComponent implements OnInit {
   blogForm: FormGroup;
-  availableTags: { id: string; name: string }[] = [];
+  availableTags: TagData[] = [];
   isSubmitting = false;
   uploadedImages: { url: string; file: File }[] = [];
   imageUploading = false;

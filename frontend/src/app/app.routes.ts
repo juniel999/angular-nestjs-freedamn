@@ -5,6 +5,7 @@ import { BlogComposeComponent } from './pages/blog-compose/blog-compose.componen
 import { onboardingGuard } from './guards/onboarding.guard';
 import { onboardingCompletedGuard } from './guards/onboarding-completed.guard';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 export const routes: Routes = [
   {
@@ -22,6 +23,11 @@ export const routes: Routes = [
       {
         path: 'compose',
         component: BlogComposeComponent,
+        canActivate: [onboardingCompletedGuard],
+      },
+      {
+        path: 'profile',
+        component: ProfileComponent,
         canActivate: [onboardingCompletedGuard],
       },
       {

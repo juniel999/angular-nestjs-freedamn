@@ -1,0 +1,181 @@
+<!-- Main Container -->
+<div class="min-h-screen mx-auto px-4 max-w-6xl">
+  @if (isLoading()) {
+  <div class="flex justify-center items-center min-h-[50vh]">
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+  </div>
+  } @else if (userProfile()) {
+  <div class="container mx-auto px-4">
+    <!-- Left Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 py-8">
+      <div class="lg:col-span-2">
+        <!-- Cover Photo Section -->
+        <div
+          class="relative h-64 w-full bg-base-200 rounded-t-box overflow-hidden"
+        >
+          <img
+            [src]="userProfile()?.coverphoto || defaultCoverPhoto"
+            alt="Cover photo"
+            class="w-full h-full object-cover"
+          />
+          @if (isCurrentUser()) {
+          <button class="btn btn-primary btn-sm absolute bottom-4 right-4">
+            <i class="fas fa-camera"></i>
+            Change Cover
+          </button>
+          }
+        </div>
+
+        <!-- Profile Info Section -->
+        <div class="bg-base-100 shadow-sm rounded-b-box p-6 relative">
+          <!-- Avatar -->
+          <div class="absolute -top-12 left-6">
+            <div class="avatar">
+              <div
+                class="w-24 h-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2"
+              >
+                <img
+                  [src]="userProfile()?.avatar || defaultAvatar"
+                  [alt]="userProfile()?.username + ' avatar'"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- User Info -->
+          <div class="mt-14">
+            <!-- Name and Title -->
+            <div class="flex items-start justify-between">
+              <div>
+                <h1 class="text-2xl font-bold">
+                  {{ userProfile()?.firstName }} {{ userProfile()?.lastName }}
+                  @if (userProfile()?.pronouns) {
+                  <span class="text-base font-normal text-base-content/60 ml-2"
+                    >({{ userProfile()?.pronouns }})</span
+                  >
+                  }
+                </h1>
+                @if (userProfile()?.title) {
+                <p class="text-base-content/70">{{ userProfile()?.title }}</p>
+                }
+              </div>
+              <div class="flex gap-2">
+                @if (isCurrentUser()) {
+                <a routerLink="/compose" class="btn btn-primary btn-sm">
+                  <i class="fas fa-pen"></i>
+                  Compose
+                </a>
+                <a routerLink="/settings" class="btn btn-outline btn-sm">
+                  <i class="fas fa-cog"></i>
+                  Settings
+                </a>
+                }
+              </div>
+            </div>
+
+            <!-- Bio -->
+            @if (userProfile()?.bio) {
+            <p class="mt-4 text-base-content/80">{{ userProfile()?.bio }}</p>
+            }
+
+            <!-- Stats -->
+            <div class="stats bg-base-200 mt-6">
+              <div class="stat">
+                <div class="stat-title">Posts</div>
+                <div class="stat-value">{{ userStats()?.postsCount || 0 }}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-title">Followers</div>
+                <div class="stat-value">
+                  {{ userStats()?.followersCount || 0 }}
+                </div>
+              </div>
+              <div class="stat">
+                <div class="stat-title">Following</div>
+                <div class="stat-value">
+                  {{ userStats()?.followingCount || 0 }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Posts Section -->
+        <div class="mt-6">
+          <h2 class="text-xl font-semibold mb-4">Posts</h2>
+          <!-- Posts will be implemented later -->
+          <div class="alert">
+            <i class="fas fa-info-circle"></i>
+            <span>No posts yet</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Grid -->
+      <div class="space-y-6">
+        <!-- Social Links -->
+        <div class="bg-base-100 shadow-sm rounded-box p-6">
+          <h2 class="text-xl text-primary-content font-semibold mb-4">
+            Social Links
+          </h2>
+          @if (userProfile()?.socials) {
+          <div class="flex flex-wrap gap-2">
+            @if (userProfile()?.socials?.github) {
+            <a
+              [href]="userProfile()?.socials?.github"
+              target="_blank"
+              class="btn btn-primary btn-sm"
+            >
+              <i class="fab fa-github"></i>
+              GitHub
+            </a>
+            } @if (userProfile()?.socials?.twitter) {
+            <a
+              [href]="userProfile()?.socials?.twitter"
+              target="_blank"
+              class="btn btn-primary btn-sm"
+            >
+              <i class="fab fa-twitter"></i>
+              Twitter
+            </a>
+            } @if (userProfile()?.socials?.linkedin) {
+            <a
+              [href]="userProfile()?.socials?.linkedin"
+              target="_blank"
+              class="btn btn-outline btn-sm"
+            >
+              <i class="fab fa-linkedin"></i>
+              LinkedIn
+            </a>
+            }
+          </div>
+          } @else {
+          <p class="text-base-content/60">No social links added</p>
+          }
+        </div>
+
+        <!-- Liked Topics/Tags -->
+        <div class="bg-base-100 shadow-lg rounded-box p-6">
+          <h2 class="text-xl font-semibold mb-4">Liked Topics</h2>
+          @if (userTags().length) {
+          <div class="flex flex-wrap gap-2">
+            @for (tag of userTags(); track tag._id) {
+            <span class="badge badge-primary">{{ tag.name }}</span>
+            }
+          </div>
+          } @else {
+          <p class="text-base-content/60">No topics added yet</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  } @else {
+  <div class="flex flex-col items-center justify-center min-h-[50vh]">
+    <div class="alert alert-error">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>Profile not found</span>
+    </div>
+  </div>
+  }
+</div>

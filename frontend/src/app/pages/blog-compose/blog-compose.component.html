@@ -191,7 +191,7 @@
           [class.badge-outline]="
             !blogForm.get('tags')?.value.includes(tag.name)
           "
-          (click)="toggleTag(tag.id, tag.name)"
+          (click)="toggleTag(tag._id, tag.name)"
         >
           <fa-icon [icon]="['fas', 'hashtag']" class="mr-1 text-xs"></fa-icon>
           {{ tag.name }}
