@@ -87,10 +87,27 @@ export class SocialsComponent implements OnInit, OnDestroy {
 
   fetchUserProfile(): void {
     this.isLoading = true;
+
+    // Check localStorage first
+    const cachedProfile = localStorage.getItem('userProfile');
+    if (cachedProfile) {
+      const profile = JSON.parse(cachedProfile);
+      if (profile && profile.socials) {
+        this.socialsForm.patchValue({ socials: profile.socials });
+        this.isLoading = false;
+        return;
+      }
+    }
+
+    // If no cache, fetch from API
     this.onboardingService.getUserProfile().subscribe({
       next: (profile) => {
-        if (profile && profile.socials) {
-          this.socialsForm.patchValue({ socials: profile.socials });
+        if (profile) {
+          // Store in localStorage
+          localStorage.setItem('userProfile', JSON.stringify(profile));
+          if (profile.socials) {
+            this.socialsForm.patchValue({ socials: profile.socials });
+          }
         }
         this.isLoading = false;
       },
@@ -115,6 +132,14 @@ export class SocialsComponent implements OnInit, OnDestroy {
           .updateUserProfile(user.sub, profileData)
           .subscribe({
             next: () => {
+              // Update localStorage with new data
+              const cachedProfile = localStorage.getItem('userProfile');
+              if (cachedProfile) {
+                const profile = JSON.parse(cachedProfile);
+                profile.socials = profileData.socials;
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+              }
+
               this.toastService.show(
                 'Social links updated successfully',
                 'success'

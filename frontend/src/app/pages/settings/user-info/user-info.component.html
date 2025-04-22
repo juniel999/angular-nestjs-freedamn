@@ -1,11 +1,12 @@
 <div class="max-w-3xl">
   <h2 class="text-xl font-semibold mb-4">User Information</h2>
 
-  <div *ngIf="isLoading" class="flex justify-center my-4">
+  @if (isLoading) {
+  <div class="flex justify-center my-4">
     <div class="loading loading-spinner loading-lg text-primary"></div>
   </div>
-
-  <form *ngIf="!isLoading" [formGroup]="profileForm" class="space-y-4">
+  } @if (!isLoading) {
+  <form [formGroup]="profileForm" class="space-y-4">
     <!-- First and Last Name -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="form-control w-full">
@@ -23,15 +24,12 @@
             profileForm.get('firstName')?.touched
           "
         />
-        <label
-          *ngIf="
-            profileForm.get('firstName')?.invalid &&
-            profileForm.get('firstName')?.touched
-          "
-          class="label"
-        >
+        @if (profileForm.get('firstName')?.invalid &&
+        profileForm.get('firstName')?.touched) {
+        <label class="label">
           <span class="label-text-alt text-error">First name is required</span>
         </label>
+        }
       </div>
 
       <div class="form-control w-full">
@@ -49,15 +47,12 @@
             profileForm.get('lastName')?.touched
           "
         />
-        <label
-          *ngIf="
-            profileForm.get('lastName')?.invalid &&
-            profileForm.get('lastName')?.touched
-          "
-          class="label"
-        >
+        @if (profileForm.get('lastName')?.invalid &&
+        profileForm.get('lastName')?.touched) {
+        <label class="label">
           <span class="label-text-alt text-error">Last name is required</span>
         </label>
+        }
       </div>
     </div>
 
@@ -72,9 +67,9 @@
           class="select select-bordered w-full"
         >
           <option value="">Select pronouns (optional)</option>
-          <option *ngFor="let option of pronounOptions" [value]="option.value">
-            {{ option.label }}
-          </option>
+          @for (option of pronounOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+          }
         </select>
       </div>
 
@@ -131,11 +126,13 @@
         [class.textarea-error]="profileForm.get('bio')?.invalid"
         placeholder="Tell others about yourself..."
       ></textarea>
-      <label *ngIf="profileForm.get('bio')?.invalid" class="label">
+      @if (profileForm.get('bio')?.invalid) {
+      <label class="label">
         <span class="label-text-alt text-error"
           >Bio cannot exceed 500 characters</span
         >
       </label>
+      }
     </div>
 
     <!-- Save button for explicit saves (optional) -->
@@ -146,14 +143,16 @@
         [disabled]="profileForm.invalid || isSaving"
         (click)="saveProfile(profileForm.value)"
       >
+        @if (isSaving) {
         <fa-icon
-          *ngIf="isSaving"
           [icon]="['fas', 'spinner']"
           animation="spin"
           class="mr-2"
         ></fa-icon>
+        }
         {{ isSaving ? "Saving..." : "Save Changes" }}
       </button>
     </div>
   </form>
+  }
 </div>

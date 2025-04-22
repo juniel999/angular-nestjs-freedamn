@@ -46,14 +46,29 @@ export class AvatarCoverComponent {
 
   loadUserProfile(): void {
     this.isLoading = true;
+
+    // Check localStorage first
+    const cachedProfile = localStorage.getItem('userProfile');
+    if (cachedProfile) {
+      const profile = JSON.parse(cachedProfile);
+      if (profile) {
+        this.avatarUrl.set(profile?.avatar || '');
+        this.coverUrl.set(profile?.coverphoto || '');
+        this.isLoading = false;
+        return;
+      }
+    }
+
+    // If no cache, fetch from API
     this.onboardingService.getUserProfile().subscribe({
       next: (profile) => {
+        // Store in localStorage
+        localStorage.setItem('userProfile', JSON.stringify(profile));
         this.avatarUrl.set(profile?.avatar || '');
         this.coverUrl.set(profile?.coverphoto || '');
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading profile', error);
         this.toastService.show('Failed to load profile images', 'error');
         this.isLoading = false;
       },
@@ -83,7 +98,6 @@ export class AvatarCoverComponent {
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
-      console.log('this is the target', e.target?.result as string);
       this.avatarPreview.set(e.target?.result as string);
     };
     reader.readAsDataURL(file);
@@ -135,6 +149,15 @@ export class AvatarCoverComponent {
         this.avatarUrl.set(response);
         this.avatarPreview.set(response);
         this.avatarUpdateService.updateAvatar(response);
+
+        // Update localStorage
+        const cachedProfile = localStorage.getItem('userProfile');
+        if (cachedProfile) {
+          const profile = JSON.parse(cachedProfile);
+          profile.avatar = response;
+          localStorage.setItem('userProfile', JSON.stringify(profile));
+        }
+
         this.toastService.show('Avatar updated successfully', 'success');
         this.isAvatarUploading = false;
 
@@ -142,7 +165,6 @@ export class AvatarCoverComponent {
         avatarInput.value = '';
       },
       error: (error) => {
-        console.error('Error uploading avatar', error);
         this.toastService.show('Failed to upload avatar', 'error');
         this.isAvatarUploading = false;
       },
@@ -166,6 +188,15 @@ export class AvatarCoverComponent {
       next: (response) => {
         this.coverUrl.set(response);
         this.coverPreview.set(response);
+
+        // Update localStorage
+        const cachedProfile = localStorage.getItem('userProfile');
+        if (cachedProfile) {
+          const profile = JSON.parse(cachedProfile);
+          profile.coverphoto = response;
+          localStorage.setItem('userProfile', JSON.stringify(profile));
+        }
+
         this.toastService.show('Cover photo updated successfully', 'success');
         this.isCoverUploading = false;
 
@@ -173,7 +204,6 @@ export class AvatarCoverComponent {
         coverInput.value = '';
       },
       error: (error) => {
-        console.error('Error uploading cover photo', error);
         this.toastService.show('Failed to upload cover photo', 'error');
         this.isCoverUploading = false;
       },

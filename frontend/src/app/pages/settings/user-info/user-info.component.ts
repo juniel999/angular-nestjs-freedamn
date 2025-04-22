@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -26,7 +26,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './user-info.component.html',
   imports: [FontAwesomeModule, ReactiveFormsModule, CommonModule],
 })
-export class UserInfoComponent implements OnInit, OnDestroy {
+export class UserInfoComponent {
   profileForm!: FormGroup;
   isLoading: boolean = false;
   isSaving: boolean = false;
@@ -34,6 +34,7 @@ export class UserInfoComponent implements OnInit, OnDestroy {
   private saveSubject = new Subject<ProfileData>();
   private saveSubscription: Subscription | null = null;
   private formValueChanges$: Subscription | null = null;
+  private profileData = signal<ProfileData | null>(null);
 
   pronounOptions = [
     { value: 'He/Him', label: 'He/Him' },
@@ -50,7 +51,7 @@ export class UserInfoComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initForm();
-    this.fetchUserProfile();
+    this.loadProfileFromStorage();
   }
 
   ngOnDestroy(): void {
@@ -61,6 +62,22 @@ export class UserInfoComponent implements OnInit, OnDestroy {
       this.saveSubscription.unsubscribe();
     }
     this.saveSubject.complete();
+  }
+
+  private loadProfileFromStorage(): void {
+    const storedProfile = localStorage.getItem('userProfile');
+    if (storedProfile) {
+      const profile = JSON.parse(storedProfile);
+      this.profileData.set(profile);
+      if (profile.birthdate) {
+        const date = new Date(profile.birthdate);
+        profile.birthdate = this.formatDateForInput(date);
+      }
+      this.profileForm.patchValue(profile);
+      this.isLoading = false;
+    } else {
+      this.fetchUserProfile();
+    }
   }
 
   initForm(): void {
@@ -103,6 +120,8 @@ export class UserInfoComponent implements OnInit, OnDestroy {
               birthdate: this.formatDateForInput(date),
             };
           }
+          this.profileData.set(profile);
+          localStorage.setItem('userProfile', JSON.stringify(profile));
           this.profileForm.patchValue(profile);
         }
         this.isLoading = false;
@@ -144,6 +163,8 @@ export class UserInfoComponent implements OnInit, OnDestroy {
           .updateUserProfile(user.sub, profileData)
           .subscribe({
             next: () => {
+              this.profileData.set(profileData);
+              localStorage.setItem('userProfile', JSON.stringify(profileData));
               this.toastService.show('Profile updated successfully', 'success');
               this.isSaving = false;
             },

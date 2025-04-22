@@ -1,11 +1,12 @@
 <div class="max-w-3xl">
   <h2 class="text-xl font-semibold mb-4">Social Links</h2>
 
-  <div *ngIf="isLoading" class="flex justify-center my-4">
+  @if (isLoading) {
+  <div class="flex justify-center my-4">
     <div class="loading loading-spinner loading-lg text-primary"></div>
   </div>
-
-  <form *ngIf="!isLoading" [formGroup]="socialsForm" class="space-y-4">
+  } @if (!isLoading) {
+  <form [formGroup]="socialsForm" class="space-y-4">
     <div formGroupName="socials">
       <!-- Website -->
       <div class="form-control w-full mb-4">
@@ -25,17 +26,14 @@
             socialsForm.get('socials.website')?.touched
           "
         />
-        <label
-          *ngIf="
-            socialsForm.get('socials.website')?.invalid &&
-            socialsForm.get('socials.website')?.touched
-          "
-          class="label"
-        >
+        @if (socialsForm.get('socials.website')?.invalid &&
+        socialsForm.get('socials.website')?.touched) {
+        <label class="label">
           <span class="label-text-alt text-error"
             >Please enter a valid URL</span
           >
         </label>
+        }
       </div>
 
       <!-- GitHub -->
@@ -56,17 +54,14 @@
             socialsForm.get('socials.github')?.touched
           "
         />
-        <label
-          *ngIf="
-            socialsForm.get('socials.github')?.invalid &&
-            socialsForm.get('socials.github')?.touched
-          "
-          class="label"
-        >
+        @if (socialsForm.get('socials.github')?.invalid &&
+        socialsForm.get('socials.github')?.touched) {
+        <label class="label">
           <span class="label-text-alt text-error"
             >Please enter a valid URL</span
           >
         </label>
+        }
       </div>
 
       <!-- Twitter -->
@@ -87,17 +82,14 @@
             socialsForm.get('socials.twitter')?.touched
           "
         />
-        <label
-          *ngIf="
-            socialsForm.get('socials.twitter')?.invalid &&
-            socialsForm.get('socials.twitter')?.touched
-          "
-          class="label"
-        >
+        @if (socialsForm.get('socials.twitter')?.invalid &&
+        socialsForm.get('socials.twitter')?.touched) {
+        <label class="label">
           <span class="label-text-alt text-error"
             >Please enter a valid URL</span
           >
         </label>
+        }
       </div>
 
       <!-- LinkedIn -->
@@ -118,17 +110,14 @@
             socialsForm.get('socials.linkedin')?.touched
           "
         />
-        <label
-          *ngIf="
-            socialsForm.get('socials.linkedin')?.invalid &&
-            socialsForm.get('socials.linkedin')?.touched
-          "
-          class="label"
-        >
+        @if (socialsForm.get('socials.linkedin')?.invalid &&
+        socialsForm.get('socials.linkedin')?.touched) {
+        <label class="label">
           <span class="label-text-alt text-error"
             >Please enter a valid URL</span
           >
         </label>
+        }
       </div>
 
       <!-- Facebook -->
@@ -149,17 +138,14 @@
             socialsForm.get('socials.facebook')?.touched
           "
         />
-        <label
-          *ngIf="
-            socialsForm.get('socials.facebook')?.invalid &&
-            socialsForm.get('socials.facebook')?.touched
-          "
-          class="label"
-        >
+        @if (socialsForm.get('socials.facebook')?.invalid &&
+        socialsForm.get('socials.facebook')?.touched) {
+        <label class="label">
           <span class="label-text-alt text-error"
             >Please enter a valid URL</span
           >
         </label>
+        }
       </div>
 
       <!-- Instagram -->
@@ -180,17 +166,14 @@
             socialsForm.get('socials.instagram')?.touched
           "
         />
-        <label
-          *ngIf="
-            socialsForm.get('socials.instagram')?.invalid &&
-            socialsForm.get('socials.instagram')?.touched
-          "
-          class="label"
-        >
+        @if (socialsForm.get('socials.instagram')?.invalid &&
+        socialsForm.get('socials.instagram')?.touched) {
+        <label class="label">
           <span class="label-text-alt text-error"
             >Please enter a valid URL</span
           >
         </label>
+        }
       </div>
     </div>
 
@@ -202,14 +185,16 @@
         [disabled]="socialsForm.invalid || isSaving"
         (click)="saveSocials(socialsForm.value)"
       >
+        @if (isSaving) {
         <fa-icon
-          *ngIf="isSaving"
           [icon]="['fas', 'spinner']"
           animation="spin"
           class="mr-2"
         ></fa-icon>
+        }
         {{ isSaving ? "Saving..." : "Save Changes" }}
       </button>
     </div>
   </form>
+  }
 </div>
