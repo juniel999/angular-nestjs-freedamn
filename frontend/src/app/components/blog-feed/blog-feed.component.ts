@@ -1,10 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild,
-  inject,
-} from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +16,7 @@ type Tab = 'for-you' | 'explore' | 'following';
   imports: [CommonModule, RouterModule, FormsModule, FontAwesomeModule],
   templateUrl: './blog-feed.component.html',
 })
-export class BlogFeedComponent implements OnInit {
+export class BlogFeedComponent {
   private blogService = inject(BlogService);
   private toastService = inject(ToastService);
   private userService = inject(UserService);
@@ -33,7 +27,6 @@ export class BlogFeedComponent implements OnInit {
   filterOpen = false;
   filterTag = '';
   firstName: string = ''; // Default value
-  isLoadingProfile = true;
 
   // Computed properties from blog service
   loading = this.blogService.loading;
@@ -54,26 +47,27 @@ export class BlogFeedComponent implements OnInit {
    * Load user profile to get first name
    */
   private loadUserProfile() {
-    this.isLoadingProfile = true;
+    // First check if we have the firstName in localStorage
+    const storedFirstName = localStorage.getItem('firstName');
+    if (storedFirstName) {
+      this.firstName = storedFirstName;
+      return;
+    }
+
+    // If not in localStorage, fetch from API
     this.authService.currentUser$.subscribe((user) => {
       if (user) {
         this.userService.getUserProfile(user.sub).subscribe({
           next: (profile) => {
             if (profile && profile.firstName) {
               this.firstName = profile.firstName;
-              if (localStorage.getItem('firstName')) {
-                localStorage.setItem('firstName', profile.firstName);
-              }
+              localStorage.setItem('firstName', profile.firstName);
             }
-            this.isLoadingProfile = false;
           },
           error: (error) => {
             console.error('Error loading user profile:', error);
-            this.isLoadingProfile = false;
           },
         });
-      } else {
-        this.isLoadingProfile = false;
       }
     });
   }

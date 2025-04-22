@@ -1,45 +1,14 @@
 <div class="max-w-6xl mx-auto px-4 py-6">
   <!-- Greeting -->
   <div class="mb-10">
-    @if (isLoadingProfile) {
-    <div
-      class="h-16 sm:h-18 md:h-20 w-64 sm:w-80 md:w-96 bg-base-300 animate-pulse rounded-lg"
-    ></div>
-    <div
-      class="h-4 sm:h-4.5 md:h-5 mt-2 w-48 sm:w-72 md:w-96 bg-base-300 animate-pulse rounded-lg"
-    ></div>
-    } @else {
     <h1 class="text-4xl md:text-5xl font-bold mb-3">
       Good day, <span class="text-primary">{{ firstName }}</span> 👋
     </h1>
     <p class="text-lg text-base-content opacity-80">
       Here are some posts that you might be interested in. Enjoy!
     </p>
-    }
   </div>
 
-  <!-- Loading indicator -->
-  @if (isLoadingProfile) {
-  <!-- Tabs skeleton -->
-  <div
-    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
-  >
-    <div class="tabs tabs-lifted">
-      <div class="h-10 w-24 sm:w-28 bg-base-300 animate-pulse rounded-lg"></div>
-      <div
-        class="h-10 w-24 sm:w-28 bg-base-300 animate-pulse rounded-lg ml-1"
-      ></div>
-      <div
-        class="h-10 w-24 sm:w-28 bg-base-300 animate-pulse rounded-lg ml-1"
-      ></div>
-    </div>
-
-    <!-- Filter button skeleton -->
-    <div class="relative">
-      <div class="h-8 w-20 bg-base-300 animate-pulse rounded-full"></div>
-    </div>
-  </div>
-  } @else {
   <!-- Tabs -->
   <div
     class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
@@ -129,7 +98,7 @@
       </button>
     </div>
   </div>
-  } }
+  }
   <!-- Blog Feed -->
   <div class="space-y-8">
     <!-- Initial loading state -->
