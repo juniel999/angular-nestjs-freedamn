@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import {
@@ -6,7 +6,6 @@ import {
   TagData,
 } from '../../../services/onboarding.service';
 import { ToastService } from '../../../services/toast.service';
-import { CommonModule } from '@angular/common';
 import {
   Subscription,
   debounceTime,
@@ -22,10 +21,10 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 @Component({
   selector: 'app-topics-tags',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, FontAwesomeModule],
+  imports: [ReactiveFormsModule, FontAwesomeModule],
   templateUrl: './topics-tags.component.html',
 })
-export class TopicsTagsComponent implements OnInit, OnDestroy {
+export class TopicsTagsComponent {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
   private onboardingService = inject(OnboardingService);
@@ -137,13 +136,17 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
       return; // Don't proceed if already saving
     }
 
-    // Check if tag is already in the list
+    // Check if tag is already in the list (case-insensitive comparison)
     const isDuplicate = this.selectedTags.some(
-      (selectedTag) => selectedTag.id === tag.id
+      (selectedTag) => selectedTag.name.toLowerCase() === tag.name.toLowerCase()
     );
 
     if (isDuplicate) {
-      this.errorMessage = `"${tag.name}" has already been added.`;
+      this.errorMessage = `"${tag.name}" is already in your topics.`;
+      this.toastService.show(
+        `"${tag.name}" is already in your topics`,
+        'error'
+      );
       return;
     }
 
@@ -306,6 +309,20 @@ export class TopicsTagsComponent implements OnInit, OnDestroy {
   addTag(tag: TagData): void {
     if (!tag || !tag.name || this.isSaving) {
       return; // Don't proceed if invalid tag or already saving
+    }
+
+    // Check if tag is already in user's selected tags (case-insensitive)
+    const isDuplicate = this.selectedTags.some(
+      (selectedTag) => selectedTag.name.toLowerCase() === tag.name.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      this.errorMessage = `"${tag.name}" is already in your topics.`;
+      this.toastService.show(
+        `"${tag.name}" is already in your topics`,
+        'error'
+      );
+      return;
     }
 
     // Ensure the tag has a valid ID
