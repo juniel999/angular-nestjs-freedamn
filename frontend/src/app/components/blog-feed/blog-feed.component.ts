@@ -48,7 +48,12 @@ export class BlogFeedComponent {
    */
   private loadUserProfile() {
     // First check if we have the firstName in localStorage
-    const storedFirstName = localStorage.getItem('firstName');
+
+    const storedFirstName = JSON.parse(
+      localStorage.getItem('userProfile') || '{}'
+    ).firstName;
+
+    // const storedFirstName = localStorage.getItem('firstName');
     if (storedFirstName) {
       this.firstName = storedFirstName;
       return;
@@ -61,7 +66,7 @@ export class BlogFeedComponent {
           next: (profile) => {
             if (profile && profile.firstName) {
               this.firstName = profile.firstName;
-              localStorage.setItem('firstName', profile.firstName);
+              localStorage.setItem('userProfile', JSON.stringify(profile));
             }
           },
           error: (error) => {
