@@ -5,9 +5,10 @@
     <span class="loading loading-spinner loading-lg text-primary"></span>
   </div>
   } @else if (userProfile()) {
-  <div class="container mx-auto px-4">
-    <!-- Left Grid -->
+  <div class="mx-auto px-4">
+    <!-- Grid Container with Sticky Right Column -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 py-8">
+      <!-- Left Grid - Main Content -->
       <div class="lg:col-span-2">
         <!-- Cover Photo Section -->
         <div
@@ -20,7 +21,7 @@
           />
           @if (isCurrentUser()) {
           <button class="btn btn-primary btn-sm absolute bottom-4 right-4">
-            <i class="fas fa-camera"></i>
+            <fa-icon [icon]="['fas', 'camera']"></fa-icon>
             Change Cover
           </button>
           }
@@ -59,14 +60,14 @@
                 <p class="text-base-content/70">{{ userProfile()?.title }}</p>
                 }
               </div>
-              <div class="flex gap-2">
+              <div class="flex gap-2 hidden sm:flex">
                 @if (isCurrentUser()) {
                 <a routerLink="/compose" class="btn btn-primary btn-sm">
-                  <i class="fas fa-pen"></i>
+                  <fa-icon [icon]="['fas', 'pen']"></fa-icon>
                   Compose
                 </a>
                 <a routerLink="/settings" class="btn btn-outline btn-sm">
-                  <i class="fas fa-cog"></i>
+                  <fa-icon [icon]="['fas', 'cog']"></fa-icon>
                   Settings
                 </a>
                 }
@@ -79,21 +80,22 @@
             }
 
             <!-- Stats -->
-            <div class="stats bg-base-200 mt-6">
-              <div class="stat">
-                <div class="stat-title">Posts</div>
-                <div class="stat-value">{{ userStats()?.postsCount || 0 }}</div>
-              </div>
-              <div class="stat">
-                <div class="stat-title">Followers</div>
-                <div class="stat-value">
-                  {{ userStats()?.followersCount || 0 }}
+            <div
+              class="flex justify-start mt-4 bg-base-100 rounded-xl py-3 gap-1"
+            >
+              <div class="text-center">
+                <div class="text-xs btn btn-accent text-primary">
+                  {{ userStats()?.postsCount || 0 }} Posts
                 </div>
               </div>
-              <div class="stat">
-                <div class="stat-title">Following</div>
-                <div class="stat-value">
-                  {{ userStats()?.followingCount || 0 }}
+              <div class="text-center">
+                <div class="text-xs btn btn-accent text-primary">
+                  {{ userStats()?.followersCount || 0 }} Followers
+                </div>
+              </div>
+              <div class="text-center">
+                <div class="text-xs btn btn-accent text-primary">
+                  {{ userStats()?.followingCount || 0 }} Following
                 </div>
               </div>
             </div>
@@ -103,100 +105,219 @@
         <!-- Posts Section -->
         <div class="mt-6">
           <h2 class="text-xl font-semibold mb-4">Posts</h2>
-          <!-- Posts will be implemented later -->
+          @if (userPosts().length) {
+          <!-- Blog posts grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @for (blog of userPosts(); track blog._id) {
+            <div
+              class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-base-200"
+            >
+              <div class="card-body p-0">
+                <!-- Row 1: Image + Title combo -->
+                <div class="relative w-full">
+                  <!-- Cover image or placeholder -->
+                  <div class="w-full h-40 bg-base-200">
+                    @if (blog.coverImage || (blog.images && blog.images.length >
+                    0)) {
+                    <img
+                      [src]="blog.coverImage || blog.images[0]"
+                      alt="Blog preview"
+                      class="w-full h-40 object-cover"
+                    />
+                    } @else {
+                    <div
+                      class="w-full h-40 flex items-center justify-center bg-base-200"
+                    >
+                      <fa-icon
+                        [icon]="['fas', 'image']"
+                        class="text-2xl opacity-20"
+                      ></fa-icon>
+                    </div>
+                    }
+                  </div>
+
+                  <!-- Title overlay -->
+                  <div
+                    class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent"
+                  >
+                    <a
+                      [routerLink]="['/blogs', blog._id]"
+                      class="hover:underline"
+                    >
+                      <h2
+                        class="card-title text-lg md:text-xl font-bold text-white"
+                      >
+                        {{ blog.title }}
+                      </h2>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Row 2: Content -->
+                <div class="p-4">
+                  <!-- Excerpt -->
+                  <p class="text-sm mb-3 line-clamp-2">
+                    {{ getExcerpt(blog.content) }}
+                  </p>
+
+                  <!-- Tags -->
+                  <div class="flex flex-wrap gap-1 mb-3">
+                    @for (tag of blog.tags.slice(0, 3); track tag) {
+                    <span class="badge badge-sm badge-accent text-primary">{{
+                      tag
+                    }}</span>
+                    } @if (blog.tags.length > 3) {
+                    <span class="badge badge-sm"
+                      >+{{ blog.tags.length - 3 }}</span
+                    >
+                    }
+                  </div>
+
+                  <!-- Reactions -->
+                  <div
+                    class="flex items-center justify-between border-t border-base-200 pt-3"
+                  >
+                    <div class="flex items-center gap-1">
+                      <button
+                        class="btn btn-xs btn-ghost gap-1 px-2"
+                        (click)="toggleLike(blog, $event)"
+                      >
+                        <fa-icon
+                          [icon]="['far', 'heart']"
+                          class="text-xl text-primary-content"
+                          [class.text-error]="hasUserLiked(blog)"
+                        ></fa-icon>
+                        <span class="text-xs">{{
+                          blog.likes.length || 0
+                        }}</span>
+                      </button>
+
+                      <a
+                        [routerLink]="['/blogs', blog._id]"
+                        class="btn btn-xs btn-ghost gap-1 px-2"
+                      >
+                        <fa-icon
+                          [icon]="['far', 'comment']"
+                          class="text-xl text-primary-content"
+                        ></fa-icon>
+                        <span class="text-xs">{{
+                          blog?.comments?.length || 0
+                        }}</span>
+                      </a>
+                    </div>
+
+                    <button class="btn btn-xs btn-ghost px-2">
+                      <fa-icon
+                        [icon]="['far', 'bookmark']"
+                        class="text-xl text-primary-content"
+                      ></fa-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          } @else {
           <div class="alert">
-            <i class="fas fa-info-circle"></i>
+            <fa-icon [icon]="['fas', 'info-circle']"></fa-icon>
             <span>No posts yet</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Right Grid -->
-      <div class="space-y-6">
-        <!-- Social Links -->
-        <div class="bg-base-100 shadow-sm rounded-box p-6">
-          <h2 class="text-xl text-primary-content font-semibold mb-4">
-            Social Links
-          </h2>
-          @if (userProfile()?.socials) {
-          <div class="flex flex-wrap gap-2">
-            @if (userProfile()?.socials?.github) {
-            <app-social-link-button
-              [link]="userProfile()?.socials?.github!"
-              icon="github"
-              label="GitHub"
-            ></app-social-link-button>
-            } @if (userProfile()?.socials?.twitter) {
-            <app-social-link-button
-              [link]="userProfile()?.socials?.twitter!"
-              icon="twitter"
-              label="Twitter"
-            ></app-social-link-button>
-            } @if (userProfile()?.socials?.linkedin) {
-            <app-social-link-button
-              [link]="userProfile()?.socials?.linkedin!"
-              icon="linkedin"
-              label="LinkedIn"
-            ></app-social-link-button>
-            } @if (userProfile()?.socials?.facebook) {
-            <app-social-link-button
-              [link]="userProfile()?.socials?.facebook!"
-              icon="facebook"
-              label="Facebook"
-            ></app-social-link-button>
-            } @if (userProfile()?.socials?.instagram) {
-            <app-social-link-button
-              [link]="userProfile()?.socials?.instagram!"
-              icon="instagram"
-              label="Instagram"
-            ></app-social-link-button>
-            } @if (userProfile()?.socials?.youtube) {
-            <app-social-link-button
-              [link]="userProfile()?.socials?.youtube!"
-              icon="youtube"
-              label="YouTube"
-            ></app-social-link-button>
-            } @if (userProfile()?.socials?.tiktok) {
-            <app-social-link-button
-              [link]="userProfile()?.socials?.tiktok!"
-              icon="tiktok"
-              label="TikTok"
-            ></app-social-link-button>
-            } @if (userProfile()?.socials?.website) {
-            <app-social-link-button
-              [link]="userProfile()?.socials?.website!"
-              [isWebsite]="true"
-              label="Website"
-            ></app-social-link-button>
-            }
-          </div>
-          } @else {
-          <p class="text-base-content/60">No social links added</p>
-          }
-        </div>
-
-        <!-- Liked Topics/Tags -->
-        <div class="bg-base-100 shadow-lg rounded-box p-6">
-          <h2 class="text-xl font-semibold mb-4 text-primary-content">
-            Liked Topics
-          </h2>
-          @if (userTags().length) {
-          <div class="flex flex-wrap gap-2">
-            @for (tag of userTags(); track tag._id) {
-            <span class="badge badge-primary">{{ tag.name }}</span>
-            }
-          </div>
-          } @else {
-          <p class="text-base-content/60">No topics added yet</p>
           }
         </div>
       </div>
+
+      <!-- Right Grid - Fixed Position -->
+      <aside class="lg:block">
+        <div class="space-y-6 lg:sticky lg:top-20">
+          <!-- Social Links -->
+          <div class="bg-base-100 shadow-sm rounded-box p-6">
+            <h2 class="text-xl text-primary-content font-semibold mb-4">
+              Social Links
+            </h2>
+            @if (userProfile()?.socials) {
+            <div class="flex flex-wrap gap-2">
+              @if (userProfile()?.socials?.github) {
+              <app-social-link-button
+                [link]="userProfile()?.socials?.github!"
+                icon="github"
+                label="GitHub"
+              ></app-social-link-button>
+              } @if (userProfile()?.socials?.twitter) {
+              <app-social-link-button
+                [link]="userProfile()?.socials?.twitter!"
+                icon="twitter"
+                label="Twitter"
+              ></app-social-link-button>
+              } @if (userProfile()?.socials?.linkedin) {
+              <app-social-link-button
+                [link]="userProfile()?.socials?.linkedin!"
+                icon="linkedin"
+                label="LinkedIn"
+              ></app-social-link-button>
+              } @if (userProfile()?.socials?.facebook) {
+              <app-social-link-button
+                [link]="userProfile()?.socials?.facebook!"
+                icon="facebook"
+                label="Facebook"
+              ></app-social-link-button>
+              } @if (userProfile()?.socials?.instagram) {
+              <app-social-link-button
+                [link]="userProfile()?.socials?.instagram!"
+                icon="instagram"
+                label="Instagram"
+              ></app-social-link-button>
+              } @if (userProfile()?.socials?.youtube) {
+              <app-social-link-button
+                [link]="userProfile()?.socials?.youtube!"
+                icon="youtube"
+                label="YouTube"
+              ></app-social-link-button>
+              } @if (userProfile()?.socials?.tiktok) {
+              <app-social-link-button
+                [link]="userProfile()?.socials?.tiktok!"
+                icon="tiktok"
+                label="TikTok"
+              ></app-social-link-button>
+              } @if (userProfile()?.socials?.website) {
+              <app-social-link-button
+                [link]="userProfile()?.socials?.website!"
+                [isWebsite]="true"
+                label="Website"
+              ></app-social-link-button>
+              }
+            </div>
+            } @else {
+            <p class="text-base-content/60">No social links added</p>
+            }
+          </div>
+
+          <!-- Liked Topics/Tags -->
+          <div class="bg-base-100 shadow-lg rounded-box p-6">
+            <h2 class="text-xl font-semibold mb-4 text-primary-content">
+              Liked Topics
+            </h2>
+            @if (userTags().length) {
+            <div class="flex flex-wrap gap-2">
+              @for (tag of userTags(); track tag._id) {
+              <span class="badge badge-primary font-bold text-xs">{{
+                tag.name.toLocaleUpperCase()
+              }}</span>
+              }
+            </div>
+            } @else {
+            <p class="text-base-content/60">No topics added yet</p>
+            }
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
+
   } @else {
   <div class="flex flex-col items-center justify-center min-h-[50vh]">
     <div class="alert alert-error">
-      <i class="fas fa-exclamation-circle"></i>
+      <fa-icon [icon]="['fas', 'exclamation-circle']"></fa-icon>
       <span>Profile not found</span>
     </div>
   </div>

@@ -246,9 +246,8 @@
                   (click)="toggleLike(blog, $event)"
                 >
                   <fa-icon
-                    icon="heart"
-                    size="2x"
-                    class="text-primary"
+                    [icon]="['far', 'heart']"
+                    class="text-primary-content text-xl"
                     [class.text-error]="hasUserLiked(blog)"
                   ></fa-icon>
                   <span class="text-xs">{{ blog.likes.length || 0 }}</span>
@@ -259,9 +258,8 @@
                   class="btn btn-xs btn-ghost gap-1 px-2"
                 >
                   <fa-icon
-                    icon="comment"
-                    class="text-primary"
-                    size="2x"
+                    [icon]="['far', 'comment']"
+                    class="text-primary-content text-xl"
                   ></fa-icon>
                   <span class="text-xs">{{ blog?.comments?.length || 0 }}</span>
                 </a>
@@ -269,9 +267,8 @@
 
               <button class="btn btn-xs btn-ghost px-2">
                 <fa-icon
-                  icon="bookmark"
-                  size="2x"
-                  class="text-primary"
+                  [icon]="['far', 'bookmark']"
+                  class="text-primary-content text-xl"
                 ></fa-icon>
               </button>
             </div>
