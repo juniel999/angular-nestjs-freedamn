@@ -104,12 +104,16 @@ export class BlogsService {
   }
 
   async findUserFeedByTags(userTags: string[], page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {
-    const skip = (page - 1) * limit;
-    let query: any = { published: true };
-    
-    if (userTags && userTags.length > 0) {
-      query.tags = { $in: userTags.map(tag => tag.toLowerCase().trim()) };
+    // If no tags are provided, return empty result since user hasn't selected any preferences
+    if (!userTags || userTags.length === 0) {
+      return { posts: [], total: 0, page };
     }
+
+    const skip = (page - 1) * limit;
+    const query = { 
+      published: true,
+      tags: { $in: userTags.map(tag => tag.toLowerCase().trim()) }
+    };
     
     const [posts, total] = await Promise.all([
       this.blogModel.find(query)
