@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { SocialLinks, UserStats, UserType } from '../types/user.type';
 import { Observable, switchMap, of, take, map, forkJoin } from 'rxjs';
 import { TagData } from '../types/tag.type';
+import { BlogPostType } from '../types/blog-post.type';
 
 @Injectable({
   providedIn: 'root',
@@ -32,6 +33,11 @@ export class UserService {
     );
   }
 
+  findUserByUsername(username: string): Observable<UserType | null> {
+    console.log('Finding user by username in server:', username);
+    return this.http.get<UserType>(`${this.apiUrl}/users/find/${username}`);
+  }
+
   getUserProfile(userId: string): Observable<UserType | null> {
     return this.http.get<UserType>(`${this.apiUrl}/users/${userId}/profile`);
   }
@@ -55,8 +61,10 @@ export class UserService {
   /**
    * Get user posts
    */
-  getUserPosts(userId: string): Observable<{ posts: any[]; count: number }> {
-    return this.http.get<{ posts: any[]; count: number }>(
+  getUserPosts(
+    userId: string
+  ): Observable<{ posts: BlogPostType[]; count: number }> {
+    return this.http.get<{ posts: BlogPostType[]; count: number }>(
       `${this.apiUrl}/users/${userId}/posts`
     );
   }
@@ -311,8 +319,6 @@ export class UserService {
                 return of([]);
               }
 
-              console.log('User preferred tag names:', response.tags);
-
               // Normalize the tag names for comparison (lowercase)
               const normalizedUserTags = response.tags.map((tag) =>
                 tag.toLowerCase().trim()
@@ -321,14 +327,11 @@ export class UserService {
               // Get all available tags
               return this.getAllTags().pipe(
                 map((allTags) => {
-                  console.log('Available tags:', allTags);
-
                   // Filter to get only the user's preferred tags by matching on normalized tag name
                   const matchedTags = allTags.filter((tag) =>
                     normalizedUserTags.includes(tag.name.toLowerCase().trim())
                   );
 
-                  console.log('Matched tags:', matchedTags);
                   return matchedTags;
                 })
               );

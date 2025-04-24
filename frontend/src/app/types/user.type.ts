@@ -10,7 +10,7 @@ export type SocialLinks = {
 };
 
 export type UserType = {
-  id: string;
+  _id: string;
   avatar: string;
   coverphoto: string;
   username: string;

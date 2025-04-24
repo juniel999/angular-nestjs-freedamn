@@ -26,6 +26,11 @@ export const routes: Routes = [
         canActivate: [onboardingCompletedGuard],
       },
       {
+        path: 'profile/:username',
+        component: ProfileComponent,
+        canActivate: [onboardingCompletedGuard],
+      },
+      {
         path: 'profile',
         component: ProfileComponent,
         canActivate: [onboardingCompletedGuard],

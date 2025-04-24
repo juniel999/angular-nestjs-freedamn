@@ -1,9 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { RouterModule } from '@angular/router';
-import { Subject, forkJoin } from 'rxjs';
-import { take, switchMap, takeUntil } from 'rxjs/operators';
+import { RouterModule, ActivatedRoute } from '@angular/router';
+import { Subject, forkJoin, of } from 'rxjs';
+import { take, switchMap, takeUntil, catchError, tap } from 'rxjs/operators';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { UserStats, UserType } from '../../types/user.type';
@@ -11,16 +10,11 @@ import { TagData } from '../../types/tag.type';
 import { SocialLinkButtonComponent } from '../../components/social-link-button/social-link-button.component';
 import { BlogService } from '../../services/blog.service';
 import { ToastService } from '../../services/toast.service';
+import { BlogPostType } from '../../types/blog-post.type';
 
 @Component({
   selector: 'app-profile',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FontAwesomeModule,
-    RouterModule,
-    SocialLinkButtonComponent,
-  ],
+  imports: [FontAwesomeModule, RouterModule, SocialLinkButtonComponent],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
@@ -28,16 +22,19 @@ export class ProfileComponent {
   private authService = inject(AuthService);
   private blogService = inject(BlogService);
   private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
   private destroy$ = new Subject<void>();
 
   userProfile = signal<UserType | null>(null);
   userStats = signal<UserStats | null>(null);
   userTags = signal<TagData[]>([]);
-  userPosts = signal<any[]>([]);
+  userPosts = signal<BlogPostType[]>([]);
+
   isLoading = signal(true);
   isCurrentUser = signal(false);
+  error = signal<string | null>(null);
 
-  defaultAvatar = 'https://ui-avatars.com/api/?name=User&background=random';
+  defaultAvatar = 'https://ui-avatars.com/api/?background=E5B400&name=';
   defaultCoverPhoto = 'assets/images/default-cover.jpg';
 
   ngOnInit() {
@@ -50,30 +47,99 @@ export class ProfileComponent {
   }
 
   private loadProfileData() {
-    // Check localStorage first
-    const cachedProfile = localStorage.getItem('userProfile');
-    if (cachedProfile) {
-      const profile = JSON.parse(cachedProfile);
-      this.userProfile.set(profile);
-      this.isLoading.set(false);
+    const username = this.route.snapshot.paramMap.get('username');
+    this.error.set(null);
+    this.isLoading.set(true);
+
+    // Check if viewing own profile (no username parameter)
+    if (!username) {
+      this.isCurrentUser.set(true);
+      const cachedProfile = localStorage.getItem('userProfile');
+      const cachedStats = localStorage.getItem('userStats');
+      const cachedTags = localStorage.getItem('userTags');
+
+      // If we have all cached data, use it
+      if (cachedProfile && cachedStats && cachedTags) {
+        this.userProfile.set(JSON.parse(cachedProfile));
+        this.userStats.set(JSON.parse(cachedStats));
+        this.userTags.set(JSON.parse(cachedTags));
+
+        // Only fetch posts as they are dynamic
+        this.authService.currentUser$
+          .pipe(
+            take(1),
+            switchMap((currentUser) => {
+              if (!currentUser) throw new Error('No authenticated user found');
+              return this.userService.getUserPosts(currentUser.sub);
+            }),
+            takeUntil(this.destroy$)
+          )
+          .subscribe({
+            next: (posts) => {
+              this.userPosts.set(
+                Array.isArray(posts) ? posts : posts.posts || []
+              );
+              this.isLoading.set(false);
+            },
+            error: (error) => {
+              console.error('Error loading posts:', error);
+              this.isLoading.set(false);
+              this.toastService.show('Failed to load posts', 'error');
+            },
+          });
+        return;
+      }
     }
 
-    // Load fresh data
+    // If there's a username parameter or no cached data, fetch everything
     this.authService.currentUser$
       .pipe(
         take(1),
-        switchMap((user) => {
-          if (!user) {
+        switchMap((currentUser) => {
+          if (!currentUser) {
             throw new Error('No authenticated user found');
           }
-          this.isCurrentUser.set(true);
 
-          return forkJoin({
-            profile: this.userService.getUserProfile(user.sub),
-            stats: this.userService.getUserStats(user.sub),
-            tags: this.userService.getUserPreferredTags(user.sub),
-            posts: this.userService.getUserPosts(user.sub),
-          });
+          if (!username) {
+            // Loading current user's profile
+            this.isCurrentUser.set(true);
+            return forkJoin({
+              profile: this.userService.getUserProfile(currentUser.sub),
+              stats: this.userService.getUserStats(currentUser.sub),
+              tags: this.userService.getUserPreferredTags(currentUser.sub),
+              posts: this.userService.getUserPosts(currentUser.sub),
+            }).pipe(
+              tap(({ profile, stats, tags, posts }) => {
+                // Cache the data for future use
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+                localStorage.setItem('userStats', JSON.stringify(stats));
+                localStorage.setItem('userTags', JSON.stringify(tags));
+                localStorage.setItem('userPosts', JSON.stringify(posts));
+              })
+            );
+          }
+
+          // Loading another user's profile
+          return this.userService.findUserByUsername(username).pipe(
+            switchMap((user) => {
+              if (!user) {
+                throw new Error('User not found');
+              }
+
+              this.isCurrentUser.set(user._id === currentUser.sub);
+              return forkJoin({
+                profile: this.userService.getUserProfile(user._id),
+                stats: this.userService.getUserStats(user._id),
+                tags: this.userService.getUserPreferredTags(user._id),
+                posts: this.userService.getUserPosts(user._id),
+              });
+            })
+          );
+        }),
+        catchError((error) => {
+          console.error('Error loading profile:', error);
+          this.error.set(error.message || 'Failed to load profile');
+          return of({ profile: null, stats: null, tags: [], posts: [] });
         }),
         takeUntil(this.destroy$)
       )
@@ -81,16 +147,17 @@ export class ProfileComponent {
         next: ({ profile, stats, tags, posts }) => {
           if (profile) {
             this.userProfile.set(profile);
-            localStorage.setItem('userProfile', JSON.stringify(profile));
           }
           this.userStats.set(stats);
           this.userTags.set(tags);
-          this.userPosts.set(posts.posts || []);
+          this.userPosts.set(Array.isArray(posts) ? posts : posts.posts || []);
           this.isLoading.set(false);
         },
         error: (error) => {
+          console.error('Error in profile subscription:', error);
           this.isLoading.set(false);
-          console.error('Error loading profile data:', error);
+          this.error.set('Failed to load profile data');
+          this.toastService.show('Failed to load profile', 'error');
         },
       });
   }
@@ -157,5 +224,10 @@ export class ProfileComponent {
         },
       });
     }
+  }
+
+  hasSocialLinks(socials?: any): boolean {
+    if (!socials) return false;
+    return Object.values(socials).some((value) => value);
   }
 }
