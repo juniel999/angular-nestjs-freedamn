@@ -12,6 +12,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   Param,
+  NotFoundException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -90,7 +91,6 @@ export class UsersController {
   }
 
   // Get user profile by ID
-  @UseGuards(JwtAuthGuard)
   @Get(':id/profile')
   getUserProfile(@Param('id') id: string) {
     return this.usersService.getUserProfile(id);
@@ -240,7 +240,6 @@ export class UsersController {
   // NEW ENDPOINTS FOR USER PROFILE PAGE
 
   // Get user posts
-  @UseGuards(JwtAuthGuard)
   @Get(':id/posts')
   getUserPosts(@Param('id') id: string) {
     return this.usersService.getUserPosts(id);
@@ -299,5 +298,18 @@ export class UsersController {
     @Body() updateLikedTagsDto: UpdateLikedTagsDto,
   ) {
     return this.usersService.updatePreferredTags(id, updateLikedTagsDto.tags);
+  }
+
+  // Find user by username
+  @Get('find/:username')
+  async findByUsername(@Param('username') username: string) {
+    console.log('username in controller', username);
+
+    const user = await this.usersService.findOne(username);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const { password, ...result } = user.toObject();
+    return result;
   }
 }

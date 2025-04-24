@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { BlogService, BlogPost } from '../../services/blog.service';
+import { BlogService } from '../../services/blog.service';
 import { ToastService } from '../../services/toast.service';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
+import { BlogPostType } from '../../types/blog-post.type';
 
 type Tab = 'for-you' | 'explore' | 'following';
 
@@ -159,7 +160,7 @@ export class BlogFeedComponent {
   /**
    * Like or unlike a blog post
    */
-  toggleLike(blog: BlogPost, event: Event) {
+  toggleLike(blog: BlogPostType, event: Event) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -193,7 +194,7 @@ export class BlogFeedComponent {
   /**
    * Check if the current user has liked a blog
    */
-  hasUserLiked(blog: BlogPost): boolean {
+  hasUserLiked(blog: BlogPostType): boolean {
     const userId = localStorage.getItem('userId');
     return blog.likes.includes(userId || '');
   }

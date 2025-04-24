@@ -7,6 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, SocialLinks } from './user.schema';
+import { Blog } from '../blogs/blog.schema';
 import * as bcrypt from 'bcrypt';
 import { TagsService } from '../tags/tags.service';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
@@ -17,6 +18,7 @@ import { UpdateSocialsDto } from './dto/update-socials.dto';
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Blog.name) private blogModel: Model<Blog>,
     private tagsService: TagsService,
     private cloudinaryService: CloudinaryService,
   ) {}
@@ -274,14 +276,17 @@ export class UsersService {
 
   // NEW METHODS FOR USER PROFILE PAGE
 
-  // Get a user's posts - This method would depend on your Blog/Post implementation
-  // We'll mock this for now
+  // Get a user's posts
   async getUserPosts(userId: string) {
-    // This would typically include a lookup to a posts collection
-    // For now, return mock data
+    const posts = await this.blogModel
+      .find({ author: userId, published: true })
+      .sort({ createdAt: -1 })
+      .populate('author', 'username firstName lastName avatar')
+      .exec();
+
     return {
-      posts: [],
-      count: 0,
+      posts,
+      count: posts.length,
     };
   }
 

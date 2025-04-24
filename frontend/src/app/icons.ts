@@ -43,12 +43,14 @@ import {
   faHeading,
   faGlobe,
   faArrowUpRightFromSquare,
+  faCamera,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCommentDots,
   faBell as faBellRegular,
   faHeart as faHeartRegular,
   faBookmark as faBookmarkRegular,
+  faComment as faCommentRegular,
 } from '@fortawesome/free-regular-svg-icons';
 import {
   faTwitter,
@@ -112,6 +114,8 @@ export function initializeIcons(library: FaIconLibrary) {
     faPen,
     faHeading,
     faGlobe,
-    faArrowUpRightFromSquare
+    faArrowUpRightFromSquare,
+    faCamera,
+    faCommentRegular
   );
 }

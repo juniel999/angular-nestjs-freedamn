@@ -37,8 +37,6 @@ export class HeaderComponent implements OnInit {
       this.userId = user?.sub || '';
     });
 
-    console.log(this.username().charAt(0).toUpperCase());
-
     if (this.userId) {
       this.userService.getUserProfile(this.userId).subscribe((userProfile) => {
         this.userAvatar.set(
