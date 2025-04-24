@@ -8,13 +8,14 @@ import { ToastService } from '../../services/toast.service';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { BlogPostType } from '../../types/blog-post.type';
+import { BlogCardComponent } from '../blog-card/blog-card.component';
 
 type Tab = 'for-you' | 'explore' | 'following';
 
 @Component({
   selector: 'app-blog-feed',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, FontAwesomeModule],
+  imports: [CommonModule, RouterModule, FormsModule, FontAwesomeModule, BlogCardComponent],
   templateUrl: './blog-feed.component.html',
 })
 export class BlogFeedComponent {
