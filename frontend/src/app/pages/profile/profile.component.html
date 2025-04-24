@@ -1,15 +1,43 @@
 <!-- Main Container -->
 <div class="min-h-screen mx-auto px-4 max-w-6xl">
-  @if (isLoading()) {
-  <div class="flex justify-center items-center min-h-[50vh]">
-    <span class="loading loading-spinner loading-lg text-primary"></span>
-  </div>
-  } @else if (userProfile()) {
   <div class="mx-auto px-4">
     <!-- Grid Container with Sticky Right Column -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 py-8">
       <!-- Left Grid - Main Content -->
       <div class="lg:col-span-2">
+        @if(!isCurrentUser() && isLoading()) {
+        <!-- Skeleton Loading -->
+        <div class="space-y-4">
+          <!-- Cover Photo Skeleton -->
+          <div
+            class="h-64 w-full rounded-t-box bg-base-300 animate-pulse"
+          ></div>
+
+          <!-- Profile Info Skeleton -->
+          <div class="bg-base-100 shadow-sm rounded-b-box p-6 relative">
+            <!-- Avatar Skeleton -->
+            <div class="absolute -top-12 left-6">
+              <div
+                class="w-24 h-24 rounded-full bg-base-300 animate-pulse"
+              ></div>
+            </div>
+
+            <!-- Name and Bio Skeleton -->
+            <div class="mt-14 space-y-4">
+              <div class="h-8 w-48 bg-base-300 rounded animate-pulse"></div>
+              <div class="h-4 w-32 bg-base-300 rounded animate-pulse"></div>
+              <div class="h-16 w-full bg-base-300 rounded animate-pulse"></div>
+
+              <!-- Stats Skeleton -->
+              <div class="flex gap-4 mt-4">
+                <div class="h-8 w-20 bg-base-300 rounded animate-pulse"></div>
+                <div class="h-8 w-20 bg-base-300 rounded animate-pulse"></div>
+                <div class="h-8 w-20 bg-base-300 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        } @else {
         <!-- Cover Photo Section -->
         <div
           class="relative h-64 w-full bg-base-200 rounded-t-box overflow-hidden"
@@ -101,11 +129,18 @@
             </div>
           </div>
         </div>
+        }
 
         <!-- Posts Section -->
         <div class="mt-6">
           <h2 class="text-xl font-semibold mb-4">Posts</h2>
-          @if (userPosts().length) {
+          @if (isLoading()) {
+          <div class="flex justify-center items-center min-h-[200px]">
+            <span
+              class="loading loading-spinner loading-lg text-primary"
+            ></span>
+          </div>
+          } @else if (userPosts().length) {
           <!-- Blog posts grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @for (blog of userPosts(); track blog._id) {
@@ -128,6 +163,27 @@
       <!-- Right Grid - Fixed Position -->
       <aside class="lg:block">
         <div class="space-y-6 lg:sticky lg:top-20">
+          @if(!isCurrentUser() && isLoading()) {
+          <!-- Social Links Skeleton -->
+          <div class="bg-base-100 shadow-sm rounded-box p-6">
+            <div class="h-8 w-40 bg-base-300 rounded animate-pulse mb-4"></div>
+            <div class="flex flex-wrap gap-2">
+              @for(item of [1,2,3,4]; track item) {
+              <div class="h-8 w-24 bg-base-300 rounded animate-pulse"></div>
+              }
+            </div>
+          </div>
+
+          <!-- Liked Topics Skeleton -->
+          <div class="bg-base-100 shadow-lg rounded-box p-6">
+            <div class="h-8 w-40 bg-base-300 rounded animate-pulse mb-4"></div>
+            <div class="flex flex-wrap gap-2">
+              @for(item of [1,2,3,4,5]; track item) {
+              <div class="h-6 w-16 bg-base-300 rounded animate-pulse"></div>
+              }
+            </div>
+          </div>
+          } @else {
           <!-- Social Links -->
           <div class="bg-base-100 shadow-sm rounded-box p-6">
             <h2 class="text-xl text-primary-content font-semibold mb-4">
@@ -207,17 +263,9 @@
             <p class="text-base-content/60">No topics added yet</p>
             }
           </div>
+          }
         </div>
       </aside>
     </div>
   </div>
-
-  } @else {
-  <div class="flex flex-col items-center justify-center min-h-[50vh]">
-    <div class="alert alert-error">
-      <fa-icon [icon]="['fas', 'exclamation-circle']"></fa-icon>
-      <span>Profile not found</span>
-    </div>
-  </div>
-  }
 </div>
