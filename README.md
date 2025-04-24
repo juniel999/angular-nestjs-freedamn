@@ -15,6 +15,12 @@ FreeDamn is a full-stack web application built with Angular (frontend) and NestJ
 - Real-time notifications
 - User profiles
 
+## Sample Screenshots
+![freedamnprofile](https://github.com/user-attachments/assets/777fa420-d4cb-40e6-86f9-a8aa6da541e1)
+![freedamnhome](https://github.com/user-attachments/assets/cabd5399-47c3-4ba0-b324-c38a4186ddb3)
+![freedamnsettings](https://github.com/user-attachments/assets/44b04c2f-4d0c-4129-a7c2-3dd737e60bc5)
+![freedamnonboarding](https://github.com/user-attachments/assets/52e5d93f-4522-4a8a-a883-eb158f463413)
+
 ## Tech Stack
 
 ### Frontend
