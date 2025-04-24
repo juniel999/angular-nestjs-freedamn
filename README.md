@@ -1,89 +1,85 @@
-# Freedamn
+# FreeDamn
+
+A modern social media platform focused on freedom of expression and community engagement.
 
 ## Overview
-Freedamn is a web application with a NestJS backend and MongoDB database. This document provides information about the project structure and features.
 
-## User Model
+FreeDamn is a full-stack web application built with Angular (frontend) and NestJS (backend) that allows users to share thoughts, media, and engage with others in a meaningful way.
 
-The User model in this application contains the following fields:
+## Features
 
-### Base Information
-- **username**: Unique identifier for the user (required)
-- **email**: User's email address (required, unique)
-- **password**: User's password (required, stored securely)
-- **firstName**: User's first name (required)
-- **lastName**: User's last name (required)
+- User authentication and authorization
+- Blog post creation and management
+- Comment/Like/Bookmark system
+- Media upload support
+- Real-time notifications
+- User profiles
 
-### Profile Information
-- **title**: User's professional title or role (optional)
-- **location**: User's geographic location (optional)
-- **avatar**: URL to user's profile picture (optional)
-- **coverphoto**: URL to user's cover/banner image (optional)
-- **birthdate**: User's date of birth (optional)
-- **pronouns**: User's preferred pronouns - options are:
-  - He/Him
-  - She/Her
-  - They/Them
+## Tech Stack
 
-### Account Settings
-- **isActive**: Boolean flag indicating if the account is active (default: true)
-- **roles**: Array of roles assigned to the user (default: ['user'])
+### Frontend
+- Angular19
+- TypeScript
+- Tailwind CSS
+- Font Awesome Icons
+- Daisy UI
 
-### Social Media Links
-The user can add links to their social media profiles:
-- Facebook
-- LinkedIn
-- GitHub
-- Twitter
-- Instagram
-- YouTube
-- TikTok
-- Personal website
-
-## API Endpoints
-
-### Authentication
-- **POST /api/auth/register**: Register a new user
-- **POST /api/auth/login**: Login with user credentials
-- **GET /api/auth/profile**: Get authenticated user profile
-- **POST /api/auth/test-user**: Create a predefined test user
-
-### User Management
-- **GET /api/users/me**: Get current user profile
+### Backend
+- NestJS
+- TypeScript
+- MongoDB (with Mongoose)
+- Cloudinary (for media storage)
 
 ## Getting Started
 
-### Backend
-1. Navigate to the backend directory:
-   ```
-   cd backend
-   ```
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+- MongoDB cluster (mongodb atlas)
 
-2. Install dependencies:
-   ```
-   npm install
-   ```
+### Installation
 
-3. Start the development server:
-   ```
-   npm run start:dev
-   ```
+1. Clone the repository:
+```bash
+git clone https://github.com/juniel999/angular-nestjs-freedamn
+```
 
-4. The API will be available at: http://localhost:3000/api
+2. Install backend dependencies:
+```bash
+cd backend
+npm install
+```
 
-### Testing with REST Client
-The project includes a REST client file at `backend/src/rest/all-routes.rest` that you can use to test API endpoints.
+3. Install frontend dependencies:
+```bash
+cd frontend
+npm install
+```
 
-#### Workflow
-1. Run the server: `npm run start:dev`
-2. Create a test user: Use POST /auth/test-user
-3. Login: Use POST /auth/login
-4. Copy the access_token from the response
-5. Update the @authToken variable at the top of the REST file
-6. You can now make authenticated requests
+4. Configure environment variables:
+- Copy `.env.example` to `.env` in the backend directory
+- Update the variables with your configuration
 
-## Project Structure
-The application is divided into frontend and backend:
+### Running the Application
 
-- **Backend**: NestJS application with MongoDB
-- **Frontend**: [Frontend framework information - to be added]
+1. Start the backend server:
+```bash
+cd backend
+npm run start:dev
+```
+
+2. Start the frontend development server:
+```bash
+cd frontend
+npm run start
+```
+
+The application will be available at `http://localhost:4200`
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
