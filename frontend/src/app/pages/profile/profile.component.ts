@@ -11,10 +11,11 @@ import { SocialLinkButtonComponent } from '../../components/social-link-button/s
 import { BlogService } from '../../services/blog.service';
 import { ToastService } from '../../services/toast.service';
 import { BlogPostType } from '../../types/blog-post.type';
+import { BlogCardComponent } from '../../components/blog-card/blog-card.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [FontAwesomeModule, RouterModule, SocialLinkButtonComponent],
+  imports: [FontAwesomeModule, RouterModule, SocialLinkButtonComponent, BlogCardComponent],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
@@ -190,40 +191,45 @@ export class ProfileComponent {
     event.stopPropagation();
 
     // Simple check if the user already liked this post
-    const userId = localStorage.getItem('userId');
-    const hasLiked = blog.likes.includes(userId || '');
+    this.authService.currentUser$.subscribe((user) => {
+      const hasLiked = blog.likes.includes(user?.sub || '');
 
-    if (hasLiked) {
-      this.blogService.unlikeBlog(blog._id).subscribe({
-        next: (updatedBlog) => {
-          // Update the blog in the local state
-          const posts = this.userPosts();
-          const index = posts.findIndex((p) => p._id === blog._id);
-          if (index !== -1) {
-            posts[index] = updatedBlog;
-            this.userPosts.set([...posts]);
-          }
-        },
-        error: () => {
-          this.toastService.show('Failed to unlike post', 'error');
-        },
-      });
-    } else {
-      this.blogService.likeBlog(blog._id).subscribe({
-        next: (updatedBlog) => {
-          // Update the blog in the local state
-          const posts = this.userPosts();
-          const index = posts.findIndex((p) => p._id === blog._id);
-          if (index !== -1) {
-            posts[index] = updatedBlog;
-            this.userPosts.set([...posts]);
-          }
-        },
-        error: () => {
-          this.toastService.show('Failed to like post', 'error');
-        },
-      });
-    }
+      if (hasLiked) {
+        console.log('you already liked this post');
+        this.blogService.unlikeBlog(blog._id).subscribe({
+          next: (updatedBlog) => {
+            // Update the blog in the local state
+            const posts = this.userPosts();
+            const index = posts.findIndex((p) => p._id === blog._id);
+            if (index !== -1) {
+              posts[index] = updatedBlog;
+              this.userPosts.set([...posts]);
+            }
+          },
+          error: () => {
+            this.toastService.show('Failed to unlike post', 'error');
+          },
+        });
+      } else {
+        this.blogService.likeBlog(blog._id).subscribe({
+          next: (updatedBlog) => {
+            // Update the blog in the local state
+            const posts = this.userPosts();
+            const index = posts.findIndex((p) => p._id === blog._id);
+            if (index !== -1) {
+              posts[index] = updatedBlog;
+              this.userPosts.set([...posts]);
+            }
+          },
+          error: () => {
+            this.toastService.show('Failed to like post', 'error');
+          },
+        });
+      }
+    });
+
+
+    
   }
 
   hasSocialLinks(socials?: any): boolean {
