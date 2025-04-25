@@ -47,8 +47,9 @@
         (click)="toggleFilter()"
       >
         <fa-icon icon="filter" class="text-xs"></fa-icon>
-        Filters
-        <div class="badge badge-xs badge-accent" *ngIf="currentFilter()">1</div>
+        Filters @if (currentFilter()) {
+        <div class="badge badge-xs badge-accent">1</div>
+        }
       </button>
 
       <!-- Filter dropdown -->
@@ -161,11 +162,11 @@
     <!-- Blog posts grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       @for (blog of currentBlogs()!.posts; track blog._id) {
-        <app-blog-card
-          [blog]="blog"
-          [hasUserLiked]="hasUserLiked.bind(this)"
-          [onLikeClick]="toggleLike.bind(this)"
-        ></app-blog-card>
+      <app-blog-card
+        [blog]="blog"
+        [hasUserLiked]="hasUserLiked.bind(this)"
+        [onLikeClick]="toggleLike.bind(this)"
+      ></app-blog-card>
       }
     </div>
     }

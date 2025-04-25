@@ -9,21 +9,27 @@ import { CommentsModule } from './comments/comments.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MulterModule } from '@nestjs/platform-express';
 import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot('mongodb+srv://junieldev:invokersucks2@cluster0.e5bz1.mongodb.net/freedamnv2?retryWrites=true&w=majority&appName=Cluster0'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
+    }),
     MulterModule.register({
       dest: './uploads',
     }),
-    UsersModule, 
+    UsersModule,
     AuthModule,
     BlogsModule,
     TagsModule,
     CommentsModule,
-    CloudinaryModule
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
