@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface LoginResponse {
   access_token: string;
@@ -31,7 +32,7 @@ export interface UserProfile {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.apiUrl;
   private readonly tokenKey = 'freedamn_token';
   private readonly currentUserSubject = new BehaviorSubject<UserProfile | null>(
     null
