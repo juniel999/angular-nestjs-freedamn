@@ -50,7 +50,10 @@ export class BlogsController {
     @Query('page') page?: number,
     @Query('tags') tags?: string
   ) {
+
     const userTags = tags ? tags.split(',') : req.user.preferredTags;
+
+    console.log('this is the usertags',userTags);
     return this.blogsService.findUserFeedByTags(
       userTags,
       page ? parseInt(page.toString()) : 1

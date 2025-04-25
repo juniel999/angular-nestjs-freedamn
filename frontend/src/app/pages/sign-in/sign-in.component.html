@@ -1,160 +1,110 @@
-<div class="min-h-screen flex">
-  <!-- Left side: Form -->
-  <div
-    class="w-full md:w-1/2 bg-base-100 flex items-center justify-center p-6 md:p-10"
-  >
-    <div class="w-full max-w-md">
-      <!-- Branding -->
-      <button class="mb-6" routerLink="/">
-        <h1 class="text-2xl font-bold cursor-pointer">
-          <span class="text-primary">free</span
-          ><span class="text-accent">damn.</span>
-        </h1>
-      </button>
+<div class="min-h-screen flex items-center justify-center bg-base-200/50 px-4">
+  <div class="w-full max-w-md bg-base-100 rounded-2xl shadow-lg p-8">
+    <!-- Branding -->
+    <button class="mb-8 transition-transform hover:scale-105" routerLink="/">
+      <h1 class="text-3xl font-bold cursor-pointer">
+        <span class="text-primary">free</span><span class="text-accent">damn.</span>
+      </h1>
+    </button>
 
-      <!-- Form Title & Subtitle -->
-      <h2 class="text-3xl font-bold mb-2">Welcome Back</h2>
-      <p class="text-base-content/70 mb-8">
-        Sign in to your account to continue.
-      </p>
+    <!-- Form Title & Subtitle -->
+    <h2 class="text-2xl font-bold mb-2">Welcome Back</h2>
+    <p class="text-base-content/70 mb-8">
+      Sign in to your account to continue.
+    </p>
 
-      <!-- Sign In Form -->
-      <form [formGroup]="signInForm" (submit)="onSubmit()" class="space-y-4">
-        <!-- Username -->
-        <div class="form-control w-full">
-          <label for="username" class="label">
-            <span class="label-text font-medium">Username</span>
-          </label>
+    <!-- Sign In Form -->
+    <form [formGroup]="signInForm" (submit)="onSubmit()" class="space-y-6">
+      <!-- Username -->
+      <div class="form-control w-full">
+        <label for="username" class="label">
+          <span class="label-text font-medium">Username</span>
+        </label>
+        <input
+          type="text"
+          id="username"
+          placeholder="Enter your username"
+          class="input input-bordered w-full transition-shadow focus:shadow-md"
+          formControlName="username"
+        />
+        @if (formControls['username'].invalid && formControls['username'].touched) {
+        <span class="text-xs text-error mt-2 block">Username is required</span>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-control w-full">
+        <label for="password" class="label">
+          <span class="label-text font-medium">Password</span>
+        </label>
+        <div class="relative">
           <input
-            type="text"
-            id="username"
-            placeholder="Enter your username"
-            class="input input-bordered w-full"
-            formControlName="username"
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Enter your password"
+            class="input input-bordered w-full pr-10 transition-shadow focus:shadow-md"
+            formControlName="password"
           />
-          @if (formControls['username'].invalid &&
-          formControls['username'].touched) {
-          <span class="text-xs text-error mt-1 block"
-            >Username is required</span
-          >
-          }
-        </div>
-
-        <!-- Password -->
-        <div class="form-control w-full">
-          <label for="password" class="label">
-            <span class="label-text font-medium">Password</span>
-          </label>
-          <div class="relative">
-            <input
-              id="password"
-              [type]="showPassword ? 'text' : 'password'"
-              placeholder="Enter your password"
-              class="input input-bordered w-full pr-10"
-              formControlName="password"
-            />
-            <button
-              type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content"
-              (click)="togglePasswordVisibility()"
-            >
-              @if (showPassword) {
-              <fa-icon [icon]="['fas', 'eye']"></fa-icon>
-              } @else {
-              <fa-icon [icon]="['fas', 'eye-slash']"></fa-icon>
-              }
-            </button>
-          </div>
-          @if (formControls['password'].invalid &&
-          formControls['password'].touched) {
-          <span class="text-xs text-error mt-1 block">
-            Password is required
-          </span>
-          }
-        </div>
-
-        <!-- Forgot Password Link -->
-        <div class="flex justify-end">
           <button
             type="button"
-            class="text-sm text-primary hover:underline"
-            [routerLink]="['/forgot-password']"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content transition-colors"
+            (click)="togglePasswordVisibility()"
           >
-            Forgot password?
+            @if (showPassword) {
+            <fa-icon [icon]="['fas', 'eye']"></fa-icon>
+            } @else {
+            <fa-icon [icon]="['fas', 'eye-slash']"></fa-icon>
+            }
           </button>
         </div>
-
-        <!-- Login Button -->
-        <div class="form-control mt-8">
-          <button type="submit" class="btn btn-primary" [disabled]="isLoading">
-            @if (isLoading) {
-            <span class="inline-block animate-spin mr-2">
-              <fa-icon [icon]="['fas', 'spinner']"></fa-icon>
-            </span>
-            Signing in... } @else { Sign In }
-          </button>
-        </div>
-      </form>
-
-      <!-- Sign Up Link -->
-      <div class="text-center mt-6">
-        <p>
-          Don't have an account?
-          <button
-            [routerLink]="['/signup']"
-            class="text-primary cursor-pointer font-semibold hover:underline"
-          >
-            Create one here.
-          </button>
-        </p>
+        @if (formControls['password'].invalid && formControls['password'].touched) {
+        <span class="text-xs text-error mt-2 block">
+          Password is required
+        </span>
+        }
       </div>
-    </div>
-  </div>
 
-  <!-- Right side: Text content -->
-  <div
-    class="hidden md:flex md:w-1/2 bg-black text-white flex-col justify-center items-center p-10"
-  >
-    <div class="max-w-md text-center space-y-8">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">
-        Welcome back to
-        <span class="text-accent"
-          ><span class="text-primary">free</span
-          ><span class="text-white">damn.</span></span
+      <!-- Forgot Password Link -->
+      <div class="flex justify-end">
+        <button
+          type="button"
+          class="text-sm text-primary hover:text-primary/80 transition-colors"
+          [routerLink]="['/forgot-password']"
         >
-      </h1>
-
-      <p class="text-xl opacity-90 mb-6">We're excited to see you again.</p>
-
-      <div class="flex flex-col gap-6 items-center">
-        <div class="flex items-center gap-3">
-          <fa-icon
-            [icon]="['fas', 'check']"
-            class="text-primary text-xl"
-          ></fa-icon>
-          <span class="text-lg">Access your personalized feed</span>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <fa-icon
-            [icon]="['fas', 'check']"
-            class="text-primary text-xl"
-          ></fa-icon>
-          <span class="text-lg">Continue your conversations</span>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <fa-icon
-            [icon]="['fas', 'check']"
-            class="text-primary text-xl"
-          ></fa-icon>
-          <span class="text-lg">Explore new content and ideas</span>
-        </div>
+          Forgot password?
+        </button>
       </div>
 
-      <div class="mt-12 text-base opacity-80">
-        <p>"Express without limits. Connect without barriers."</p>
+      <!-- Login Button -->
+      <div class="form-control mt-8">
+        <button 
+          type="submit" 
+          class="btn btn-primary w-full transition-all hover:shadow-md" 
+          [disabled]="isLoading"
+        >
+          @if (isLoading) {
+          <span class="inline-block animate-spin mr-2">
+            <fa-icon [icon]="['fas', 'spinner']"></fa-icon>
+          </span>
+          Signing in...
+          } @else {
+          Sign In
+          }
+        </button>
       </div>
+    </form>
+
+    <!-- Sign Up Link -->
+    <div class="text-center mt-8">
+      <p class="text-base-content/70">
+        Don't have an account?
+        <button
+          [routerLink]="['/signup']"
+          class="text-primary hover:text-primary/80 font-semibold transition-colors ml-1"
+        >
+          Create one here
+        </button>
+      </p>
     </div>
   </div>
 </div>
