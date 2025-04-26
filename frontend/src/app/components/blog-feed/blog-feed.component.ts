@@ -47,8 +47,6 @@ export class BlogFeedComponent {
    * Load user profile to get first name
    */
   private loadUserProfile() {
-    // First check if we have the firstName in localStorage
-
     const storedFirstName = JSON.parse(
       localStorage.getItem('userProfile') || '{}'
     ).firstName;
@@ -196,62 +194,5 @@ export class BlogFeedComponent {
   hasUserLiked(blog: BlogPostType): boolean {
     const userId = localStorage.getItem('userId');
     return blog.likes.includes(userId || '');
-  }
-
-  /**
-   * Format date to display time ago
-   */
-  formatTimeAgo(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds}s ago`;
-    }
-
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    }
-
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    }
-
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 30) {
-      return `${diffInDays}d ago`;
-    }
-
-    const diffInMonths = Math.floor(diffInDays / 30);
-    if (diffInMonths < 12) {
-      return `${diffInMonths}mo ago`;
-    }
-
-    const diffInYears = Math.floor(diffInMonths / 12);
-    return `${diffInYears}y ago`;
-  }
-
-  /**
-   * Get excerpt from blog content
-   */
-  getExcerpt(content: string, maxLength: number = 150): string {
-    // Strip HTML tags
-    const plainText = content.replace(/<[^>]*>?/gm, '');
-
-    if (plainText.length <= maxLength) {
-      return plainText;
-    }
-
-    // Find the last space before maxLength
-    const lastSpace = plainText.substring(0, maxLength).lastIndexOf(' ');
-    const excerpt = plainText.substring(
-      0,
-      lastSpace > 0 ? lastSpace : maxLength
-    );
-
-    return `${excerpt}...`;
   }
 }
