@@ -15,7 +15,12 @@ import { BlogCardComponent } from '../../components/blog-card/blog-card.componen
 
 @Component({
   selector: 'app-profile',
-  imports: [FontAwesomeModule, RouterModule, SocialLinkButtonComponent, BlogCardComponent],
+  imports: [
+    FontAwesomeModule,
+    RouterModule,
+    SocialLinkButtonComponent,
+    BlogCardComponent,
+  ],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {
@@ -33,12 +38,20 @@ export class ProfileComponent {
 
   isLoading = signal(true);
   isCurrentUser = signal(false);
+  isLoggedIn = signal(false);
   error = signal<string | null>(null);
 
   defaultAvatar = 'https://ui-avatars.com/api/?background=E5B400&name=';
   defaultCoverPhoto = 'assets/images/default-cover.jpg';
 
   ngOnInit() {
+    // Check authentication status
+    this.authService.currentUser$
+      .pipe(take(1), takeUntil(this.destroy$))
+      .subscribe((user) => {
+        this.isLoggedIn.set(!!user);
+      });
+
     this.loadProfileData();
   }
 
@@ -52,184 +65,153 @@ export class ProfileComponent {
     this.error.set(null);
     this.isLoading.set(true);
 
-    // Check if viewing own profile (no username parameter)
-    if (!username) {
-      this.isCurrentUser.set(true);
-      const cachedProfile = localStorage.getItem('userProfile');
-      const cachedStats = localStorage.getItem('userStats');
-      const cachedTags = localStorage.getItem('userTags');
-
-      // If we have all cached data, use it
-      if (cachedProfile && cachedStats && cachedTags) {
-        this.userProfile.set(JSON.parse(cachedProfile));
-        this.userStats.set(JSON.parse(cachedStats));
-        this.userTags.set(JSON.parse(cachedTags));
-
-        // Only fetch posts as they are dynamic
-        this.authService.currentUser$
-          .pipe(
-            take(1),
-            switchMap((currentUser) => {
-              if (!currentUser) throw new Error('No authenticated user found');
-              return this.userService.getUserPosts(currentUser.sub);
-            }),
-            takeUntil(this.destroy$)
-          )
-          .subscribe({
-            next: (posts) => {
-              this.userPosts.set(
-                Array.isArray(posts) ? posts : posts.posts || []
-              );
-              this.isLoading.set(false);
-            },
-            error: (error) => {
-              console.error('Error loading posts:', error);
-              this.isLoading.set(false);
-              this.toastService.show('Failed to load posts', 'error');
-            },
-          });
-        return;
-      }
+    // If not logged in and no username parameter, show error
+    if (!username && !this.isLoggedIn()) {
+      this.error.set('Please sign in to view your profile');
+      this.isLoading.set(false);
+      return;
     }
 
-    // If there's a username parameter or no cached data, fetch everything
-    this.authService.currentUser$
-      .pipe(
-        take(1),
-        switchMap((currentUser) => {
-          if (!currentUser) {
-            throw new Error('No authenticated user found');
-          }
-
-          if (!username) {
-            // Loading current user's profile
-            this.isCurrentUser.set(true);
+    // If viewing own profile
+    if (!username) {
+      this.isCurrentUser.set(true);
+      this.authService.currentUser$
+        .pipe(
+          take(1),
+          switchMap((currentUser) => {
+            if (!currentUser) throw new Error('No authenticated user found');
             return forkJoin({
               profile: this.userService.getUserProfile(currentUser.sub),
               stats: this.userService.getUserStats(currentUser.sub),
               tags: this.userService.getUserPreferredTags(currentUser.sub),
               posts: this.userService.getUserPosts(currentUser.sub),
-            }).pipe(
-              tap(({ profile, stats, tags, posts }) => {
-                // Cache the data for future use
-                localStorage.setItem('userProfile', JSON.stringify(profile));
-                localStorage.setItem('userStats', JSON.stringify(stats));
-                localStorage.setItem('userTags', JSON.stringify(tags));
-                localStorage.setItem('userPosts', JSON.stringify(posts));
-              })
+            });
+          }),
+          takeUntil(this.destroy$)
+        )
+        .subscribe({
+          next: ({ profile, stats, tags, posts }) => {
+            this.userProfile.set(profile);
+            this.userStats.set(stats);
+            this.userTags.set(tags);
+            this.userPosts.set(
+              Array.isArray(posts) ? posts : posts.posts || []
             );
+            this.isLoading.set(false);
+          },
+          error: (error) => {
+            console.error('Error loading profile:', error);
+            this.error.set(error.message || 'Failed to load profile');
+            this.isLoading.set(false);
+          },
+        });
+      return;
+    }
+
+    // Loading another user's profile
+    this.userService
+      .findUserByUsername(username)
+      .pipe(
+        switchMap((user) => {
+          if (!user) throw new Error('User not found');
+
+          // Check if viewing own profile
+          if (this.isLoggedIn()) {
+            this.authService.currentUser$
+              .pipe(take(1))
+              .subscribe((currentUser) => {
+                this.isCurrentUser.set(user._id === currentUser?.sub);
+              });
           }
 
-          // Loading another user's profile
-          return this.userService.findUserByUsername(username).pipe(
-            switchMap((user) => {
-              if (!user) {
-                throw new Error('User not found');
-              }
-
-              this.isCurrentUser.set(user._id === currentUser.sub);
-              return forkJoin({
-                profile: this.userService.getUserProfile(user._id),
-                stats: this.userService.getUserStats(user._id),
-                tags: this.userService.getUserPreferredTags(user._id),
-                posts: this.userService.getUserPosts(user._id),
-              });
-            })
-          );
-        }),
-        catchError((error) => {
-          console.error('Error loading profile:', error);
-          this.error.set(error.message || 'Failed to load profile');
-          return of({ profile: null, stats: null, tags: [], posts: [] });
+          return forkJoin({
+            profile: this.userService.getUserProfile(user._id),
+            stats: this.userService.getUserStats(user._id),
+            tags: this.userService.getUserPreferredTags(user._id),
+            posts: this.userService.getUserPosts(user._id),
+          });
         }),
         takeUntil(this.destroy$)
       )
       .subscribe({
         next: ({ profile, stats, tags, posts }) => {
-          if (profile) {
-            this.userProfile.set(profile);
-          }
+          this.userProfile.set(profile);
           this.userStats.set(stats);
           this.userTags.set(tags);
           this.userPosts.set(Array.isArray(posts) ? posts : posts.posts || []);
           this.isLoading.set(false);
         },
         error: (error) => {
-          console.error('Error in profile subscription:', error);
+          console.error('Error loading profile:', error);
+          this.error.set(error.message || 'Failed to load profile');
           this.isLoading.set(false);
-          this.error.set('Failed to load profile data');
-          this.toastService.show('Failed to load profile', 'error');
         },
       });
   }
 
   getExcerpt(content: string, maxLength: number = 150): string {
-    // Strip HTML tags
     const plainText = content.replace(/<[^>]*>?/gm, '');
-
-    if (plainText.length <= maxLength) {
-      return plainText;
-    }
-
-    // Find the last space before maxLength
+    if (plainText.length <= maxLength) return plainText;
     const lastSpace = plainText.substring(0, maxLength).lastIndexOf(' ');
-    const excerpt = plainText.substring(
+    return `${plainText.substring(
       0,
       lastSpace > 0 ? lastSpace : maxLength
-    );
-
-    return `${excerpt}...`;
+    )}...`;
   }
 
-  hasUserLiked(blog: any): boolean {
-    const userId = localStorage.getItem('userId');
-    return blog.likes.includes(userId || '');
+  hasUserLiked(blog: BlogPostType): boolean {
+    if (!this.isLoggedIn()) return false;
+    const user = localStorage.getItem('user');
+    if (!user) return false;
+    const userId = JSON.parse(user).sub;
+    return blog.likes.includes(userId);
   }
 
-  toggleLike(blog: any, event: Event) {
+  toggleLike(blog: BlogPostType, event: Event) {
     event.preventDefault();
     event.stopPropagation();
 
+    if (!this.isLoggedIn()) {
+      this.toastService.show('Please sign in to like posts', 'error');
+      return;
+    }
+
     // Simple check if the user already liked this post
-    this.authService.currentUser$.subscribe((user) => {
-      const hasLiked = blog.likes.includes(user?.sub || '');
+    const user = localStorage.getItem('user');
+    if (!user) return;
 
-      if (hasLiked) {
-        console.log('you already liked this post');
-        this.blogService.unlikeBlog(blog._id).subscribe({
-          next: (updatedBlog) => {
-            // Update the blog in the local state
-            const posts = this.userPosts();
-            const index = posts.findIndex((p) => p._id === blog._id);
-            if (index !== -1) {
-              posts[index] = updatedBlog;
-              this.userPosts.set([...posts]);
-            }
-          },
-          error: () => {
-            this.toastService.show('Failed to unlike post', 'error');
-          },
-        });
-      } else {
-        this.blogService.likeBlog(blog._id).subscribe({
-          next: (updatedBlog) => {
-            // Update the blog in the local state
-            const posts = this.userPosts();
-            const index = posts.findIndex((p) => p._id === blog._id);
-            if (index !== -1) {
-              posts[index] = updatedBlog;
-              this.userPosts.set([...posts]);
-            }
-          },
-          error: () => {
-            this.toastService.show('Failed to like post', 'error');
-          },
-        });
-      }
-    });
+    const userId = JSON.parse(user).sub;
+    const hasLiked = blog.likes.includes(userId);
 
-
-    
+    if (hasLiked) {
+      this.blogService.unlikeBlog(blog._id).subscribe({
+        next: (updatedBlog) => {
+          const posts = this.userPosts();
+          const index = posts.findIndex((p) => p._id === blog._id);
+          if (index !== -1) {
+            posts[index] = updatedBlog;
+            this.userPosts.set([...posts]);
+          }
+        },
+        error: () => {
+          this.toastService.show('Failed to unlike post', 'error');
+        },
+      });
+    } else {
+      this.blogService.likeBlog(blog._id).subscribe({
+        next: (updatedBlog) => {
+          const posts = this.userPosts();
+          const index = posts.findIndex((p) => p._id === blog._id);
+          if (index !== -1) {
+            posts[index] = updatedBlog;
+            this.userPosts.set([...posts]);
+          }
+        },
+        error: () => {
+          this.toastService.show('Failed to like post', 'error');
+        },
+      });
+    }
   }
 
   hasSocialLinks(socials?: any): boolean {

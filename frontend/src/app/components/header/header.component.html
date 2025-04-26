@@ -1,3 +1,4 @@
+<!-- Desktop Header -->
 <header
   class="fixed w-full bg-gradient-to-r from-base-100 to-base-200 shadow-sm top-0 z-[999]"
 >
@@ -12,6 +13,7 @@
         </a>
 
         <!-- Search Input - Hidden on very small screens -->
+        @if (isLoggedIn) {
         <div class="relative mx-2 hidden sm:block w-full md:w-64">
           <input
             type="text"
@@ -24,18 +26,12 @@
             <fa-icon [icon]="['fas', 'search']" class="text-gray-400"></fa-icon>
           </div>
         </div>
-      </div>
-
-      <!-- Mobile Menu Button - Only visible on small screens -->
-      <div class="sm:hidden">
-        <label for="mobile-menu" class="btn btn-square btn-ghost">
-          <fa-icon [icon]="['fas', 'bars']" class="h-6 w-6"></fa-icon>
-        </label>
+        }
       </div>
 
       <!-- Not Logged In Section -->
       @if (!isLoggedIn) {
-      <div class="hidden sm:flex items-center space-x-3">
+      <div class="flex items-center space-x-3">
         <button
           class="btn btn-ghost btn-sm hover:bg-base-200"
           [routerLink]="['/signin']"
@@ -48,7 +44,7 @@
       </div>
       }
 
-      <!-- Logged In Section -->
+      <!-- Logged In Section - Desktop Only -->
       @if (isLoggedIn) {
       <div class="hidden sm:flex items-center space-x-3">
         <button routerLink="/compose" class="btn btn-primary btn-sm">
@@ -129,94 +125,133 @@
       }
     </div>
   </div>
-
-  <!-- Mobile Menu Drawer -->
-  <div class="drawer sm:hidden">
-    <input id="mobile-menu" type="checkbox" class="drawer-toggle" />
-    <div class="drawer-side z-10">
-      <label for="mobile-menu" class="drawer-overlay"></label>
-      <ul class="menu p-4 w-80 h-full bg-base-100 text-base-content">
-        <!-- Mobile User Info - Only shown when logged in -->
-        @if (isLoggedIn) {
-        <li class="mb-4">
-          <div class="flex items-center p-2 border-b border-base-200">
-            <div class="avatar mr-3">
-              <div class="w-10 h-10 rounded-full">
-                <img
-                  [src]="userAvatar()"
-                  [alt]="username() + ' avatar'"
-                  onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'"
-                />
-              </div>
-            </div>
-            <div routerLink="/profile">
-              <p class="font-medium">{{ username() }}</p>
-              <p class="text-xs text-gray-500">View profile</p>
-            </div>
-          </div>
-        </li>
-        }
-
-        <!-- Search Input for Mobile -->
-        <li class="mb-4">
-          <div class="form-control">
-            <div class="input-group flex gap-1">
-              <input
-                type="text"
-                placeholder="Search"
-                class="input input-bordered w-full rounded-l-full"
-              />
-              <button class="btn btn-square rounded-r-full">
-                <fa-icon [icon]="['fas', 'search']"></fa-icon>
-              </button>
-            </div>
-          </div>
-        </li>
-
-        <!-- Mobile Menu Items -->
-        @if (!isLoggedIn) {
-        <li>
-          <a class="btn btn-ghost justify-start" [routerLink]="['/signin']"
-            >Sign In</a
-          >
-        </li>
-        <li>
-          <a
-            class="btn btn-primary justify-start mt-2"
-            [routerLink]="['/signup']"
-            >Sign Up</a
-          >
-        </li>
-        } @if (isLoggedIn) {
-        <li>
-          <a routerLink="/compose" class="btn btn-primary justify-start">
-            <fa-icon [icon]="['fas', 'plus']" class="mr-2"></fa-icon>Compose
-          </a>
-        </li>
-        <li class="mt-2">
-          <a>
-            <fa-icon [icon]="['far', 'bell']" class="mr-2"></fa-icon
-            >Notifications
-          </a>
-        </li>
-        <li>
-          <a routerLink="/profile">
-            <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile
-          </a>
-        </li>
-        <li>
-          <a routerLink="/settings">
-            <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings
-          </a>
-        </li>
-        <li>
-          <a (click)="logout()">
-            <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon
-            >Logout
-          </a>
-        </li>
-        }
-      </ul>
-    </div>
-  </div>
 </header>
+
+<!-- Mobile Bottom Navigation - Only for logged-in users -->
+@if (isLoggedIn) {
+<nav
+  class="sm:hidden fixed bottom-0 left-0 right-0 bg-base-100 shadow-lg border-t border-base-200 z-[999]"
+>
+  <div class="flex justify-around items-center py-2">
+    <a routerLink="/profile" class="flex flex-col items-center p-2">
+      <fa-icon [icon]="['fas', 'user']" size="lg"></fa-icon>
+      <span class="text-xs mt-1">Profile</span>
+    </a>
+
+    <a class="flex flex-col items-center p-2">
+      <div class="indicator">
+        <fa-icon [icon]="['far', 'bell']" size="lg"></fa-icon>
+        <span class="badge badge-xs badge-primary indicator-item">3</span>
+      </div>
+      <span class="text-xs mt-1">Alerts</span>
+    </a>
+
+    <a routerLink="/compose" class="flex flex-col items-center p-2">
+      <fa-icon
+        [icon]="['fas', 'plus']"
+        size="lg"
+        class="text-primary-content"
+      ></fa-icon>
+
+      <span class="text-xs mt-1">Create</span>
+    </a>
+
+    <a routerLink="/settings" class="flex flex-col items-center p-2">
+      <fa-icon [icon]="['fas', 'cog']" size="lg"></fa-icon>
+      <span class="text-xs mt-1">Settings</span>
+    </a>
+
+    <button (click)="logout()" class="flex flex-col items-center p-2">
+      <fa-icon [icon]="['fas', 'sign-out-alt']" size="lg"></fa-icon>
+      <span class="text-xs mt-1">Logout</span>
+    </button>
+  </div>
+</nav>
+}
+
+<!-- Mobile Menu Drawer -->
+<div class="drawer sm:hidden">
+  <input id="mobile-menu" type="checkbox" class="drawer-toggle" />
+  <div class="drawer-side z-10">
+    <label for="mobile-menu" class="drawer-overlay"></label>
+    <ul class="menu p-4 w-80 h-full bg-base-100 text-base-content">
+      <!-- Mobile User Info - Only shown when logged in -->
+      @if (isLoggedIn) {
+      <li class="mb-4">
+        <div class="flex items-center p-2 border-b border-base-200">
+          <div class="avatar mr-3">
+            <div class="w-10 h-10 rounded-full">
+              <img
+                [src]="userAvatar()"
+                [alt]="username() + ' avatar'"
+                onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'"
+              />
+            </div>
+          </div>
+          <div routerLink="/profile">
+            <p class="font-medium">{{ username() }}</p>
+            <p class="text-xs text-gray-500">View profile</p>
+          </div>
+        </div>
+      </li>
+      }
+
+      <!-- Search Input for Mobile -->
+      <li class="mb-4">
+        <div class="form-control">
+          <div class="input-group flex gap-1">
+            <input
+              type="text"
+              placeholder="Search"
+              class="input input-bordered w-full rounded-l-full"
+            />
+            <button class="btn btn-square rounded-r-full">
+              <fa-icon [icon]="['fas', 'search']"></fa-icon>
+            </button>
+          </div>
+        </div>
+      </li>
+
+      <!-- Mobile Menu Items -->
+      @if (!isLoggedIn) {
+      <li>
+        <a class="btn btn-ghost justify-start" [routerLink]="['/signin']"
+          >Sign In</a
+        >
+      </li>
+      <li>
+        <a class="btn btn-primary justify-start mt-2" [routerLink]="['/signup']"
+          >Sign Up</a
+        >
+      </li>
+      } @if (isLoggedIn) {
+      <li>
+        <a routerLink="/compose" class="btn btn-primary justify-start">
+          <fa-icon [icon]="['fas', 'plus']" class="mr-2"></fa-icon>Compose
+        </a>
+      </li>
+      <li class="mt-2">
+        <a>
+          <fa-icon [icon]="['far', 'bell']" class="mr-2"></fa-icon>Notifications
+        </a>
+      </li>
+      <li>
+        <a routerLink="/profile">
+          <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile
+        </a>
+      </li>
+      <li>
+        <a routerLink="/settings">
+          <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings
+        </a>
+      </li>
+      <li>
+        <a (click)="logout()">
+          <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon
+          >Logout
+        </a>
+      </li>
+      }
+    </ul>
+  </div>
+</div>

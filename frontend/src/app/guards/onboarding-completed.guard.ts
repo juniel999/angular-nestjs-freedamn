@@ -8,20 +8,19 @@ export const onboardingCompletedGuard: CanActivateFn = (route, state) => {
   const onboardingService = inject(OnboardingService);
   const authService = inject(AuthService);
   const router = inject(Router);
-  
+
   // Get the current user from the auth service observable
   return authService.currentUser$.pipe(
     take(1),
-    switchMap(currentUser => {
+    switchMap((currentUser) => {
+      // If not logged in, allow access to public routes
       if (!currentUser) {
-        // If not logged in, redirect to login
-        router.navigate(['/signin']);
-        return of(false);
+        return of(true);
       }
-      
+
       // Check if the user has completed onboarding
       return onboardingService.getOnboardingStatus(currentUser.sub).pipe(
-        map(status => {
+        map((status) => {
           if (!status.completed) {
             // If onboarding is not completed, redirect to onboarding
             router.navigate(['/onboarding']);
@@ -38,4 +37,4 @@ export const onboardingCompletedGuard: CanActivateFn = (route, state) => {
       );
     })
   );
-}; 
+};

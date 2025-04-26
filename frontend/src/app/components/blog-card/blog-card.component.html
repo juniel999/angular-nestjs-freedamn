@@ -85,12 +85,13 @@
         <div class="flex items-center gap-1">
           <button
             class="btn btn-xs btn-ghost gap-1 px-2"
-            (click)="onLikeClick(blog, $event); $event.stopPropagation()"
+            (click)="onLikeButtonClick(blog, $event)"
+            [title]="isLoggedIn ? 'Like this post' : 'Sign in to like posts'"
           >
             <fa-icon
               [icon]="['far', 'heart']"
               class="text-xl text-primary-content"
-              [class.text-error]="hasUserLiked(blog)"
+              [class.text-error]="isLoggedIn && hasUserLiked(blog)"
             ></fa-icon>
             <span class="text-xs">{{ blog.likes.length || 0 }}</span>
           </button>
@@ -110,13 +111,17 @@
           </a>
         </div>
 
+        <!-- Save/bookmark button -->
         <button
           class="btn btn-xs btn-ghost px-2"
           (click)="$event.stopPropagation()"
+          [title]="isLoggedIn ? 'Save for later' : 'Sign in to save posts'"
+          [disabled]="!isLoggedIn"
         >
           <fa-icon
             [icon]="['far', 'bookmark']"
-            class="text-xl text-primary-content"
+            class="text-xl"
+            [class.text-primary-content]="!isLoggedIn || !hasUserLiked(blog)"
           ></fa-icon>
         </button>
       </div>
