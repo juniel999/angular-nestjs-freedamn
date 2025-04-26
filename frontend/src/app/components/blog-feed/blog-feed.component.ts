@@ -1,4 +1,11 @@
-import { Component, ElementRef, ViewChild, inject } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  inject,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -16,17 +23,20 @@ type Tab = 'for-you' | 'explore' | 'following';
   imports: [RouterModule, FormsModule, FontAwesomeModule, BlogCardComponent],
   templateUrl: './blog-feed.component.html',
 })
-export class BlogFeedComponent {
+export class BlogFeedComponent implements OnInit, OnDestroy {
   private blogService = inject(BlogService);
   private toastService = inject(ToastService);
   private userService = inject(UserService);
   private authService = inject(AuthService);
 
-  @ViewChild('feedContainer') feedContainer!: ElementRef;
+  @ViewChild('feedContainer', { static: false }) feedContainer!: ElementRef;
+
+  private observer?: IntersectionObserver;
 
   filterOpen = false;
   filterTag = '';
-  firstName: string = ''; // Default value
+  firstName: string = '';
+  isLoggedIn = false;
 
   // Computed properties from blog service
   loading = this.blogService.loading;
@@ -35,50 +45,46 @@ export class BlogFeedComponent {
   currentFilter = this.blogService.currentFilter;
 
   ngOnInit() {
-    // Set initial tab to "For You" and load data
-    this.blogService.setActiveTab('for-you');
-    this.setupInfiniteScroll();
-
-    // Load user profile to get the first name
-    this.loadUserProfile();
-  }
-
-  /**
-   * Load user profile to get first name
-   */
-  private loadUserProfile() {
-    const storedFirstName = JSON.parse(
-      localStorage.getItem('userProfile') || '{}'
-    ).firstName;
-
-    // const storedFirstName = localStorage.getItem('firstName');
-    if (storedFirstName) {
-      this.firstName = storedFirstName;
-      return;
-    }
-
-    // If not in localStorage, fetch from API
+    // Check authentication status and handle tab changes
     this.authService.currentUser$.subscribe((user) => {
+      const wasLoggedIn = this.isLoggedIn;
+      this.isLoggedIn = !!user;
+
+      // Set firstName directly from JWT payload
       if (user) {
-        this.userService.getUserProfile(user.sub).subscribe({
-          next: (profile) => {
-            if (profile && profile.firstName) {
-              this.firstName = profile.firstName;
-              localStorage.setItem('userProfile', JSON.stringify(profile));
-            }
-          },
-          error: (error) => {
-            console.error('Error loading user profile:', error);
-          },
-        });
+        this.firstName = user.firstName;
+        // Only switch to for-you if we just logged in
+        if (!wasLoggedIn) {
+          this.blogService.setActiveTab('for-you');
+        }
+      } else {
+        // If logged out, switch to explore
+        this.blogService.setActiveTab('explore');
       }
     });
+
+    // Setup infinite scroll
+    this.setupInfiniteScroll();
+  }
+
+  ngOnDestroy() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
   }
 
   /**
    * Switch between tabs
    */
   changeTab(tab: Tab) {
+    if (!this.isLoggedIn && (tab === 'for-you' || tab === 'following')) {
+      this.toastService.show(
+        'Please sign in to access personalized content',
+        'error'
+      );
+      return;
+    }
+
     this.blogService.setActiveTab(tab);
     this.filterOpen = false;
     this.filterTag = '';
@@ -98,6 +104,11 @@ export class BlogFeedComponent {
    * Apply filter when user presses enter
    */
   applyFilter(event: KeyboardEvent) {
+    if (!this.isLoggedIn) {
+      this.toastService.show('Please sign in to use filters', 'error');
+      return;
+    }
+
     if (event.key === 'Enter' && this.filterTag.trim()) {
       this.blogService.setFilter(this.filterTag.trim());
       this.filterOpen = false;
@@ -108,6 +119,11 @@ export class BlogFeedComponent {
    * Apply filter when user clicks button
    */
   applyFilterByButton() {
+    if (!this.isLoggedIn) {
+      this.toastService.show('Please sign in to use filters', 'error');
+      return;
+    }
+
     if (this.filterTag.trim()) {
       this.blogService.setFilter(this.filterTag.trim());
       this.filterOpen = false;
@@ -126,25 +142,37 @@ export class BlogFeedComponent {
    * Set up infinite scrolling
    */
   private setupInfiniteScroll() {
-    // Use Intersection Observer for infinite scrolling
     const options = {
       root: null,
-      rootMargin: '0px',
-      threshold: 0.5,
+      rootMargin: '20px',
+      threshold: 0.1,
     };
 
-    const observer = new IntersectionObserver((entries) => {
+    this.observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && !this.loading()) {
         this.loadMorePosts();
       }
     }, options);
 
-    // Add a small delay to make sure the DOM is ready
-    setTimeout(() => {
+    // Re-observe the container whenever it changes
+    const setupObserver = () => {
       if (this.feedContainer?.nativeElement) {
-        observer.observe(this.feedContainer.nativeElement);
+        this.observer?.observe(this.feedContainer.nativeElement);
       }
-    }, 500);
+    };
+
+    // Use mutation observer to watch for container changes
+    const mutationObserver = new MutationObserver(() => {
+      if (this.feedContainer?.nativeElement) {
+        setupObserver();
+        // Don't disconnect the mutation observer as the container might change again
+      }
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
   }
 
   /**
@@ -160,6 +188,11 @@ export class BlogFeedComponent {
   toggleLike(blog: BlogPostType, event: Event) {
     event.preventDefault();
     event.stopPropagation();
+
+    if (!this.isLoggedIn) {
+      this.toastService.show('Please sign in to like posts', 'error');
+      return;
+    }
 
     // Simple check if the user already liked this post
     const userId = localStorage.getItem('userId');

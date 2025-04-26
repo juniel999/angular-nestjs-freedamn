@@ -1,4 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+} from '@nestjs/common';
 import { BlogsService } from './blogs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,13 +34,13 @@ export class BlogsController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('sort') sort?: string,
-    @Query('filter') filter?: string
+    @Query('filter') filter?: string,
   ) {
     return this.blogsService.findAll(
       page ? parseInt(page.toString()) : 1,
       limit ? parseInt(limit.toString()) : 10,
       sort || 'newest',
-      filter
+      filter,
     );
   }
 
@@ -48,35 +64,30 @@ export class BlogsController {
   forYou(
     @Request() req,
     @Query('page') page?: number,
-    @Query('tags') tags?: string
+    @Query('tags') tags?: string,
   ) {
+    // Get user's preferred tags, using passed tags or user's saved preferences
+    const userTags = tags ? tags.split(',') : req.user.preferredTags || [];
 
-    const userTags = tags ? tags.split(',') : req.user.preferredTags;
-
-    console.log('this is the usertags',userTags);
     return this.blogsService.findUserFeedByTags(
       userTags,
-      page ? parseInt(page.toString()) : 1
+      page ? parseInt(page.toString()) : 1,
     );
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('explore')
   explore(@Query('page') page?: number) {
     return this.blogsService.findRandomBlogs(
-      page ? parseInt(page.toString()) : 1
+      page ? parseInt(page.toString()) : 1,
     );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('following')
-  following(
-    @Request() req,
-    @Query('page') page?: number
-  ) {
+  following(@Request() req, @Query('page') page?: number) {
     return this.blogsService.findBlogsByFollowedAuthors(
       req.user._id || req.user.userId,
-      page ? parseInt(page.toString()) : 1
+      page ? parseInt(page.toString()) : 1,
     );
   }
 
@@ -92,7 +103,7 @@ export class BlogsController {
         ],
       }),
     )
-    file: Express.Multer.File
+    file: Express.Multer.File,
   ) {
     return this.blogsService.uploadImage(file);
   }

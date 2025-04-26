@@ -355,4 +355,23 @@ export class UsersService {
 
     return updatedUser.socials;
   }
+
+  async getUserStats(userId: string) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const [postsCount, followersCount, followingCount] = await Promise.all([
+      this.blogModel.countDocuments({ author: userId }).exec(),
+      this.userModel.countDocuments({ following: userId }).exec(),
+      user.following?.length || 0,
+    ]);
+
+    return {
+      postsCount,
+      followersCount,
+      followingCount,
+    };
+  }
 }

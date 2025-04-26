@@ -1,165 +1,118 @@
-<div class="max-w-6xl mx-auto px-4 py-6">
-  <!-- Greeting -->
-  <div class="mb-10">
-    <h1 class="text-4xl md:text-5xl font-bold mb-3">
-      Good day, <span class="text-primary">{{ firstName }}</span> 👋
+<!-- Container -->
+<div class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
+  <!-- Hero Section -->
+  <div class="mb-12 space-y-4">
+    <h1 class="text-3xl md:text-6xl font-bold tracking-tight">
+      @if (isLoggedIn) { Good day,
+      <span class="text-primary">{{ firstName }} 👋</span>
+      } @else { Discover Amazing Stories }
     </h1>
-    <p class="text-lg text-base-content opacity-80">
-      Here are some posts that you might be interested in. Enjoy!
+    <p class="text-lg md:text-xl text-base-content/70 max-w-2xl">
+      @if (isLoggedIn) { Your personalized feed awaits. Explore stories that
+      match your interests. } @else { Join our community of creators and
+      readers. Every story matters. }
     </p>
   </div>
 
-  <!-- Tabs -->
+  <!-- Tabs & Filters Row -->
   <div
-    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
   >
-    <div class="tabs tabs-lifted">
+    <!-- Tabs -->
+    <div class="tabs tabs-lifted gap-1">
+      @if (isLoggedIn) {
       <a
-        class="tab tab-bordered text-base transition-all duration-200"
+        class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
         [class.tab-active]="currentTab() === 'for-you'"
         (click)="changeTab('for-you')"
       >
-        <fa-icon icon="star" class="mr-2 text-sm"></fa-icon>
+        <fa-icon [icon]="['fas', 'star']" class="text-sm"></fa-icon>
         For You
       </a>
+      }
       <a
-        class="tab tab-bordered text-base transition-all duration-200"
+        class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
         [class.tab-active]="currentTab() === 'explore'"
         (click)="changeTab('explore')"
       >
-        <fa-icon icon="compass" class="mr-2 text-sm"></fa-icon>
+        <fa-icon [icon]="['fas', 'compass']" class="text-sm"></fa-icon>
         Explore
       </a>
+      @if (isLoggedIn) {
       <a
-        class="tab tab-bordered text-base transition-all duration-200"
+        class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
         [class.tab-active]="currentTab() === 'following'"
         (click)="changeTab('following')"
       >
-        <fa-icon icon="user-friends" class="mr-2 text-sm"></fa-icon>
+        <fa-icon [icon]="['fas', 'user-friends']" class="text-sm"></fa-icon>
         Following
       </a>
+      }
     </div>
 
-    <!-- Filters -->
+    <!-- Filter Button -->
+    @if (isLoggedIn) {
     <div class="relative">
       <button
-        class="btn btn-sm btn-outline gap-2 rounded-full"
+        class="btn btn-sm btn-outline gap-2"
+        [class.btn-primary]="currentFilter()"
         (click)="toggleFilter()"
       >
-        <fa-icon icon="filter" class="text-xs"></fa-icon>
-        Filters @if (currentFilter()) {
-        <div class="badge badge-xs badge-accent">1</div>
-        }
+        <fa-icon [icon]="['fas', 'filter']"></fa-icon>
+        @if (currentFilter()) {
+        <span class="font-medium">{{ currentFilter() }}</span>
+        <button
+          class="btn btn-circle btn-xs btn-ghost"
+          (click)="clearFilter(); $event.stopPropagation()"
+        >
+          <fa-icon [icon]="['fas', 'times']"></fa-icon>
+        </button>
+        } @else { Filter }
       </button>
 
-      <!-- Filter dropdown -->
       @if (filterOpen) {
       <div
-        class="absolute right-0 mt-2 p-4 bg-base-100 shadow-xl rounded-lg z-10 w-64 border border-base-300"
+        class="absolute right-0 mt-2 p-3 bg-base-100 rounded-lg shadow-lg border border-base-300 z-10"
       >
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text font-medium">Filter by tag</span>
-          </label>
-          <div class="input-group input-group-sm">
-            <input
-              type="text"
-              [(ngModel)]="filterTag"
-              (keyup)="applyFilter($event)"
-              placeholder="Enter tag..."
-              class="input input-bordered input-sm w-full focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <div class="flex justify-end mt-4">
-            <button class="btn btn-sm btn-ghost" (click)="filterOpen = false">
-              Cancel
-            </button>
-            <button
-              class="btn btn-sm btn-primary ml-2"
-              [disabled]="!filterTag.trim()"
-              (click)="applyFilterByButton()"
-            >
-              Apply
-            </button>
-          </div>
+        <div class="join">
+          <input
+            type="text"
+            [(ngModel)]="filterTag"
+            placeholder="Enter a tag..."
+            class="input input-sm input-bordered join-item"
+            (keyup)="applyFilter($event)"
+          />
+          <button
+            class="btn btn-sm join-item btn-primary"
+            [disabled]="!filterTag.trim()"
+            (click)="applyFilterByButton()"
+          >
+            Apply
+          </button>
         </div>
       </div>
       }
     </div>
+    }
   </div>
 
-  <!-- Current filter indicator -->
-  @if (currentFilter()) {
-  <div class="flex items-center mb-6">
-    <span class="text-sm text-base-content opacity-70">Filtered by:</span>
-    <div class="badge badge-primary ml-2 gap-1 py-3">
-      <span>{{ currentFilter() }}</span>
-      <button class="ml-1 hover:text-primary-content" (click)="clearFilter()">
-        <fa-icon icon="times" class="text-xs"></fa-icon>
-      </button>
+  <!-- Blog Grid -->
+  @if (loading() && !currentBlogs()) {
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    @for (_ of [1, 2, 3, 4]; track $index) {
+    <div class="card bg-base-100 shadow-lg">
+      <div class="h-48 bg-base-200"></div>
+      <div class="card-body">
+        <div class="space-y-3">
+          <div class="h-4 bg-base-300 rounded w-3/4"></div>
+          <div class="h-4 bg-base-300 rounded w-1/2"></div>
+        </div>
+      </div>
     </div>
+    }
   </div>
-  }
-  <!-- Blog Feed -->
+  } @else if (currentBlogs() && currentBlogs()!.posts.length > 0) {
   <div class="space-y-8">
-    <!-- Initial loading state -->
-    @if (loading() && !currentBlogs()) {
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      @for (item of [1,2,3,4]; track item) {
-      <div class="card bg-base-100 border border-base-200 overflow-hidden">
-        <!-- Image skeleton -->
-        <div class="w-full h-40 bg-base-300 animate-pulse"></div>
-
-        <!-- Content skeleton -->
-        <div class="p-4">
-          <!-- Author skeleton -->
-          <div class="flex items-center mb-3">
-            <div class="w-8 h-8 rounded-full bg-base-300 animate-pulse"></div>
-            <div class="ml-2">
-              <div class="h-4 w-24 bg-base-300 animate-pulse rounded"></div>
-              <div
-                class="h-3 w-16 bg-base-300 animate-pulse rounded mt-1"
-              ></div>
-            </div>
-          </div>
-
-          <!-- Text skeleton -->
-          <div class="space-y-2 mb-3">
-            <div class="h-4 w-full bg-base-300 animate-pulse rounded"></div>
-            <div class="h-4 w-3/4 bg-base-300 animate-pulse rounded"></div>
-          </div>
-
-          <!-- Tags skeleton -->
-          <div class="flex gap-1 mb-3">
-            <div class="h-5 w-12 bg-base-300 animate-pulse rounded-full"></div>
-            <div class="h-5 w-16 bg-base-300 animate-pulse rounded-full"></div>
-            <div class="h-5 w-14 bg-base-300 animate-pulse rounded-full"></div>
-          </div>
-        </div>
-      </div>
-      }
-    </div>
-    } @else if (!currentBlogs() || currentBlogs()?.posts?.length === 0) {
-    <!-- Empty state -->
-    <div class="flex flex-col items-center py-12">
-      <div class="text-center max-w-md">
-        <div class="text-5xl mb-4 opacity-30">
-          <fa-icon icon="newspaper"></fa-icon>
-        </div>
-        <h3 class="text-xl font-bold mb-2">No posts found</h3>
-        <p class="text-base-content opacity-70">
-          @if (currentTab() === 'for-you') { Follow topics or users to see
-          personalized content here. } @else if (currentTab() === 'explore') {
-          No blog posts to explore right now. Check back later! } @else if
-          (currentTab() === 'following') { Follow someone to see their posts
-          here! } @else if (currentFilter()) { No posts found with the tag "{{
-            currentFilter()
-          }}". }
-        </p>
-      </div>
-    </div>
-    } @else {
-    <!-- Blog posts grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       @for (blog of currentBlogs()!.posts; track blog._id) {
       <app-blog-card
@@ -169,13 +122,40 @@
       ></app-blog-card>
       }
     </div>
-    }
 
-    <!-- Infinite scroll marker -->
-    <div #feedContainer class="py-6 h-12 flex justify-center">
-      @if (loading() && currentBlogs()?.posts?.length) {
-      <span class="loading loading-dots loading-md"></span>
+    <!-- Loading indicator -->
+    <div #feedContainer class="h-20 flex justify-center items-center">
+      @if (loading()) {
+      <div class="flex flex-col items-center gap-2">
+        <span class="loading loading-spinner loading-md text-primary"></span>
+        <span class="text-sm text-base-content/70"
+          >Loading more stories...</span
+        >
+      </div>
       }
     </div>
   </div>
+  } @else {
+  <div
+    class="flex flex-col gap-4 py-8 items-center text-center max-w-2xl mx-auto"
+  >
+    <div class="space-y-2">
+      <h3 class="font-medium text-lg">No posts found</h3>
+      <p class="text-base-content/70">
+        @if (currentTab() === 'for-you') { It seems your personalized feed is
+        empty. Start by exploring different tags! } @else if (currentTab() ===
+        'following') { Connect with creators by following them to see their
+        latest posts here. } @else if (currentFilter()) { No posts found with
+        the tag "{{ currentFilter() }}". Try exploring other tags or remove the
+        filter. } @else { The feed is currently empty. Be the first to share
+        your story! }
+      </p>
+      <button class="btn btn-primary btn-sm mt-4">
+        @if (currentTab() === 'for-you' || currentTab() === 'following') {
+        Discover Creators } @else if (currentFilter()) { Clear Filter } @else {
+        Explore Tags & Interests }
+      </button>
+    </div>
+  </div>
+  }
 </div>

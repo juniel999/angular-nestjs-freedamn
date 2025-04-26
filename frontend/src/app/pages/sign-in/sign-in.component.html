@@ -1,9 +1,10 @@
-<div class="min-h-screen flex items-center justify-center bg-base-200/50 px-4">
-  <div class="w-full max-w-md bg-base-100 rounded-2xl shadow-lg p-8">
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-md bg-base-100 sm:rounded-2xl sm:shadow-lg p-8">
     <!-- Branding -->
     <button class="mb-8 transition-transform hover:scale-105" routerLink="/">
       <h1 class="text-3xl font-bold cursor-pointer">
-        <span class="text-primary">free</span><span class="text-accent">damn.</span>
+        <span class="text-primary">free</span
+        ><span class="text-accent">damn.</span>
       </h1>
     </button>
 
@@ -27,7 +28,8 @@
           class="input input-bordered w-full transition-shadow focus:shadow-md"
           formControlName="username"
         />
-        @if (formControls['username'].invalid && formControls['username'].touched) {
+        @if (formControls['username'].invalid &&
+        formControls['username'].touched) {
         <span class="text-xs text-error mt-2 block">Username is required</span>
         }
       </div>
@@ -57,7 +59,8 @@
             }
           </button>
         </div>
-        @if (formControls['password'].invalid && formControls['password'].touched) {
+        @if (formControls['password'].invalid &&
+        formControls['password'].touched) {
         <span class="text-xs text-error mt-2 block">
           Password is required
         </span>
@@ -77,19 +80,16 @@
 
       <!-- Login Button -->
       <div class="form-control mt-8">
-        <button 
-          type="submit" 
-          class="btn btn-primary w-full transition-all hover:shadow-md" 
+        <button
+          type="submit"
+          class="btn btn-primary w-full transition-all hover:shadow-md"
           [disabled]="isLoading"
         >
           @if (isLoading) {
           <span class="inline-block animate-spin mr-2">
             <fa-icon [icon]="['fas', 'spinner']"></fa-icon>
           </span>
-          Signing in...
-          } @else {
-          Sign In
-          }
+          Signing in... } @else { Sign In }
         </button>
       </div>
     </form>

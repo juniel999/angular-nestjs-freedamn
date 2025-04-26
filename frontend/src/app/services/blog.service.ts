@@ -1,8 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, catchError, throwError, of, tap } from 'rxjs';
+import { Observable, map, catchError, throwError, of, tap, take } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ToastService } from './toast.service';
+import { AuthService } from './auth.service';
 import { BlogPostType } from '../types/blog-post.type';
 
 export interface BlogsResponse {
@@ -17,6 +18,7 @@ export interface BlogsResponse {
 export class BlogService {
   private http = inject(HttpClient);
   private toastService = inject(ToastService);
+  private authService = inject(AuthService);
   private apiUrl = `${environment.apiUrl}/blogs`;
 
   // State management with signals
@@ -34,9 +36,17 @@ export class BlogService {
     following: null,
     filtered: null,
     loading: false,
-    currentTab: 'for-you',
+    currentTab: 'explore', // Change default to explore
     currentFilter: null,
   });
+
+  constructor() {
+    // Check auth status and initialize appropriate tab
+    this.authService.currentUser$.pipe(take(1)).subscribe((user) => {
+      const initialTab = user ? 'for-you' : 'explore';
+      this.setActiveTab(initialTab);
+    });
+  }
 
   // Computed values
   loading = computed(() => this.blogsState().loading);
@@ -65,13 +75,15 @@ export class BlogService {
    * Set the active tab
    */
   setActiveTab(tab: 'for-you' | 'explore' | 'following') {
+    // Always reset state when changing tabs
     this.blogsState.update((state) => ({
       ...state,
       currentTab: tab,
       currentFilter: null,
+      [tab]: null, // Reset the current tab's data to force a fresh load
     }));
 
-    // Load data for the selected tab if not already loaded
+    // Load data for the selected tab
     this.loadTabData(tab, 1);
   }
 
@@ -81,9 +93,11 @@ export class BlogService {
   setFilter(filter: string | null) {
     if (filter === this.currentFilter()) return;
 
+    // Reset filtered data when changing filters
     this.blogsState.update((state) => ({
       ...state,
       currentFilter: filter,
+      filtered: null,
     }));
 
     if (filter) {
@@ -185,16 +199,26 @@ export class BlogService {
       .subscribe({
         next: (response) => {
           this.blogsState.update((state) => {
-            // If first page, replace data; otherwise append
-            const existingPosts = page === 1 ? [] : state.explore?.posts || [];
-            const newPosts = [...existingPosts, ...response.posts];
+            // Only append if we're loading more pages and there are existing posts
+            const existingPosts =
+              page === 1 || !state.explore?.posts ? [] : state.explore.posts;
+
+            // Filter out any duplicate posts that might come from random selection
+            const uniquePosts = response.posts.filter(
+              (newPost) =>
+                !existingPosts.some(
+                  (existingPost) => existingPost._id === newPost._id
+                )
+            );
+
+            const newPosts = [...existingPosts, ...uniquePosts];
 
             return {
               ...state,
               explore: {
-                ...response,
                 posts: newPosts,
-                page,
+                total: response.total,
+                page: page,
               },
               loading: false,
             };

@@ -26,6 +26,7 @@ export interface UserProfile {
   sub: string;
   roles: string[];
   email?: string;
+  firstName: string;
 }
 
 @Injectable({
@@ -121,6 +122,7 @@ export class AuthService {
         sub: payload.sub,
         roles: payload.roles,
         email: payload.email,
+        firstName: payload.firstName,
       };
 
       this.currentUserSubject.next(userProfile);

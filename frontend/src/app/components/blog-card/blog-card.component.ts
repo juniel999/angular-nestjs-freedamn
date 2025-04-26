@@ -1,7 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { BlogPostType } from '../../types/blog-post.type';
+import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-blog-card',
@@ -13,39 +16,65 @@ export class BlogCardComponent {
   @Input() hasUserLiked: (blog: BlogPostType) => boolean = () => false;
   @Input() onLikeClick: (blog: BlogPostType, event: Event) => void = () => {};
 
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private router = inject(Router);
+  isLoggedIn = false;
+
+  ngOnInit() {
+    this.authService.currentUser$.subscribe((user) => {
+      this.isLoggedIn = !!user;
+    });
+  }
+
+  onLikeButtonClick(blog: BlogPostType, event: Event) {
+    if (!this.isLoggedIn) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.toastService.show('Please sign in to like posts', 'error');
+      return;
+    }
+    this.onLikeClick(blog, event);
+  }
+
   getExcerpt(content: string): string {
-    if (!content) return '';
-    return content.slice(0, 150) + (content.length > 150 ? '...' : '');
+    // Strip HTML tags
+    const plainText = content.replace(/<[^>]*>?/gm, '');
+    const maxLength = 150;
+
+    if (plainText.length <= maxLength) {
+      return plainText;
+    }
+
+    // Find the last space before maxLength
+    const lastSpace = plainText.substring(0, maxLength).lastIndexOf(' ');
+    const excerpt = plainText.substring(
+      0,
+      lastSpace > 0 ? lastSpace : maxLength
+    );
+    return `${excerpt}...`;
   }
 
   formatTimeAgo(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    // Less than a minute
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds}s ago`;
-    }
+    if (seconds < 60) return 'just now';
 
-    // Less than an hour
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    }
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
 
-    // Less than a day
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    }
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
 
-    // After 24 hours, show the actual date and time
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}d ago`;
+
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}mo ago`;
+
+    const years = Math.floor(months / 12);
+    return `${years}y ago`;
   }
 }

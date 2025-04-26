@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Blog } from './blog.schema';
@@ -8,11 +12,13 @@ import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class BlogsService {
+  private seenRandomBlogIds: Set<string> = new Set();
+
   constructor(
     @InjectModel(Blog.name) private blogModel: Model<Blog>,
     @InjectModel(User.name) private userModel: Model<User>,
     private tagsService: TagsService,
-    private cloudinaryService: CloudinaryService
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createBlogDto: any, user: any): Promise<Blog> {
@@ -20,20 +26,25 @@ export class BlogsService {
     if (createBlogDto.tags && createBlogDto.tags.length > 0) {
       await this.tagsService.addTagsIfNotExist(createBlogDto.tags);
     }
-    
+
     const createdBlog = new this.blogModel({
       ...createBlogDto,
-      author: user._id || user.userId // Support both formats
+      author: user._id || user.userId, // Support both formats
     });
     return createdBlog.save();
   }
 
-  async findAll(page = 1, limit = 10, sort = 'newest', filter?: string): Promise<{ posts: Blog[], total: number, page: number }> {
+  async findAll(
+    page = 1,
+    limit = 10,
+    sort = 'newest',
+    filter?: string,
+  ): Promise<{ posts: Blog[]; total: number; page: number }> {
     const skip = (page - 1) * limit;
     let sortOptions = {};
-    
+
     // Set sort options based on parameter
-    switch(sort) {
+    switch (sort) {
       case 'popular':
         sortOptions = { likes: -1, viewCount: -1 };
         break;
@@ -50,17 +61,18 @@ export class BlogsService {
     if (filter) {
       query.tags = { $in: [filter.toLowerCase().trim()] };
     }
-    
+
     const [posts, total] = await Promise.all([
-      this.blogModel.find(query)
+      this.blogModel
+        .find(query)
         .sort(sortOptions)
         .skip(skip)
         .limit(limit)
         .populate('author', 'username firstName lastName avatar')
         .exec(),
-      this.blogModel.countDocuments(query).exec()
+      this.blogModel.countDocuments(query).exec(),
     ]);
-    
+
     return { posts, total, page };
   }
 
@@ -70,13 +82,14 @@ export class BlogsService {
       throw new NotFoundException('Tag not found');
     }
 
-    return this.blogModel.find({ 
-      tags: { $in: [tag.name.toLowerCase().trim()] },
-      published: true
-    })
-    .sort({ createdAt: -1 })
-    .populate('author', 'username firstName lastName avatar')
-    .exec();
+    return this.blogModel
+      .find({
+        tags: { $in: [tag.name.toLowerCase().trim()] },
+        published: true,
+      })
+      .sort({ createdAt: -1 })
+      .populate('author', 'username firstName lastName avatar')
+      .exec();
   }
 
   async findByUser(userId: string): Promise<Blog[]> {
@@ -84,101 +97,146 @@ export class BlogsService {
       throw new NotFoundException('Invalid user ID format');
     }
 
-    return this.blogModel.find({ 
-      author: userId,
-      published: true 
-    })
-    .sort({ createdAt: -1 })
-    .populate('author', 'username firstName lastName avatar')
-    .exec();
+    return this.blogModel
+      .find({
+        author: userId,
+        published: true,
+      })
+      .sort({ createdAt: -1 })
+      .populate('author', 'username firstName lastName avatar')
+      .exec();
   }
 
   async findFeatured(): Promise<Blog[]> {
     // Featured blogs are those with the most likes and views
     // We're limiting to 10 featured blogs
-    return this.blogModel.find({ published: true })
+    return this.blogModel
+      .find({ published: true })
       .sort({ likes: -1, viewCount: -1, createdAt: -1 })
       .limit(10)
       .populate('author', 'username firstName lastName avatar')
       .exec();
   }
 
-  async findUserFeedByTags(userTags: string[], page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {
-    // If no tags are provided, return empty result since user hasn't selected any preferences
+  async findUserFeedByTags(
+    userTags: string[],
+    page = 1,
+    limit = 10,
+  ): Promise<{ posts: Blog[]; total: number; page: number }> {
+    // If no tags are provided, return all posts since user hasn't selected any preferences
     if (!userTags || userTags.length === 0) {
-      return { posts: [], total: 0, page };
+      return this.findAll(page, limit, 'newest');
     }
 
     const skip = (page - 1) * limit;
-    const query = { 
+    const query = {
       published: true,
-      tags: { $in: userTags.map(tag => tag.toLowerCase().trim()) }
+      tags: { $in: userTags.map((tag) => tag.toLowerCase().trim()) },
     };
-    
+
     const [posts, total] = await Promise.all([
-      this.blogModel.find(query)
+      this.blogModel
+        .find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .populate('author', 'username firstName lastName avatar')
         .exec(),
-      this.blogModel.countDocuments(query).exec()
+      this.blogModel.countDocuments(query).exec(),
     ]);
-    
+
     return { posts, total, page };
   }
 
-  async findRandomBlogs(page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {
+  async findRandomBlogs(
+    page = 1,
+    limit = 10,
+  ): Promise<{ posts: Blog[]; total: number; page: number }> {
+    const skip = (page - 1) * limit;
+
     // Get total count of published blogs for pagination info
-    const total = await this.blogModel.countDocuments({ published: true }).exec();
-    
-    // For randomization with proper pagination, we'll use a different approach:
-    // 1. Get all blog IDs
-    // 2. Randomize the order using a random sort
-    // 3. Apply pagination
-    const skip = (page - 1) * limit;
-    
-    // Use a random sort with proper pagination
-    const posts = await this.blogModel.find({ published: true })
-      .sort({ createdAt: -1 }) // First sort by creation date
-      .skip(skip)              // Apply pagination
-      .limit(limit)            // Limit results
-      .populate('author', 'username firstName lastName avatar')
+    const total = await this.blogModel
+      .countDocuments({ published: true })
       .exec();
-    
+
+    // Get blogs with random sorting but consistent pagination
+    const posts = await this.blogModel
+      .aggregate([
+        { $match: { published: true } },
+        { $sort: { createdAt: -1 } }, // First sort by date to ensure consistency
+        { $sort: { viewCount: -1 } }, // Then by popularity
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'author',
+            foreignField: '_id',
+            as: 'author',
+          },
+        },
+        { $unwind: '$author' },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            content: 1,
+            excerpt: 1,
+            coverImage: 1,
+            tags: 1,
+            published: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            likes: 1,
+            viewCount: 1,
+            'author._id': 1,
+            'author.username': 1,
+            'author.firstName': 1,
+            'author.lastName': 1,
+            'author.avatar': 1,
+          },
+        },
+      ])
+      .exec();
+
     return { posts, total, page };
   }
 
-  async findBlogsByFollowedAuthors(userId: string, page = 1, limit = 10): Promise<{ posts: Blog[], total: number, page: number }> {
+  async findBlogsByFollowedAuthors(
+    userId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<{ posts: Blog[]; total: number; page: number }> {
     const skip = (page - 1) * limit;
-    
+
     // Get the user with their following list
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     // If user doesn't follow anyone, return empty array
     if (!user.following || user.following.length === 0) {
       return { posts: [], total: 0, page };
     }
-    
+
     // Find blogs by followed authors
-    const query = { 
+    const query = {
       author: { $in: user.following },
-      published: true
+      published: true,
     };
-    
+
     const [posts, total] = await Promise.all([
-      this.blogModel.find(query)
+      this.blogModel
+        .find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .populate('author', 'username firstName lastName avatar')
         .exec(),
-      this.blogModel.countDocuments(query).exec()
+      this.blogModel.countDocuments(query).exec(),
     ]);
-    
+
     return { posts, total, page };
   }
 
@@ -186,20 +244,23 @@ export class BlogsService {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Invalid blog ID format');
     }
-    
+
     // Increment view count
-    await this.blogModel.findByIdAndUpdate(id, { $inc: { viewCount: 1 } }).exec();
-    
+    await this.blogModel
+      .findByIdAndUpdate(id, { $inc: { viewCount: 1 } })
+      .exec();
+
     // Return the blog with populated author and comments information
-    return this.blogModel.findById(id)
+    return this.blogModel
+      .findById(id)
       .populate('author', 'username firstName lastName avatar')
       .populate({
         path: 'comments',
         populate: {
           path: 'userId',
-          select: 'username avatar'
+          select: 'username avatar',
         },
-        options: { sort: { 'createdAt': -1 } }
+        options: { sort: { createdAt: -1 } },
       })
       .exec();
   }
@@ -208,19 +269,19 @@ export class BlogsService {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Invalid blog ID format');
     }
-    
+
     // If tags are being updated, process them
     if (updateBlogDto.tags && updateBlogDto.tags.length > 0) {
       await this.tagsService.addTagsIfNotExist(updateBlogDto.tags);
     }
-    
+
     return this.blogModel
       .findByIdAndUpdate(id, updateBlogDto, { new: true })
       .exec();
   }
 
   async remove(id: string): Promise<Blog | null> {
-    if(!Types.ObjectId.isValid(id)){
+    if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Invalid blog ID format');
     }
 
@@ -228,60 +289,60 @@ export class BlogsService {
   }
 
   async like(blogId: string, userId: string): Promise<Blog> {
-    if(!Types.ObjectId.isValid(blogId)){
+    if (!Types.ObjectId.isValid(blogId)) {
       throw new NotFoundException('Invalid blog ID format');
     }
 
     const blog = await this.blogModel.findById(blogId);
-    
+
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
-    
+
     // Check if the user has already liked the blog
     const userIdObj = new Types.ObjectId(userId);
-    const hasLiked = blog.likes.some(id => id.toString() === userId);
-    
+    const hasLiked = blog.likes.some((id) => id.toString() === userId);
+
     if (!hasLiked) {
       // Use updateOne to properly handle the array update
       await this.blogModel.updateOne(
         { _id: blogId },
-        { $addToSet: { likes: userIdObj } }
+        { $addToSet: { likes: userIdObj } },
       );
-      
+
       const updatedBlog = await this.blogModel.findById(blogId).exec();
       if (!updatedBlog) {
         throw new NotFoundException('Blog not found after update');
       }
-      
+
       return updatedBlog;
     }
-    
+
     return blog;
   }
 
   async unlike(blogId: string, userId: string): Promise<Blog> {
-    if(!Types.ObjectId.isValid(blogId)){
+    if (!Types.ObjectId.isValid(blogId)) {
       throw new NotFoundException('Invalid blog ID format');
     }
 
     const blog = await this.blogModel.findById(blogId);
-    
+
     if (!blog) {
       throw new NotFoundException('Blog not found');
     }
-    
+
     // Use updateOne to properly handle the array update
     await this.blogModel.updateOne(
       { _id: blogId },
-      { $pull: { likes: new Types.ObjectId(userId) } }
+      { $pull: { likes: new Types.ObjectId(userId) } },
     );
-    
+
     const updatedBlog = await this.blogModel.findById(blogId).exec();
     if (!updatedBlog) {
       throw new NotFoundException('Blog not found after update');
     }
-    
+
     return updatedBlog;
   }
 

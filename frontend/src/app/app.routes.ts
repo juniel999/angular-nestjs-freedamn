@@ -6,6 +6,8 @@ import { onboardingGuard } from './guards/onboarding.guard';
 import { onboardingCompletedGuard } from './guards/onboarding-completed.guard';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { publicOnlyGuard } from './guards/public-only.guard';
+import { HomeComponent } from './pages/home/home.component';
 
 export const routes: Routes = [
   {
@@ -14,11 +16,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        canActivate: [onboardingCompletedGuard],
-        loadChildren: () =>
-          import('./pages/protected/protected.module').then(
-            (m) => m.ProtectedModule
-          ),
+        component: HomeComponent, // Direct component reference for public access
       },
       {
         path: 'compose',
@@ -45,8 +43,16 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: 'signup', component: SignUpComponent },
-  { path: 'signin', component: SignInComponent },
+  {
+    path: 'signup',
+    component: SignUpComponent,
+    canActivate: [publicOnlyGuard],
+  },
+  {
+    path: 'signin',
+    component: SignInComponent,
+    canActivate: [publicOnlyGuard],
+  },
   {
     path: 'onboarding',
     loadChildren: () =>
