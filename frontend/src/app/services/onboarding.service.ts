@@ -148,18 +148,12 @@ export class OnboardingService {
       ) || [];
     console.log('Valid tags after filtering:', validTags);
 
-    return this.getUserId(userId).pipe(
-      switchMap((id) => {
-        console.log(`Sending tags update request for user ${id}:`, validTags);
-        return this.http
-          .post<{ tags: string[] }>(`${this.apiUrl}/users/${id}/tags`, {
-            tags: validTags,
-          })
-          .pipe(
-            tap((response) => console.log('Tags update response:', response))
-          );
+    // Use the /me/tags endpoint directly since it's protected and uses the current user
+    return this.http
+      .patch<{ tags: string[] }>(`${this.apiUrl}/users/me/tags`, {
+        tags: validTags,
       })
-    );
+      .pipe(tap((response) => console.log('Tags update response:', response)));
   }
 
   completeOnboarding(userId?: string): Observable<{ completed: boolean }> {

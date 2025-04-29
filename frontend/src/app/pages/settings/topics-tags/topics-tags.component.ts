@@ -310,9 +310,12 @@ export class TopicsTagsComponent {
       return; // Don't proceed if invalid tag or already saving
     }
 
+    const normalizedTagName = tag.name.toLowerCase().trim();
+
     // Check if tag is already in user's selected tags (case-insensitive)
     const isDuplicate = this.selectedTags.some(
-      (selectedTag) => selectedTag.name.toLowerCase() === tag.name.toLowerCase()
+      (selectedTag) =>
+        selectedTag.name.toLowerCase().trim() === normalizedTagName
     );
 
     if (isDuplicate) {
@@ -350,11 +353,13 @@ export class TopicsTagsComponent {
             return of({ tags: [] });
           }),
           switchMap((response) => {
-            const currentTags: string[] = [...(response.tags || [])];
+            const currentTags: string[] = [...(response.tags || [])].map((t) =>
+              t.toLowerCase().trim()
+            );
 
             // Add the tag name if it doesn't exist
-            if (!currentTags.includes(tag.name)) {
-              currentTags.push(tag.name);
+            if (!currentTags.includes(normalizedTagName)) {
+              currentTags.push(normalizedTagName);
             }
 
             // Update the user's tags directly
@@ -379,7 +384,9 @@ export class TopicsTagsComponent {
             // Add to user tags and remove from available tags
             this.selectedTags.push(tag);
             this.availableTags = this.availableTags.filter(
-              (t) => t._id !== tag._id
+              (t) =>
+                t._id !== tag._id &&
+                t.name.toLowerCase().trim() !== normalizedTagName
             );
 
             // Update filtered tags
@@ -416,6 +423,8 @@ export class TopicsTagsComponent {
       return; // Don't proceed if invalid tag or already saving
     }
 
+    const normalizedTagName = tag.name.toLowerCase().trim();
+
     // Ensure the tag has a valid ID
     if (!tag._id) {
       tag._id = `remove-tag-${Date.now()}`;
@@ -442,11 +451,13 @@ export class TopicsTagsComponent {
             return of({ tags: [] });
           }),
           switchMap((response) => {
-            const currentTags: string[] = [...(response.tags || [])];
+            const currentTags: string[] = [...(response.tags || [])].map((t) =>
+              t.toLowerCase().trim()
+            );
 
             // Filter out the tag to remove (case-insensitive comparison)
             const updatedTags = currentTags.filter(
-              (t) => t.toLowerCase() !== tag.name.toLowerCase()
+              (t) => t !== normalizedTagName
             );
 
             // Update the user's tags directly
@@ -470,9 +481,16 @@ export class TopicsTagsComponent {
           if (result) {
             // Update local data
             this.selectedTags = this.selectedTags.filter(
-              (t) => t._id !== tag._id
+              (t) =>
+                t._id !== tag._id &&
+                t.name.toLowerCase().trim() !== normalizedTagName
             );
             this.availableTags.push(tag);
+
+            // Sort available tags by usageCount
+            this.availableTags.sort(
+              (a, b) => (b.usageCount || 0) - (a.usageCount || 0)
+            );
 
             // Update filtered tags
             this.filterAvailableTags(
