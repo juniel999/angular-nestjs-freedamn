@@ -78,7 +78,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Post('me/avatar')
   @UseInterceptors(FileInterceptor('file'))
-  uploadAvatar(
+  async uploadAvatar(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -90,13 +90,13 @@ export class UsersController {
     file: Express.Multer.File,
     @Request() req,
   ) {
-    return this.usersService.updateAvatar(req.user._id, file);
+    return this.usersService.updateAvatar(req.user.userId, file);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('me/coverphoto')
   @UseInterceptors(FileInterceptor('file'))
-  uploadCoverPhoto(
+  async uploadCoverPhoto(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -108,7 +108,7 @@ export class UsersController {
     file: Express.Multer.File,
     @Request() req,
   ) {
-    return this.usersService.updateCoverPhoto(req.user._id, file);
+    return this.usersService.updateCoverPhoto(req.user.userId, file);
   }
 
   // Onboarding related routes (protected)

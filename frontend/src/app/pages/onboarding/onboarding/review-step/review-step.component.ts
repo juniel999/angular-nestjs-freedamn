@@ -113,6 +113,21 @@ export class ReviewStepComponent {
     );
   }
 
+  formatDate(dateString: string | undefined): string {
+    if (!dateString) return 'Not provided';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Not provided';
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format(date);
+    } catch (e) {
+      return 'Not provided';
+    }
+  }
+
   completeOnboarding(): void {
     this.isCompleting = true;
 

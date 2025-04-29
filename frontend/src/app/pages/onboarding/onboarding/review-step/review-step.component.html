@@ -96,9 +96,7 @@
           ></fa-icon>
           <div>
             <p class="text-sm text-base-content/60">Birthdate</p>
-            <p class="font-medium">
-              {{ profile?.birthdate || "Not provided" }}
-            </p>
+            <p class="font-medium">{{ formatDate(profile?.birthdate) }}</p>
           </div>
         </div>
       </div>
