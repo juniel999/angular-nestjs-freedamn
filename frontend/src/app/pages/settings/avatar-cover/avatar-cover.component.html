@@ -17,13 +17,25 @@
           <div
             class="w-40 h-40 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300"
           >
+            @if (avatarPreview() || avatarUrl()) {
             <img
-              [src]="avatarPreview() || avatarUrl()"
+              [src]="
+                avatarPreview() ||
+                avatarUrl() ||
+                'https://ui-avatars.com/api/?background=E5B400&name=U'
+              "
               alt="Avatar preview"
-              class="object-cover"
+              class="object-cover w-full h-full"
+              onerror="this.src='https://ui-avatars.com/api/?background=E5B400&name=U'"
             />
-            {{ avatarUrl() }}
-            {{ avatarPreview() }}
+            } @else {
+            <div class="flex items-center justify-center h-full">
+              <fa-icon
+                [icon]="['fas', 'user']"
+                class="h-16 w-16 text-base-content/30"
+              ></fa-icon>
+            </div>
+            }
           </div>
         </div>
 
@@ -50,12 +62,13 @@
               [disabled]="isAvatarUploading"
               (click)="uploadAvatar()"
             >
+              @if (isAvatarUploading) {
               <fa-icon
-                *ngIf="isAvatarUploading"
                 [icon]="['fas', 'spinner']"
                 animation="spin"
                 class="mr-2"
               ></fa-icon>
+              }
               {{ isAvatarUploading ? "Uploading..." : "Upload Avatar" }}
             </button>
 
@@ -83,10 +96,17 @@
           [src]="coverPreview() || coverUrl()"
           alt="Cover preview"
           class="w-full h-full object-cover"
+          onerror="this.style.display='none'"
         />
         } @else {
         <div class="flex items-center justify-center h-full">
-          <p class="text-gray-500">No cover photo uploaded</p>
+          <div class="text-center">
+            <fa-icon
+              [icon]="['fas', 'image']"
+              class="h-12 w-12 text-base-content/30"
+            ></fa-icon>
+            <p class="text-base-content/50 mt-2">No cover photo uploaded</p>
+          </div>
         </div>
         }
       </div>
@@ -114,12 +134,13 @@
             [disabled]="isCoverUploading"
             (click)="uploadCover()"
           >
+            @if (isCoverUploading) {
             <fa-icon
-              *ngIf="isCoverUploading"
               [icon]="['fas', 'spinner']"
               animation="spin"
               class="mr-2"
             ></fa-icon>
+            }
             {{ isCoverUploading ? "Uploading..." : "Upload Cover Photo" }}
           </button>
 

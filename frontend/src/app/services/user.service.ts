@@ -362,18 +362,9 @@ export class UserService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.getUserId(userId).pipe(
-      switchMap((id) =>
-        this.http
-          .post<{ avatar: string }>(
-            `${this.apiUrl}/users/${id}/avatar`,
-            formData
-          )
-          .pipe(
-            map((response) => response.avatar) // Extract the URL from the response
-          )
-      )
-    );
+    return this.http
+      .post<{ avatar: string }>(`${this.apiUrl}/users/me/avatar`, formData)
+      .pipe(map((response) => response.avatar));
   }
 
   uploadCoverPhoto(userId?: string, file?: File): Observable<string> {
@@ -384,15 +375,11 @@ export class UserService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.getUserId(userId).pipe(
-      switchMap((id) =>
-        this.http
-          .post<{ coverphoto: string }>(
-            `${this.apiUrl}/users/${id}/cover-photo`,
-            formData
-          )
-          .pipe(map((response) => response.coverphoto))
+    return this.http
+      .post<{ coverphoto: string }>(
+        `${this.apiUrl}/users/me/coverphoto`,
+        formData
       )
-    );
+      .pipe(map((response) => response.coverphoto));
   }
 }
