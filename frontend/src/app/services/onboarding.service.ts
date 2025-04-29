@@ -86,7 +86,7 @@ export class OnboardingService {
     );
   }
 
-  uploadAvatar(userId?: string, file?: File): Observable<{ url: string }> {
+  uploadAvatar(userId?: string, file?: File): Observable<{ avatar: string }> {
     if (!file) {
       throw new Error('No file provided for upload');
     }
@@ -94,17 +94,16 @@ export class OnboardingService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.getUserId(userId).pipe(
-      switchMap((id) =>
-        this.http.post<{ url: string }>(
-          `${this.apiUrl}/users/${id}/avatar`,
-          formData
-        )
-      )
+    return this.http.post<{ avatar: string }>(
+      `${this.apiUrl}/users/me/avatar`,
+      formData
     );
   }
 
-  uploadCoverPhoto(userId?: string, file?: File): Observable<{ url: string }> {
+  uploadCoverPhoto(
+    userId?: string,
+    file?: File
+  ): Observable<{ coverphoto: string }> {
     if (!file) {
       throw new Error('No file provided for upload');
     }
@@ -112,13 +111,9 @@ export class OnboardingService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.getUserId(userId).pipe(
-      switchMap((id) =>
-        this.http.post<{ url: string }>(
-          `${this.apiUrl}/users/${id}/cover-photo`,
-          formData
-        )
-      )
+    return this.http.post<{ coverphoto: string }>(
+      `${this.apiUrl}/users/me/coverphoto`,
+      formData
     );
   }
 
