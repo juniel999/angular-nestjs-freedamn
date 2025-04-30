@@ -16,10 +16,10 @@
 
   <!-- Tabs & Filters Row -->
   <div
-    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
+    class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8"
   >
     <!-- Tabs -->
-    <div class="tabs tabs-lifted gap-1">
+    <div class="tabs tabs-lifted gap-1 overflow-x-auto self-start">
       @if (isLoggedIn) {
       <a
         class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
@@ -52,43 +52,61 @@
 
     <!-- Filter Button -->
     @if (isLoggedIn) {
-    <div class="relative">
+    <div class="relative self-end sm:self-auto">
       <button
-        class="btn btn-sm btn-outline gap-2"
+        class="btn btn-sm gap-2 bg-base-100 border-base-300 hover:bg-base-200 shadow-sm whitespace-nowrap"
         [class.btn-primary]="currentFilter()"
         (click)="toggleFilter()"
       >
-        <fa-icon [icon]="['fas', 'filter']"></fa-icon>
+        <fa-icon [icon]="['fas', 'filter']" class="text-sm"></fa-icon>
         @if (currentFilter()) {
-        <span class="font-medium">{{ currentFilter() }}</span>
-        <button
-          class="btn btn-circle btn-xs btn-ghost"
-          (click)="clearFilter(); $event.stopPropagation()"
-        >
-          <fa-icon [icon]="['fas', 'times']"></fa-icon>
-        </button>
+        <div class="flex items-center gap-1">
+          <span class="font-medium truncate max-w-[120px]">{{
+            currentFilter()
+          }}</span>
+          <button
+            class="btn btn-circle btn-ghost btn-xs hover:bg-base-300/50"
+            (click)="clearFilter(); $event.stopPropagation()"
+          >
+            <fa-icon
+              [icon]="['fas', 'times']"
+              class="text-xs opacity-70"
+            ></fa-icon>
+          </button>
+        </div>
         } @else { Filter }
       </button>
 
       @if (filterOpen) {
       <div
-        class="absolute right-0 mt-2 p-3 bg-base-100 rounded-lg shadow-lg border border-base-300 z-10"
+        class="absolute right-0 mt-2 p-4 bg-base-100 rounded-xl shadow-xl border border-base-200 z-20 w-[280px] backdrop-blur-sm bg-opacity-95 animate-in fade-in slide-in-from-top-2 duration-200"
       >
-        <div class="join">
-          <input
-            type="text"
-            [(ngModel)]="filterTag"
-            placeholder="Enter a tag..."
-            class="input input-sm input-bordered join-item"
-            (keyup)="applyFilter($event)"
-          />
-          <button
-            class="btn btn-sm join-item btn-primary"
-            [disabled]="!filterTag.trim()"
-            (click)="applyFilterByButton()"
-          >
-            Apply
-          </button>
+        <div class="space-y-3">
+          <div class="text-sm font-medium text-base-content/70 mb-1">
+            Filter by tag
+          </div>
+          <div class="join w-full">
+            <div class="relative flex-1">
+              <fa-icon
+                [icon]="['fas', 'search']"
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-base-content/50"
+              ></fa-icon>
+              <input
+                type="text"
+                [(ngModel)]="filterTag"
+                placeholder="Enter a tag..."
+                class="input input-sm input-bordered join-item w-full pl-9"
+                (keyup)="applyFilter($event)"
+              />
+            </div>
+            <button
+              class="btn btn-sm join-item btn-primary"
+              [disabled]="!filterTag.trim()"
+              (click)="applyFilterByButton()"
+            >
+              Apply
+            </button>
+          </div>
         </div>
       </div>
       }
