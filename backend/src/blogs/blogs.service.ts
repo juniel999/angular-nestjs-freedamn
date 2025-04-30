@@ -68,7 +68,10 @@ export class BlogsService {
         .sort(sortOptions)
         .skip(skip)
         .limit(limit)
-        .populate('author', 'username firstName lastName avatar')
+        .populate(
+          'author',
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        )
         .exec(),
       this.blogModel.countDocuments(query).exec(),
     ]);
@@ -88,7 +91,10 @@ export class BlogsService {
         published: true,
       })
       .sort({ createdAt: -1 })
-      .populate('author', 'username firstName lastName avatar')
+      .populate(
+        'author',
+        'username firstName lastName avatar pronouns title location bio email posts followers following',
+      )
       .exec();
   }
 
@@ -103,7 +109,10 @@ export class BlogsService {
         published: true,
       })
       .sort({ createdAt: -1 })
-      .populate('author', 'username firstName lastName avatar')
+      .populate(
+        'author',
+        'username firstName lastName avatar pronouns title location bio email posts followers following',
+      )
       .exec();
   }
 
@@ -114,7 +123,10 @@ export class BlogsService {
       .find({ published: true })
       .sort({ likes: -1, viewCount: -1, createdAt: -1 })
       .limit(10)
-      .populate('author', 'username firstName lastName avatar')
+      .populate(
+        'author',
+        'username firstName lastName avatar pronouns title location bio email posts followers following',
+      )
       .exec();
   }
 
@@ -140,7 +152,10 @@ export class BlogsService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('author', 'username firstName lastName avatar')
+        .populate(
+          'author',
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        )
         .exec(),
       this.blogModel.countDocuments(query).exec(),
     ]);
@@ -168,29 +183,28 @@ export class BlogsService {
             localField: 'author',
             foreignField: '_id',
             as: 'author',
+            pipeline: [
+              {
+                $project: {
+                  _id: 1,
+                  username: 1,
+                  firstName: 1,
+                  lastName: 1,
+                  avatar: 1,
+                  pronouns: 1,
+                  title: 1,
+                  location: 1,
+                  bio: 1,
+                  email: 1,
+                  posts: 1,
+                  followers: 1,
+                  following: 1,
+                },
+              },
+            ],
           },
         },
         { $unwind: '$author' },
-        {
-          $project: {
-            _id: 1,
-            title: 1,
-            content: 1,
-            excerpt: 1,
-            coverImage: 1,
-            tags: 1,
-            published: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            likes: 1,
-            viewCount: 1,
-            'author._id': 1,
-            'author.username': 1,
-            'author.firstName': 1,
-            'author.lastName': 1,
-            'author.avatar': 1,
-          },
-        },
       ])
       .exec();
 
@@ -227,7 +241,10 @@ export class BlogsService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('author', 'username firstName lastName avatar')
+        .populate(
+          'author',
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        )
         .exec(),
       this.blogModel.countDocuments(query).exec(),
     ]);
@@ -248,7 +265,10 @@ export class BlogsService {
     // Return the blog with populated author and comments information
     return this.blogModel
       .findById(id)
-      .populate('author', 'username firstName lastName avatar')
+      .populate(
+        'author',
+        'username firstName lastName avatar pronouns title location bio email posts followers following',
+      )
       .populate({
         path: 'comments',
         populate: {

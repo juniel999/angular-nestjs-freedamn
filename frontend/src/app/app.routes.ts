@@ -8,6 +8,7 @@ import { MainLayoutComponent } from './layouts/main-layout/main-layout.component
 import { ProfileComponent } from './pages/profile/profile.component';
 import { publicOnlyGuard } from './guards/public-only.guard';
 import { HomeComponent } from './pages/home/home.component';
+import { ViewBlogComponent } from './pages/view-blog/view-blog.component';
 
 export const routes: Routes = [
   {
@@ -22,6 +23,10 @@ export const routes: Routes = [
         path: 'compose',
         component: BlogComposeComponent,
         canActivate: [onboardingCompletedGuard],
+      },
+      {
+        path: 'blogs/:id',
+        component: ViewBlogComponent,
       },
       {
         path: 'profile/:username',
