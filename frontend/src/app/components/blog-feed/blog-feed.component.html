@@ -150,6 +150,8 @@
           >Loading more stories...</span
         >
       </div>
+      } @else if (currentBlogs()!.posts.length >= currentBlogs()!.total) {
+      <div class="text-sm text-base-content/70">No more posts available.</div>
       }
     </div>
   </div>
