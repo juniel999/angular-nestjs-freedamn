@@ -9,6 +9,14 @@ export type BlogPostType = {
     lastName: string;
     username: string;
     avatar?: string;
+    email: string;
+    pronouns?: string;
+    title?: string;
+    location?: string;
+    bio?: string;
+    posts?: any[];
+    followers?: any[];
+    following?: any[];
   };
   published: boolean;
   coverImage?: string;

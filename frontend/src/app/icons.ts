@@ -25,6 +25,7 @@ import {
   faIdCard,
   faQuoteLeft,
   faChevronDown,
+  faChevronUp,
   faHeart,
   faComment,
   faBookmark,
@@ -51,6 +52,9 @@ import {
   faHeart as faHeartRegular,
   faBookmark as faBookmarkRegular,
   faComment as faCommentRegular,
+  faUser as faUserRegular,
+  faPlusSquare as faPlusSquareRegular,
+  faArrowAltCircleRight as faArrowAltCircleRightRegular,
 } from '@fortawesome/free-regular-svg-icons';
 import {
   faTwitter,
@@ -95,6 +99,7 @@ export function initializeIcons(library: FaIconLibrary) {
     faInstagram,
     faLinkedin,
     faChevronDown,
+    faChevronUp,
     faHeart,
     faHeartRegular,
     faComment,
@@ -116,6 +121,9 @@ export function initializeIcons(library: FaIconLibrary) {
     faGlobe,
     faArrowUpRightFromSquare,
     faCamera,
-    faCommentRegular
+    faCommentRegular,
+    faUserRegular,
+    faPlusSquareRegular,
+    faArrowAltCircleRightRegular
   );
 }

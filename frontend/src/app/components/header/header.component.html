@@ -100,7 +100,7 @@
           >
             <li>
               <a routerLink="/profile">
-                <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>
+                <fa-icon [icon]="['far', 'user']" class="mr-2"></fa-icon>
                 Profile
               </a>
             </li>
@@ -113,7 +113,7 @@
             <li>
               <a (click)="logout()">
                 <fa-icon
-                  [icon]="['fas', 'sign-out-alt']"
+                  [icon]="['far', 'arrow-alt-circle-right']"
                   class="mr-2"
                 ></fa-icon>
                 Logout
@@ -130,40 +130,38 @@
 <!-- Mobile Bottom Navigation - Only for logged-in users -->
 @if (isLoggedIn) {
 <nav
-  class="sm:hidden fixed bottom-0 left-0 right-0 bg-base-100 shadow-lg border-t border-base-200 z-[999]"
+  class="sm:hidden fixed bottom-0 left-0 right-0 bg-black text-primary shadow-lg border-t border-base-200 z-[999]"
 >
   <div class="flex justify-around items-center py-2">
     <a routerLink="/profile" class="flex flex-col items-center p-2">
-      <fa-icon [icon]="['fas', 'user']" size="lg"></fa-icon>
-      <span class="text-xs mt-1">Profile</span>
+      <fa-icon [icon]="['far', 'user']" size="xl"></fa-icon>
+      <!-- <span class="text-xs mt-1">Profile</span> -->
     </a>
 
     <a class="flex flex-col items-center p-2">
       <div class="indicator">
-        <fa-icon [icon]="['far', 'bell']" size="lg"></fa-icon>
-        <span class="badge badge-xs badge-primary indicator-item">3</span>
+        <fa-icon [icon]="['far', 'bell']" size="xl"></fa-icon>
+        <!-- <span class="badge badge-xs badge-primary indicator-item">3</span> -->
       </div>
-      <span class="text-xs mt-1">Alerts</span>
+      <!-- <span class="text-xs mt-1">Alerts</span> -->
     </a>
 
     <a routerLink="/compose" class="flex flex-col items-center p-2">
       <fa-icon
-        [icon]="['fas', 'plus']"
-        size="lg"
+        [icon]="['far', 'plus-square']"
+        size="xl"
         class="text-primary-content"
       ></fa-icon>
-
-      <span class="text-xs mt-1">Create</span>
+      <!-- <span class="text-xs mt-1">Create</span> -->
     </a>
 
     <a routerLink="/settings" class="flex flex-col items-center p-2">
-      <fa-icon [icon]="['fas', 'cog']" size="lg"></fa-icon>
-      <span class="text-xs mt-1">Settings</span>
+      <fa-icon [icon]="['fas', 'cog']" size="xl"></fa-icon>
     </a>
 
     <button (click)="logout()" class="flex flex-col items-center p-2">
-      <fa-icon [icon]="['fas', 'sign-out-alt']" size="lg"></fa-icon>
-      <span class="text-xs mt-1">Logout</span>
+      <fa-icon [icon]="['far', 'arrow-alt-circle-right']" size="xl"></fa-icon>
+      <!-- <span class="text-xs mt-1">Logout</span> -->
     </button>
   </div>
 </nav>
@@ -227,7 +225,8 @@
       } @if (isLoggedIn) {
       <li>
         <a routerLink="/compose" class="btn btn-primary justify-start">
-          <fa-icon [icon]="['fas', 'plus']" class="mr-2"></fa-icon>Compose
+          <fa-icon [icon]="['far', 'plus-square']" class="mr-2"></fa-icon
+          >Compose
         </a>
       </li>
       <li class="mt-2">
@@ -237,7 +236,7 @@
       </li>
       <li>
         <a routerLink="/profile">
-          <fa-icon [icon]="['fas', 'user']" class="mr-2"></fa-icon>Profile
+          <fa-icon [icon]="['far', 'user']" class="mr-2"></fa-icon>Profile
         </a>
       </li>
       <li>
@@ -247,7 +246,10 @@
       </li>
       <li>
         <a (click)="logout()">
-          <fa-icon [icon]="['fas', 'sign-out-alt']" class="mr-2"></fa-icon
+          <fa-icon
+            [icon]="['far', 'arrow-alt-circle-right']"
+            class="mr-2"
+          ></fa-icon
           >Logout
         </a>
       </li>
