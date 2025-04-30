@@ -152,21 +152,16 @@ export class BlogsService {
     page = 1,
     limit = 10,
   ): Promise<{ posts: Blog[]; total: number; page: number }> {
-    const skip = (page - 1) * limit;
-
     // Get total count of published blogs for pagination info
     const total = await this.blogModel
       .countDocuments({ published: true })
       .exec();
 
-    // Get blogs with random sorting but consistent pagination
+    // Get random blogs using $sample
     const posts = await this.blogModel
       .aggregate([
         { $match: { published: true } },
-        { $sort: { createdAt: -1 } }, // First sort by date to ensure consistency
-        { $sort: { viewCount: -1 } }, // Then by popularity
-        { $skip: skip },
-        { $limit: limit },
+        { $sample: { size: limit } }, // Use $sample for true randomization
         {
           $lookup: {
             from: 'users',
