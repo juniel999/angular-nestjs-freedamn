@@ -161,9 +161,9 @@ export class ProfileComponent {
 
   hasUserLiked(blog: BlogPostType): boolean {
     if (!this.isLoggedIn()) return false;
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem('userProfile');
     if (!user) return false;
-    const userId = JSON.parse(user).sub;
+    const userId = JSON.parse(user).id;
     return blog.likes.includes(userId);
   }
 

@@ -5,6 +5,7 @@ import {
   inject,
   OnInit,
   OnDestroy,
+  signal,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -39,6 +40,7 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
   filterTag = '';
   firstName: string = '';
   isLoggedIn = false;
+  isCurrentlyLiked = signal(false);
 
   // Computed properties from blog service
   loading = this.blogService.loading;
@@ -212,15 +214,17 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
+    console.log(this.isCurrentlyLiked());
+
     if (!this.isLoggedIn) {
       this.toastService.show('Please sign in to like posts', 'error');
       return;
     }
 
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem('userProfile');
     if (!user) return;
 
-    const userId = JSON.parse(user).sub;
+    const userId = JSON.parse(user).id;
     const currentlyLiked = blog.likes.includes(userId);
 
     // Only proceed if there's a state change
@@ -229,6 +233,7 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
         next: (updatedBlog) => {
           // Update the blog in the local state
           this.blogService.updateBlogInState(updatedBlog);
+          this.isCurrentlyLiked.set(false);
         },
         error: () => {
           this.toastService.show('Failed to unlike post', 'error');
@@ -239,6 +244,7 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
         next: (updatedBlog) => {
           // Update the blog in the local state
           this.blogService.updateBlogInState(updatedBlog);
+          this.isCurrentlyLiked.set(true);
         },
         error: () => {
           this.toastService.show('Failed to like post', 'error');
@@ -252,9 +258,9 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
    */
   hasUserLiked(blog: BlogPostType): boolean {
     if (!this.isLoggedIn) return false;
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem('userProfile');
     if (!user) return false;
-    const userId = JSON.parse(user).sub;
+    const userId = JSON.parse(user).id;
     return blog.likes.includes(userId);
   }
 

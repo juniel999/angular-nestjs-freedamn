@@ -90,11 +90,11 @@
             [title]="isLoggedIn ? 'Like this post' : 'Sign in to like posts'"
           >
             <fa-icon
-              [icon]="['far', 'heart']"
+              [icon]="hasUserLiked(blog) ? ['fas', 'heart'] : ['far', 'heart']"
               class="text-xl text-primary-content"
               [class.text-error]="isLoggedIn && hasUserLiked(blog)"
             ></fa-icon>
-            <span class="text-xs">{{ blog.likes.length || 0 }}</span>
+            <span class="text-xs">{{ blog.likes.length || 0 }} likes</span>
           </button>
 
           <a
@@ -106,9 +106,9 @@
               [icon]="['far', 'comment']"
               class="text-xl text-primary-content"
             ></fa-icon>
-            <span class="text-xs">{{
-              blog.comments ? blog.comments.length : 0
-            }}</span>
+            <span class="text-xs"
+              >{{ blog.comments ? blog.comments.length : 0 }} comments</span
+            >
           </a>
         </div>
 

@@ -69,13 +69,14 @@
 
         <!-- Engagement -->
         <div class="flex items-center gap-4 pt-4">
-          <button
-            class="btn btn-ghost gap-2"
-            [class.text-error]="hasUserLiked()"
-            (click)="toggleLike()"
-          >
+          <button class="btn btn-ghost gap-2" (click)="toggleLike()">
             <fa-icon
-              [icon]="hasUserLiked() ? ['fas', 'heart'] : ['far', 'heart']"
+              [icon]="
+                blog()?.likes?.includes(userId())
+                  ? ['fas', 'heart']
+                  : ['far', 'heart']
+              "
+              [class.text-error]="blog()?.likes?.includes(userId())"
             ></fa-icon>
             {{ blog()?.likes?.length ?? 0 }} likes
           </button>

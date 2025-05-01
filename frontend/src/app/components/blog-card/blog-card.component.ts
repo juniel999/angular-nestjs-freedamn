@@ -38,21 +38,10 @@ export class BlogCardComponent {
   }
 
   getExcerpt(content: string): string {
-    // Strip HTML tags
     const plainText = content.replace(/<[^>]*>?/gm, '');
-    const maxLength = 150;
-
-    if (plainText.length <= maxLength) {
-      return plainText;
-    }
-
-    // Find the last space before maxLength
-    const lastSpace = plainText.substring(0, maxLength).lastIndexOf(' ');
-    const excerpt = plainText.substring(
-      0,
-      lastSpace > 0 ? lastSpace : maxLength
-    );
-    return `${excerpt}...`;
+    if (plainText.length <= 150) return plainText;
+    const lastSpace = plainText.substring(0, 150).lastIndexOf(' ');
+    return `${plainText.substring(0, lastSpace > 0 ? lastSpace : 150)}...`;
   }
 
   formatTimeAgo(dateString: string): string {

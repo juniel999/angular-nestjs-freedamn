@@ -24,11 +24,13 @@ export class ViewBlogComponent {
   isLoading = signal(true);
   error = signal<string | null>(null);
   isLoggedIn = signal(false);
+  userId = signal<string>('');
 
   ngOnInit() {
     // Check authentication status
     this.authService.currentUser$.subscribe((user) => {
       this.isLoggedIn.set(!!user);
+      this.userId.set(user ? user.sub : '');
     });
 
     // Get blog ID from route params and load blog
@@ -56,14 +58,6 @@ export class ViewBlogComponent {
     });
   }
 
-  hasUserLiked(): boolean {
-    if (!this.isLoggedIn() || !this.blog()) return false;
-    const user = localStorage.getItem('user');
-    if (!user) return false;
-    const userId = JSON.parse(user).sub;
-    return this.blog()!.likes.includes(userId);
-  }
-
   toggleLike() {
     if (!this.isLoggedIn()) {
       this.toastService.show('Please sign in to like posts', 'error');
@@ -73,7 +67,11 @@ export class ViewBlogComponent {
     const blog = this.blog();
     if (!blog) return;
 
-    const currentlyLiked = this.hasUserLiked();
+    const user = localStorage.getItem('userProfile');
+    if (!user) return;
+
+    const userId = JSON.parse(user).id;
+    const currentlyLiked = blog.likes.includes(userId);
 
     // Only proceed if there's a state change
     if (currentlyLiked) {
