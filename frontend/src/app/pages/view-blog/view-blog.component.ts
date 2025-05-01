@@ -73,7 +73,10 @@ export class ViewBlogComponent {
     const blog = this.blog();
     if (!blog) return;
 
-    if (this.hasUserLiked()) {
+    const currentlyLiked = this.hasUserLiked();
+
+    // Only proceed if there's a state change
+    if (currentlyLiked) {
       this.blogService.unlikeBlog(blog._id).subscribe({
         next: (updatedBlog) => {
           this.blog.set(updatedBlog);

@@ -74,7 +74,9 @@
             [class.text-error]="hasUserLiked()"
             (click)="toggleLike()"
           >
-            <fa-icon [icon]="['far', 'heart']"></fa-icon>
+            <fa-icon
+              [icon]="hasUserLiked() ? ['fas', 'heart'] : ['far', 'heart']"
+            ></fa-icon>
             {{ blog()?.likes?.length ?? 0 }} likes
           </button>
           <button class="btn btn-ghost gap-2">

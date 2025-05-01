@@ -2,6 +2,7 @@ import {
   Injectable,
   ForbiddenException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -325,7 +326,15 @@ export class BlogsService {
         { $addToSet: { likes: userIdObj } },
       );
 
-      const updatedBlog = await this.blogModel.findById(blogId).exec();
+      // Return populated blog data
+      const updatedBlog = await this.blogModel
+        .findById(blogId)
+        .populate(
+          'author',
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        )
+        .exec();
+
       if (!updatedBlog) {
         throw new NotFoundException('Blog not found after update');
       }
@@ -347,13 +356,27 @@ export class BlogsService {
       throw new NotFoundException('Blog not found');
     }
 
+    // Check if user has liked the blog
+    const hasLiked = blog.likes.some((id) => id.toString() === userId);
+    if (!hasLiked) {
+      throw new BadRequestException('You have not liked this blog');
+    }
+
     // Use updateOne to properly handle the array update
     await this.blogModel.updateOne(
       { _id: blogId },
       { $pull: { likes: new Types.ObjectId(userId) } },
     );
 
-    const updatedBlog = await this.blogModel.findById(blogId).exec();
+    // Return populated blog data
+    const updatedBlog = await this.blogModel
+      .findById(blogId)
+      .populate(
+        'author',
+        'username firstName lastName avatar pronouns title location bio email posts followers following',
+      )
+      .exec();
+
     if (!updatedBlog) {
       throw new NotFoundException('Blog not found after update');
     }

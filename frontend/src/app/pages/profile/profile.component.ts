@@ -176,21 +176,23 @@ export class ProfileComponent {
       return;
     }
 
-    // Simple check if the user already liked this post
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem('userProfile');
     if (!user) return;
 
-    const userId = JSON.parse(user).sub;
-    const hasLiked = blog.likes.includes(userId);
+    const userId = JSON.parse(user).id;
+    const currentlyLiked = blog.likes.includes(userId);
 
-    if (hasLiked) {
+    // Only proceed if there's a state change
+    if (currentlyLiked) {
       this.blogService.unlikeBlog(blog._id).subscribe({
         next: (updatedBlog) => {
-          const posts = this.userPosts();
+          // Update both global and local state
+          this.blogService.updateBlogInState(updatedBlog);
+          const posts = [...this.userPosts()];
           const index = posts.findIndex((p) => p._id === blog._id);
           if (index !== -1) {
             posts[index] = updatedBlog;
-            this.userPosts.set([...posts]);
+            this.userPosts.set(posts);
           }
         },
         error: () => {
@@ -200,11 +202,13 @@ export class ProfileComponent {
     } else {
       this.blogService.likeBlog(blog._id).subscribe({
         next: (updatedBlog) => {
-          const posts = this.userPosts();
+          // Update both global and local state
+          this.blogService.updateBlogInState(updatedBlog);
+          const posts = [...this.userPosts()];
           const index = posts.findIndex((p) => p._id === blog._id);
           if (index !== -1) {
             posts[index] = updatedBlog;
-            this.userPosts.set([...posts]);
+            this.userPosts.set(posts);
           }
         },
         error: () => {
