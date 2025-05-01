@@ -6,17 +6,11 @@ import { BlogService } from '../../services/blog.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { BlogPostType } from '../../types/blog-post.type';
-import { SocialLinkButtonComponent } from '../../components/social-link-button/social-link-button.component';
 
 @Component({
   selector: 'app-view-blog',
   standalone: true,
-  imports: [
-    CommonModule,
-    FontAwesomeModule,
-    RouterModule,
-    SocialLinkButtonComponent,
-  ],
+  imports: [CommonModule, FontAwesomeModule, RouterModule],
   templateUrl: './view-blog.component.html',
 })
 export class ViewBlogComponent {
