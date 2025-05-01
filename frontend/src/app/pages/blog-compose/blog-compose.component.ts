@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   Validators,
-  FormArray,
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,19 +13,49 @@ import { UserService } from '../../services/user.service';
 import { finalize } from 'rxjs/operators';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TagData } from '../../types/tag.type';
+import { QuillModule, QuillEditorComponent } from 'ngx-quill';
 
 @Component({
   selector: 'app-blog-compose',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    FontAwesomeModule,
+    QuillModule,
+  ],
   templateUrl: './blog-compose.component.html',
 })
 export class BlogComposeComponent implements OnInit {
+  @ViewChild('quillEditor') quillEditor?: QuillEditorComponent;
+
   blogForm: FormGroup;
   availableTags: TagData[] = [];
   isSubmitting = false;
-  uploadedImages: { url: string; file: File }[] = [];
   imageUploading = false;
+
+  quillConfig = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ header: 1 }, { header: 2 }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ script: 'sub' }, { script: 'super' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      [{ direction: 'rtl' }],
+      [{ size: ['small', false, 'large', 'huge'] }],
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      [{ color: [] }, { background: [] }],
+      [{ font: [] }],
+      [{ align: [] }],
+      ['clean'],
+      ['link', 'image', 'video'],
+    ],
+    imageHandler: this.imageHandler.bind(this),
+  };
+
+  private uploadedImages: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -42,9 +71,6 @@ export class BlogComposeComponent implements OnInit {
     this.loadAvailableTags();
   }
 
-  /**
-   * Create the blog form with validation
-   */
   private createBlogForm(): FormGroup {
     return this.fb.group({
       title: [
@@ -59,13 +85,9 @@ export class BlogComposeComponent implements OnInit {
       tags: [[], [Validators.required, Validators.minLength(1)]],
       published: [true],
       coverImage: [''],
-      images: this.fb.array([], [Validators.required, Validators.minLength(1)]),
     });
   }
 
-  /**
-   * Load available tags for selection
-   */
   loadAvailableTags(): void {
     this.userService.getAllTags().subscribe({
       next: (tags) => {
@@ -78,31 +100,6 @@ export class BlogComposeComponent implements OnInit {
     });
   }
 
-  /**
-   * Get the images form array
-   */
-  get imagesArray(): FormArray {
-    return this.blogForm.get('images') as FormArray;
-  }
-
-  /**
-   * Handle image file selection
-   */
-  onImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-
-    const file = input.files[0];
-
-    // Validate file
-    if (!this.validateImage(file)) return;
-
-    this.uploadImage(file);
-  }
-
-  /**
-   * Validate that file is an image and not too large
-   */
   private validateImage(file: File): boolean {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -123,113 +120,27 @@ export class BlogComposeComponent implements OnInit {
     return true;
   }
 
-  /**
-   * Upload image to server
-   */
-  private uploadImage(file: File): void {
-    this.imageUploading = true;
-
-    this.blogService
-      .uploadImage(file)
-      .pipe(
-        finalize(() => {
-          this.imageUploading = false;
-        })
-      )
-      .subscribe({
-        next: (response) => {
-          // Add image URL to form array
-          this.imagesArray.push(this.fb.control(response.url));
-
-          // Store uploaded image info
-          this.uploadedImages.push({
-            url: response.url,
-            file: file,
-          });
-
-          // If this is the first image, set it as cover image
-          if (this.uploadedImages.length === 1) {
-            this.setCoverImage(response.url);
-          }
-
-          this.toastService.show('Image uploaded successfully');
-        },
-        error: (err) => {
-          this.toastService.show('Failed to upload image', 'error');
-          console.error('Error uploading image:', err);
-        },
-      });
-  }
-
-  /**
-   * Remove an uploaded image
-   */
-  removeImage(index: number): void {
-    const imageUrl = this.uploadedImages[index].url;
-
-    // If removing the cover image, reset or select another image as cover
-    if (this.blogForm.get('coverImage')?.value === imageUrl) {
-      // If there are other images, set the first one as cover
-      if (this.uploadedImages.length > 1) {
-        const newCoverIndex = index === 0 ? 1 : 0;
-        this.setCoverImage(this.uploadedImages[newCoverIndex].url);
-      } else {
-        this.blogForm.patchValue({ coverImage: '' });
-      }
-    }
-
-    this.imagesArray.removeAt(index);
-    this.uploadedImages.splice(index, 1);
-  }
-
-  /**
-   * Set cover image from uploaded images
-   */
-  setCoverImage(imageUrl: string): void {
-    this.blogForm.patchValue({
-      coverImage: imageUrl,
-    });
-    this.toastService.show('Cover image updated');
-  }
-
-  /**
-   * Add or remove a tag from selection
-   */
   toggleTag(tagId: string, tagName: string): void {
     const currentTags = this.blogForm.get('tags')?.value as string[];
 
     if (currentTags.includes(tagName)) {
-      // Remove tag
       this.blogForm.patchValue({
         tags: currentTags.filter((tag) => tag !== tagName),
       });
     } else {
-      // Add tag
       this.blogForm.patchValue({
         tags: [...currentTags, tagName],
       });
     }
   }
 
-  /**
-   * Submit the blog post
-   */
   onSubmit(): void {
     if (this.blogForm.invalid) {
-      // Mark all fields as touched to trigger validation messages
       Object.keys(this.blogForm.controls).forEach((key) => {
         const control = this.blogForm.get(key);
         control?.markAsTouched();
       });
 
-      // Special validation for images array
-      if (this.imagesArray.length === 0) {
-        this.imagesArray.markAsTouched();
-        this.toastService.show('At least one image is required', 'error');
-        return;
-      }
-
-      // Show general validation error
       this.toastService.show('Please fix the errors in the form', 'error');
       return;
     }
@@ -242,18 +153,37 @@ export class BlogComposeComponent implements OnInit {
       return;
     }
 
+    // Extract all images from the content using regex
+    const content = this.blogForm.get('content')?.value;
+    const imgRegex = /<img[^>]+src="([^">]+)"/g;
+    const images = [];
+    let match;
+
+    while ((match = imgRegex.exec(content)) !== null) {
+      images.push(match[1]);
+    }
+
+    if (images.length === 0) {
+      this.toastService.show(
+        'Please add at least one image to your post',
+        'error'
+      );
+      return;
+    }
+
     this.isSubmitting = true;
 
-    // Prepare blog data
+    // Only send image URLs that were actually uploaded through our service
+    const validImages = images.filter((img) =>
+      this.uploadedImages.includes(img)
+    );
+
     const blogData = {
       ...this.blogForm.value,
-      images: this.imagesArray.value,
+      images: validImages,
+      coverImage: validImages[0] || '', // Use first valid image as cover
+      content: this.blogForm.get('content')?.value.trim(), // Trim content to remove unnecessary whitespace
     };
-
-    // If no cover image is selected, use the first image
-    if (!blogData.coverImage && this.imagesArray.length > 0) {
-      blogData.coverImage = this.imagesArray.at(0)?.value;
-    }
 
     this.blogService
       .createBlog(blogData)
@@ -265,12 +195,83 @@ export class BlogComposeComponent implements OnInit {
       .subscribe({
         next: (newBlog) => {
           this.toastService.show('Blog post created successfully');
-          // Navigate to the new blog post
           this.router.navigate(['/blog', newBlog._id]);
         },
         error: (err) => {
-          this.toastService.show('Failed to create blog post', 'error');
+          const errorMessage =
+            err.status === 413
+              ? 'Blog post content is too large. Try reducing the number of images or content size.'
+              : 'Failed to create blog post';
+          this.toastService.show(errorMessage, 'error');
           console.error('Error creating blog post:', err);
+        },
+      });
+  }
+
+  imageHandler(): void {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (file && this.validateImage(file)) {
+        this.uploadContentImage(file);
+      }
+    };
+  }
+
+  private uploadContentImage(file: File): void {
+    this.imageUploading = true;
+
+    this.blogService
+      .uploadImage(file)
+      .pipe(
+        finalize(() => {
+          this.imageUploading = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (this.quillEditor?.quillEditor) {
+            const range = this.quillEditor.quillEditor.getSelection(true) as {
+              index: number;
+            };
+            if (range) {
+              this.quillEditor.quillEditor.insertEmbed(
+                range.index,
+                'image',
+                response.url
+              );
+              // Add to uploaded images array
+              this.uploadedImages.push(response.url);
+              this.toastService.show('Image inserted successfully');
+            } else {
+              const length = this.quillEditor.quillEditor.getLength();
+              this.quillEditor.quillEditor.insertEmbed(
+                length - 1,
+                'image',
+                response.url
+              );
+              // Add to uploaded images array
+              this.uploadedImages.push(response.url);
+              this.toastService.show('Image inserted at the end');
+            }
+
+            // Set first uploaded image as cover if not already set
+            if (this.uploadedImages.length === 1) {
+              this.blogForm.patchValue({
+                coverImage: response.url,
+              });
+            }
+          } else {
+            this.toastService.show('Editor not initialized', 'error');
+          }
+        },
+        error: (err) => {
+          this.toastService.show('Failed to upload image', 'error');
+          console.error('Error uploading image:', err);
         },
       });
   }

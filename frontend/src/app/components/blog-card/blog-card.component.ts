@@ -31,6 +31,8 @@ export class BlogCardComponent {
     if (!this.isLoggedIn) {
       event.preventDefault();
       event.stopPropagation();
+      // return to login page if not logged in
+      this.router.navigate(['/signin']);
       this.toastService.show('Please sign in to like posts', 'error');
       return;
     }
