@@ -39,8 +39,12 @@ export class BlogCardComponent {
     this.onLikeClick(blog, event);
   }
 
-  getExcerpt(content: string): string {
-    const plainText = content.replace(/<[^>]*>?/gm, '');
+  getExcerpt(html: string): string {
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const plainText = tempDiv.textContent || tempDiv.innerText || '';
+
     if (plainText.length <= 150) return plainText;
     const lastSpace = plainText.substring(0, 150).lastIndexOf(' ');
     return `${plainText.substring(0, lastSpace > 0 ? lastSpace : 150)}...`;

@@ -36,15 +36,6 @@
       } @else if (blog()) {
       <!-- Blog Content -->
       <article class="space-y-6">
-        <!-- Cover Image -->
-        <div class="w-full h-64 bg-base-200 rounded-lg overflow-hidden">
-          <img
-            [src]="blog()?.coverImage ?? blog()?.images?.[0] ?? ''"
-            [alt]="blog()?.title ?? ''"
-            class="w-full h-full object-cover"
-          />
-        </div>
-
         <!-- Title & Meta -->
         <div class="space-y-4">
           <h1 class="text-3xl md:text-4xl font-bold">{{ blog()?.title }}</h1>
@@ -56,9 +47,10 @@
         </div>
 
         <!-- Content -->
-        <div class="prose prose-lg max-w-none">
-          {{ blog()?.content }}
-        </div>
+        <div
+          class="prose prose-lg max-w-none"
+          [innerHTML]="blog()?.safeHtml"
+        ></div>
 
         <!-- Tags -->
         <div class="flex flex-wrap gap-2 pt-4">

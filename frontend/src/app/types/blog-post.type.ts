@@ -2,6 +2,7 @@ export type BlogPostType = {
   _id: string;
   title: string;
   content: string;
+  contentHtml: string;
   tags: string[];
   author: {
     _id: string;

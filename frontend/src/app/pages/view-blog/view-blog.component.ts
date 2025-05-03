@@ -6,6 +6,11 @@ import { BlogService } from '../../services/blog.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { BlogPostType } from '../../types/blog-post.type';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
+interface ExtendedBlogPost extends BlogPostType {
+  safeHtml: SafeHtml;
+}
 
 @Component({
   selector: 'app-view-blog',
@@ -19,8 +24,9 @@ export class ViewBlogComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private toastService = inject(ToastService);
+  private sanitizer = inject(DomSanitizer);
 
-  blog = signal<BlogPostType | null>(null);
+  blog = signal<ExtendedBlogPost | null>(null);
   isLoading = signal(true);
   error = signal<string | null>(null);
   isLoggedIn = signal(false);
@@ -47,7 +53,12 @@ export class ViewBlogComponent {
   private loadBlog(id: string) {
     this.blogService.getBlogById(id).subscribe({
       next: (blog) => {
-        this.blog.set(blog);
+        // Add sanitized HTML content
+        const extendedBlog: ExtendedBlogPost = {
+          ...blog,
+          safeHtml: this.sanitizer.bypassSecurityTrustHtml(blog.contentHtml),
+        };
+        this.blog.set(extendedBlog);
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -60,6 +71,7 @@ export class ViewBlogComponent {
 
   toggleLike() {
     if (!this.isLoggedIn()) {
+      this.router.navigate(['/signin']);
       this.toastService.show('Please sign in to like posts', 'error');
       return;
     }
@@ -77,7 +89,12 @@ export class ViewBlogComponent {
     if (currentlyLiked) {
       this.blogService.unlikeBlog(blog._id).subscribe({
         next: (updatedBlog) => {
-          this.blog.set(updatedBlog);
+          this.blog.set({
+            ...updatedBlog,
+            safeHtml: this.sanitizer.bypassSecurityTrustHtml(
+              updatedBlog.contentHtml
+            ),
+          });
         },
         error: () => {
           this.toastService.show('Failed to unlike post', 'error');
@@ -86,7 +103,12 @@ export class ViewBlogComponent {
     } else {
       this.blogService.likeBlog(blog._id).subscribe({
         next: (updatedBlog) => {
-          this.blog.set(updatedBlog);
+          this.blog.set({
+            ...updatedBlog,
+            safeHtml: this.sanitizer.bypassSecurityTrustHtml(
+              updatedBlog.contentHtml
+            ),
+          });
         },
         error: () => {
           this.toastService.show('Failed to like post', 'error');

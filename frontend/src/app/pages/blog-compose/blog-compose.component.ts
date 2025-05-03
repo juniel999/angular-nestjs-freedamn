@@ -153,36 +153,22 @@ export class BlogComposeComponent implements OnInit {
       return;
     }
 
-    // Extract all images from the content using regex
-    const content = this.blogForm.get('content')?.value;
-    const imgRegex = /<img[^>]+src="([^">]+)"/g;
-    const images = [];
-    let match;
+    this.isSubmitting = true;
 
-    while ((match = imgRegex.exec(content)) !== null) {
-      images.push(match[1]);
-    }
+    // Get the Quill editor content in Delta format
+    const deltaContent = this.quillEditor?.quillEditor?.getContents();
 
-    if (images.length === 0) {
-      this.toastService.show(
-        'Please add at least one image to your post',
-        'error'
-      );
+    if (!deltaContent) {
+      this.toastService.show('Content cannot be empty', 'error');
+      this.isSubmitting = false;
       return;
     }
 
-    this.isSubmitting = true;
-
-    // Only send image URLs that were actually uploaded through our service
-    const validImages = images.filter((img) =>
-      this.uploadedImages.includes(img)
-    );
-
     const blogData = {
       ...this.blogForm.value,
-      images: validImages,
-      coverImage: validImages[0] || '', // Use first valid image as cover
-      content: this.blogForm.get('content')?.value.trim(), // Trim content to remove unnecessary whitespace
+      content: deltaContent, // Send the Delta format
+      images: this.uploadedImages, // Send all uploaded image URLs
+      coverImage: this.uploadedImages[0] || '', // Use first image as cover if available
     };
 
     this.blogService
