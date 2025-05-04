@@ -7,8 +7,11 @@ export class Blog extends Document {
   @Prop({ required: true })
   title: string;
 
+  @Prop({ type: Object, required: true })
+  content: any; // Store Delta format
+
   @Prop({ required: true })
-  content: string;
+  contentHtml: string; // Store HTML version
 
   @Prop({ type: [String], default: [] })
   tags: string[];
@@ -28,7 +31,10 @@ export class Blog extends Document {
   @Prop({ default: 0 })
   viewCount: number;
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }], default: [] })
+  @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
+    default: [],
+  })
   likes: User[];
 }
 

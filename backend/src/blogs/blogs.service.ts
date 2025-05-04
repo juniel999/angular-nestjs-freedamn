@@ -2,6 +2,7 @@ import {
   Injectable,
   ForbiddenException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -21,16 +22,133 @@ export class BlogsService {
     private cloudinaryService: CloudinaryService,
   ) {}
 
+  private async processImagesInContent(content: any): Promise<{
+    processedContent: any;
+    processedContentHtml: string;
+    imageUrls: string[];
+  }> {
+    const imageUrls: string[] = [];
+    const processedContent = { ...content };
+    let processedContentHtml = '';
+
+    // Function to process base64 images in the Delta ops
+    const processOps = async (ops: any[]) => {
+      for (let i = 0; i < ops.length; i++) {
+        const op = ops[i];
+        if (op.insert && typeof op.insert === 'object' && op.insert.image) {
+          // Check if the image is a base64 string
+          if (op.insert.image.startsWith('data:image')) {
+            try {
+              // Upload to Cloudinary
+              const uploadResult = await this.cloudinaryService.uploadImage(
+                op.insert.image,
+                'blog-content',
+              );
+              // Replace base64 with Cloudinary URL
+              op.insert.image = uploadResult;
+              imageUrls.push(uploadResult);
+            } catch (error) {
+              console.error('Error uploading image:', error);
+              throw new BadRequestException('Failed to upload image');
+            }
+          } else {
+            // If it's already a URL, add it to our list
+            imageUrls.push(op.insert.image);
+          }
+        }
+      }
+    };
+
+    // Process the Delta content
+    if (content.ops) {
+      await processOps(content.ops);
+      // Convert Delta to HTML (you'll need to implement this based on your needs)
+      processedContentHtml = this.deltaToHtml(content);
+    }
+
+    return {
+      processedContent,
+      processedContentHtml,
+      imageUrls,
+    };
+  }
+
+  private deltaToHtml(delta: any): string {
+    if (!delta.ops) return '';
+
+    let html = '';
+    let inList = false;
+    let listType = '';
+
+    for (const op of delta.ops) {
+      if (typeof op.insert === 'string') {
+        let text = op.insert.replace(/\n/g, '');
+        if (!text && op.insert === '\n') text = '<br/>';
+
+        if (op.attributes) {
+          if (op.attributes.bold) text = `<strong>${text}</strong>`;
+          if (op.attributes.italic) text = `<em>${text}</em>`;
+          if (op.attributes.underline) text = `<u>${text}</u>`;
+          if (op.attributes.strike) text = `<s>${text}</s>`;
+          if (op.attributes.link)
+            text = `<a href="${op.attributes.link}" target="_blank">${text}</a>`;
+          if (op.attributes.code) text = `<code>${text}</code>`;
+          if (op.attributes.blockquote)
+            text = `<blockquote>${text}</blockquote>`;
+          if (op.attributes.header)
+            text = `<h${op.attributes.header}>${text}</h${op.attributes.header}>`;
+
+          // Handle lists
+          if (op.attributes.list === 'ordered' && !inList) {
+            inList = true;
+            listType = 'ol';
+            html += '<ol>';
+          } else if (op.attributes.list === 'bullet' && !inList) {
+            inList = true;
+            listType = 'ul';
+            html += '<ul>';
+          }
+
+          if (op.attributes.list) {
+            text = `<li>${text}</li>`;
+          } else if (inList) {
+            html += `</${listType}>`;
+            inList = false;
+          }
+        }
+
+        html += text;
+      } else if (op.insert && op.insert.image) {
+        html += `<img src="${op.insert.image}" alt="Blog content image" class="blog-content-image"/>`;
+      }
+    }
+
+    if (inList) {
+      html += `</${listType}>`;
+    }
+
+    return html;
+  }
+
   async create(createBlogDto: any, user: any): Promise<Blog> {
     // Process tags first
     if (createBlogDto.tags && createBlogDto.tags.length > 0) {
       await this.tagsService.addTagsIfNotExist(createBlogDto.tags);
     }
 
+    // Process the content and images
+    const { processedContent, processedContentHtml, imageUrls } =
+      await this.processImagesInContent(createBlogDto.content);
+
     const createdBlog = new this.blogModel({
       ...createBlogDto,
+      content: processedContent,
+      contentHtml: processedContentHtml,
+      images: imageUrls,
+      coverImage: imageUrls[0] || createBlogDto.coverImage, // Use first image as cover if not specified
       author: user._id || user.userId, // Support both formats
     });
+
     return createdBlog.save();
   }
 
@@ -325,7 +443,15 @@ export class BlogsService {
         { $addToSet: { likes: userIdObj } },
       );
 
-      const updatedBlog = await this.blogModel.findById(blogId).exec();
+      // Return populated blog data
+      const updatedBlog = await this.blogModel
+        .findById(blogId)
+        .populate(
+          'author',
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        )
+        .exec();
+
       if (!updatedBlog) {
         throw new NotFoundException('Blog not found after update');
       }
@@ -347,13 +473,27 @@ export class BlogsService {
       throw new NotFoundException('Blog not found');
     }
 
+    // Check if user has liked the blog
+    const hasLiked = blog.likes.some((id) => id.toString() === userId);
+    if (!hasLiked) {
+      throw new BadRequestException('You have not liked this blog');
+    }
+
     // Use updateOne to properly handle the array update
     await this.blogModel.updateOne(
       { _id: blogId },
       { $pull: { likes: new Types.ObjectId(userId) } },
     );
 
-    const updatedBlog = await this.blogModel.findById(blogId).exec();
+    // Return populated blog data
+    const updatedBlog = await this.blogModel
+      .findById(blogId)
+      .populate(
+        'author',
+        'username firstName lastName avatar pronouns title location bio email posts followers following',
+      )
+      .exec();
+
     if (!updatedBlog) {
       throw new NotFoundException('Blog not found after update');
     }

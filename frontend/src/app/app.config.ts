@@ -1,9 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import {
-  provideRouter,
-  withViewTransitions,
-  withInMemoryScrolling,
-} from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { initializeIcons } from './icons';
 import {
@@ -12,8 +8,8 @@ import {
   HttpRequest,
   HttpHandlerFn,
 } from '@angular/common/http';
-
 import { routes } from './app.routes';
+import { QUILL_CONFIG_TOKEN } from 'ngx-quill';
 
 // HTTP interceptor function
 const authInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
@@ -37,7 +33,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(
       routes,
-      // withViewTransitions(),
       withInMemoryScrolling({
         scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
@@ -50,6 +45,30 @@ export const appConfig: ApplicationConfig = {
         const library = new FaIconLibrary();
         initializeIcons(library);
         return library;
+      },
+    },
+    {
+      provide: QUILL_CONFIG_TOKEN,
+      useValue: {
+        format: 'html',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ header: 1 }, { header: 2 }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ script: 'sub' }, { script: 'super' }],
+            [{ indent: '-1' }, { indent: '+1' }],
+            [{ direction: 'rtl' }],
+            [{ size: ['small', false, 'large', 'huge'] }],
+            [{ header: [1, 2, 3, 4, 5, 6, false] }],
+            [{ color: [] }, { background: [] }],
+            [{ font: [] }],
+            [{ align: [] }],
+            ['clean'],
+            ['link', 'image', 'video'],
+          ],
+        },
       },
     },
   ],

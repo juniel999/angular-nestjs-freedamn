@@ -314,14 +314,26 @@ export class BlogService {
    * Like a blog post
    */
   likeBlog(blogId: string): Observable<BlogPostType> {
-    return this.http.post<BlogPostType>(`${this.apiUrl}/${blogId}/like`, {});
+    return this.http
+      .post<BlogPostType>(`${this.apiUrl}/${blogId}/like`, {})
+      .pipe(
+        tap((blog) => {
+          // Update local state immediately
+          this.updateBlogInState(blog);
+        })
+      );
   }
 
   /**
    * Unlike a blog post
    */
   unlikeBlog(blogId: string): Observable<BlogPostType> {
-    return this.http.delete<BlogPostType>(`${this.apiUrl}/${blogId}/like`);
+    return this.http.delete<BlogPostType>(`${this.apiUrl}/${blogId}/like`).pipe(
+      tap((blog) => {
+        // Update local state immediately
+        this.updateBlogInState(blog);
+      })
+    );
   }
 
   /**

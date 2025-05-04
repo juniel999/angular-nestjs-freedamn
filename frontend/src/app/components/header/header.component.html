@@ -62,12 +62,24 @@
           </label>
           <ul
             tabindex="0"
-            class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-3 z-[1]"
+            class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-3 z-[1] transform opacity-0 scale-95 transition-all duration-200 origin-top-right group-focus:opacity-100 group-focus:scale-100"
           >
             <li class="menu-title">Notifications</li>
-            <li><a>New message from user</a></li>
-            <li><a>Your post was liked</a></li>
-            <li><a>Someone mentioned you</a></li>
+            <li>
+              <a class="focus:!bg-base-200" tabindex="0" (click)="onLinkClick()"
+                >New message from user</a
+              >
+            </li>
+            <li>
+              <a class="focus:!bg-base-200" tabindex="0" (click)="onLinkClick()"
+                >Your post was liked</a
+              >
+            </li>
+            <li>
+              <a class="focus:!bg-base-200" tabindex="0" (click)="onLinkClick()"
+                >Someone mentioned you</a
+              >
+            </li>
           </ul>
         </div>
 
@@ -75,7 +87,7 @@
         <div class="dropdown dropdown-end">
           <label
             tabindex="0"
-            class="flex items-center space-x-2 px-3 py-1 rounded-full cursor-pointer hover:bg-base-200 transition-colors duration-200"
+            class="flex items-center space-x-2 px-3 py-1 rounded-full cursor-pointer hover:bg-base-200 transition-all duration-200"
           >
             <div class="avatar">
               <div
@@ -91,27 +103,37 @@
             <span class="text-sm font-medium">{{ username() }}</span>
             <fa-icon
               [icon]="['fas', 'chevron-down']"
-              class="text-xs text-gray-400"
+              class="text-xs text-gray-400 transition-transform duration-200 group-focus:rotate-180"
             ></fa-icon>
           </label>
           <ul
             tabindex="0"
-            class="menu dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52"
+            class="menu dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 transform opacity-0 scale-95 transition-all duration-200 origin-top-right group-focus:opacity-100 group-focus:scale-100"
           >
             <li>
-              <a routerLink="/profile">
+              <a
+                routerLink="/profile"
+                class="focus:!bg-base-200"
+                tabindex="0"
+                (click)="onLinkClick()"
+              >
                 <fa-icon [icon]="['far', 'user']" class="mr-2"></fa-icon>
                 Profile
               </a>
             </li>
             <li>
-              <a routerLink="/settings">
+              <a
+                routerLink="/settings"
+                class="focus:!bg-base-200"
+                tabindex="0"
+                (click)="onLinkClick()"
+              >
                 <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>
                 Settings
               </a>
             </li>
             <li>
-              <a (click)="logout()">
+              <a (click)="logout()" class="focus:!bg-base-200" tabindex="0">
                 <fa-icon
                   [icon]="['far', 'arrow-alt-circle-right']"
                   class="mr-2"

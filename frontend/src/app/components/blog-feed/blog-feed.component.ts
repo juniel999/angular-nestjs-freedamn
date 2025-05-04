@@ -5,6 +5,7 @@ import {
   inject,
   OnInit,
   OnDestroy,
+  signal,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +16,7 @@ import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { BlogPostType } from '../../types/blog-post.type';
 import { BlogCardComponent } from '../blog-card/blog-card.component';
+import { OnboardingService } from '../../services/onboarding.service';
 
 type Tab = 'for-you' | 'explore' | 'following';
 
@@ -28,6 +30,7 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
   private toastService = inject(ToastService);
   private userService = inject(UserService);
   private authService = inject(AuthService);
+  private onboardingService = inject(OnboardingService);
 
   @ViewChild('feedContainer', { static: false }) feedContainer!: ElementRef;
 
@@ -37,6 +40,7 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
   filterTag = '';
   firstName: string = '';
   isLoggedIn = false;
+  isCurrentlyLiked = signal(false);
 
   // Computed properties from blog service
   loading = this.blogService.loading;
@@ -53,6 +57,27 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
       // Set firstName directly from JWT payload
       if (user) {
         this.firstName = user.firstName;
+
+        if (!localStorage.getItem('userProfile')) {
+          this.onboardingService.getUserProfile().subscribe({
+            next: (profile) => {
+              if (profile) {
+                if (profile.birthdate) {
+                  const date = new Date(profile.birthdate);
+                  profile = {
+                    ...profile,
+                    birthdate: this.formatDateForInput(date),
+                  };
+                }
+                localStorage.setItem('userProfile', JSON.stringify(profile));
+              }
+            },
+            error: (error) => {
+              console.error('Error fetching profile', error);
+            },
+          });
+        }
+
         // Only switch to for-you if we just logged in
         if (!wasLoggedIn) {
           this.blogService.setActiveTab('for-you');
@@ -189,20 +214,26 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
+    console.log(this.isCurrentlyLiked());
+
     if (!this.isLoggedIn) {
       this.toastService.show('Please sign in to like posts', 'error');
       return;
     }
 
-    // Simple check if the user already liked this post
-    const userId = localStorage.getItem('userId');
-    const hasLiked = blog.likes.includes(userId || '');
+    const user = localStorage.getItem('userProfile');
+    if (!user) return;
 
-    if (hasLiked) {
+    const userId = JSON.parse(user).id;
+    const currentlyLiked = blog.likes.includes(userId);
+
+    // Only proceed if there's a state change
+    if (currentlyLiked) {
       this.blogService.unlikeBlog(blog._id).subscribe({
         next: (updatedBlog) => {
           // Update the blog in the local state
           this.blogService.updateBlogInState(updatedBlog);
+          this.isCurrentlyLiked.set(false);
         },
         error: () => {
           this.toastService.show('Failed to unlike post', 'error');
@@ -213,6 +244,7 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
         next: (updatedBlog) => {
           // Update the blog in the local state
           this.blogService.updateBlogInState(updatedBlog);
+          this.isCurrentlyLiked.set(true);
         },
         error: () => {
           this.toastService.show('Failed to like post', 'error');
@@ -225,7 +257,17 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
    * Check if the current user has liked a blog
    */
   hasUserLiked(blog: BlogPostType): boolean {
-    const userId = localStorage.getItem('userId');
-    return blog.likes.includes(userId || '');
+    if (!this.isLoggedIn) return false;
+    const user = localStorage.getItem('userProfile');
+    if (!user) return false;
+    const userId = JSON.parse(user).id;
+    return blog.likes.includes(userId);
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

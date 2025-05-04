@@ -13,40 +13,60 @@ export class CloudinaryService {
     });
   }
 
-  async uploadImage(file: Express.Multer.File, folder: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder },
-        (error, result) => {
+  async uploadImage(
+    file: Express.Multer.File | string,
+    folder: string,
+  ): Promise<string> {
+    if (typeof file === 'string' && file.startsWith('data:image')) {
+      // Handle base64 string
+      return new Promise<string>((resolve, reject) => {
+        cloudinary.uploader.upload(file, { folder }, (error, result) => {
           if (error) return reject(error);
           if (result) {
             resolve(result.secure_url);
           } else {
             reject(new Error('Upload failed'));
           }
-        }
-      );
-      
-      streamifier.createReadStream(file.buffer).pipe(uploadStream);
-    });
+        });
+      });
+    } else if (typeof file === 'object') {
+      // Handle Multer file
+      return new Promise<string>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder },
+          (error, result) => {
+            if (error) return reject(error);
+            if (result) {
+              resolve(result.secure_url);
+            } else {
+              reject(new Error('Upload failed'));
+            }
+          },
+        );
+
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      });
+    } else {
+      throw new Error('Invalid file format');
+    }
   }
-  
+
   async deleteImageByUrl(imageUrl: string): Promise<boolean> {
     try {
       // Extract public_id from the Cloudinary URL
       // URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/public_id.ext
       if (!imageUrl) return false;
-      
+
       const urlParts = imageUrl.split('/');
       // Get the filename with extension from the URL
       const filenameWithExt = urlParts[urlParts.length - 1];
       // Remove the file extension to get the public_id
       const publicId = filenameWithExt.split('.')[0];
-      
+
       // If we have a folder structure in the URL, include it in the public_id
       const folderPath = urlParts[urlParts.length - 2];
       const fullPublicId = `${folderPath}/${publicId}`;
-      
+
       const result = await cloudinary.uploader.destroy(fullPublicId);
       return result.result === 'ok';
     } catch (error) {
@@ -54,4 +74,4 @@ export class CloudinaryService {
       return false;
     }
   }
-} 
+}

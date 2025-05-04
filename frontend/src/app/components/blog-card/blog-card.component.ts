@@ -31,28 +31,23 @@ export class BlogCardComponent {
     if (!this.isLoggedIn) {
       event.preventDefault();
       event.stopPropagation();
+      // return to login page if not logged in
+      this.router.navigate(['/signin']);
       this.toastService.show('Please sign in to like posts', 'error');
       return;
     }
     this.onLikeClick(blog, event);
   }
 
-  getExcerpt(content: string): string {
-    // Strip HTML tags
-    const plainText = content.replace(/<[^>]*>?/gm, '');
-    const maxLength = 150;
+  getExcerpt(html: string): string {
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const plainText = tempDiv.textContent || tempDiv.innerText || '';
 
-    if (plainText.length <= maxLength) {
-      return plainText;
-    }
-
-    // Find the last space before maxLength
-    const lastSpace = plainText.substring(0, maxLength).lastIndexOf(' ');
-    const excerpt = plainText.substring(
-      0,
-      lastSpace > 0 ? lastSpace : maxLength
-    );
-    return `${excerpt}...`;
+    if (plainText.length <= 150) return plainText;
+    const lastSpace = plainText.substring(0, 150).lastIndexOf(' ');
+    return `${plainText.substring(0, lastSpace > 0 ? lastSpace : 150)}...`;
   }
 
   formatTimeAgo(dateString: string): string {

@@ -6,17 +6,16 @@ import { BlogService } from '../../services/blog.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { BlogPostType } from '../../types/blog-post.type';
-import { SocialLinkButtonComponent } from '../../components/social-link-button/social-link-button.component';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
+interface ExtendedBlogPost extends BlogPostType {
+  safeHtml: SafeHtml;
+}
 
 @Component({
   selector: 'app-view-blog',
   standalone: true,
-  imports: [
-    CommonModule,
-    FontAwesomeModule,
-    RouterModule,
-    SocialLinkButtonComponent,
-  ],
+  imports: [CommonModule, FontAwesomeModule, RouterModule],
   templateUrl: './view-blog.component.html',
 })
 export class ViewBlogComponent {
@@ -25,16 +24,19 @@ export class ViewBlogComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private toastService = inject(ToastService);
+  private sanitizer = inject(DomSanitizer);
 
-  blog = signal<BlogPostType | null>(null);
+  blog = signal<ExtendedBlogPost | null>(null);
   isLoading = signal(true);
   error = signal<string | null>(null);
   isLoggedIn = signal(false);
+  userId = signal<string>('');
 
   ngOnInit() {
     // Check authentication status
     this.authService.currentUser$.subscribe((user) => {
       this.isLoggedIn.set(!!user);
+      this.userId.set(user ? user.sub : '');
     });
 
     // Get blog ID from route params and load blog
@@ -51,7 +53,12 @@ export class ViewBlogComponent {
   private loadBlog(id: string) {
     this.blogService.getBlogById(id).subscribe({
       next: (blog) => {
-        this.blog.set(blog);
+        // Add sanitized HTML content
+        const extendedBlog: ExtendedBlogPost = {
+          ...blog,
+          safeHtml: this.sanitizer.bypassSecurityTrustHtml(blog.contentHtml),
+        };
+        this.blog.set(extendedBlog);
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -62,16 +69,9 @@ export class ViewBlogComponent {
     });
   }
 
-  hasUserLiked(): boolean {
-    if (!this.isLoggedIn() || !this.blog()) return false;
-    const user = localStorage.getItem('user');
-    if (!user) return false;
-    const userId = JSON.parse(user).sub;
-    return this.blog()!.likes.includes(userId);
-  }
-
   toggleLike() {
     if (!this.isLoggedIn()) {
+      this.router.navigate(['/signin']);
       this.toastService.show('Please sign in to like posts', 'error');
       return;
     }
@@ -79,10 +79,22 @@ export class ViewBlogComponent {
     const blog = this.blog();
     if (!blog) return;
 
-    if (this.hasUserLiked()) {
+    const user = localStorage.getItem('userProfile');
+    if (!user) return;
+
+    const userId = JSON.parse(user).id;
+    const currentlyLiked = blog.likes.includes(userId);
+
+    // Only proceed if there's a state change
+    if (currentlyLiked) {
       this.blogService.unlikeBlog(blog._id).subscribe({
         next: (updatedBlog) => {
-          this.blog.set(updatedBlog);
+          this.blog.set({
+            ...updatedBlog,
+            safeHtml: this.sanitizer.bypassSecurityTrustHtml(
+              updatedBlog.contentHtml
+            ),
+          });
         },
         error: () => {
           this.toastService.show('Failed to unlike post', 'error');
@@ -91,7 +103,12 @@ export class ViewBlogComponent {
     } else {
       this.blogService.likeBlog(blog._id).subscribe({
         next: (updatedBlog) => {
-          this.blog.set(updatedBlog);
+          this.blog.set({
+            ...updatedBlog,
+            safeHtml: this.sanitizer.bypassSecurityTrustHtml(
+              updatedBlog.contentHtml
+            ),
+          });
         },
         error: () => {
           this.toastService.show('Failed to like post', 'error');
