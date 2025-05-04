@@ -56,9 +56,24 @@ export class HeaderComponent implements OnInit {
   async logout(): Promise<void> {
     try {
       this.authService.logout();
+      this.closeDropdowns();
       await this.router.navigate(['/signin'], { replaceUrl: true });
     } catch (error) {
       this.toastService.show('Logout failed', 'error');
     }
+  }
+
+  closeDropdowns(): void {
+    // Remove focus from dropdown triggers to close them
+    const dropdownTriggers = document.querySelectorAll(
+      '.dropdown [tabindex="0"]'
+    );
+    dropdownTriggers.forEach((trigger) => {
+      (trigger as HTMLElement).blur();
+    });
+  }
+
+  onLinkClick(): void {
+    this.closeDropdowns();
   }
 }
