@@ -77,54 +77,62 @@ export class BlogsService {
     if (!delta.ops) return '';
 
     let html = '';
-    let inList = false;
-    let listType = '';
+    let textBuffer = '';
 
     for (const op of delta.ops) {
       if (typeof op.insert === 'string') {
-        let text = op.insert.replace(/\n/g, '');
-        if (!text && op.insert === '\n') text = '<br/>';
+        // Handle newlines specially since they carry the header formatting
+        if (op.insert === '\n') {
+          if (op.attributes?.header) {
+            const headerClasses =
+              {
+                1: 'text-2xl md:text-4xl mb-6 mt-8',
+                2: 'text-1xl md:text-3xl mb-5 mt-7',
+                3: 'text-xl md:text-2xl mb-4 mt-6',
+                4: 'text-lg md:text-xl mb-3 mt-5',
+                5: 'text-base md:text-lg mb-2 mt-4',
+                6: 'text-sm md:text-base mb-2 mt-3',
+              }[op.attributes.header] || 'text-2xl font-bold mb-4';
 
-        if (op.attributes) {
-          if (op.attributes.bold) text = `<strong>${text}</strong>`;
-          if (op.attributes.italic) text = `<em>${text}</em>`;
-          if (op.attributes.underline) text = `<u>${text}</u>`;
-          if (op.attributes.strike) text = `<s>${text}</s>`;
-          if (op.attributes.link)
-            text = `<a href="${op.attributes.link}" target="_blank">${text}</a>`;
-          if (op.attributes.code) text = `<code>${text}</code>`;
-          if (op.attributes.blockquote)
-            text = `<blockquote>${text}</blockquote>`;
-          if (op.attributes.header)
-            text = `<h${op.attributes.header}>${text}</h${op.attributes.header}>`;
-
-          // Handle lists
-          if (op.attributes.list === 'ordered' && !inList) {
-            inList = true;
-            listType = 'ol';
-            html += '<ol>';
-          } else if (op.attributes.list === 'bullet' && !inList) {
-            inList = true;
-            listType = 'ul';
-            html += '<ul>';
+            html += `<h${op.attributes.header} class="${headerClasses}">${textBuffer}</h${op.attributes.header}>\n`;
+          } else {
+            html += `<p class="text-base leading-relaxed mb-4 text-gray-800">${textBuffer}</p>\n`;
           }
-
-          if (op.attributes.list) {
-            text = `<li>${text}</li>`;
-          } else if (inList) {
-            html += `</${listType}>`;
-            inList = false;
-          }
+          textBuffer = '';
+          continue;
         }
 
-        html += text;
-      } else if (op.insert && op.insert.image) {
-        html += `<img src="${op.insert.image}" alt="Blog content image" class="blog-content-image"/>`;
+        // Handle inline formatting
+        let text = op.insert;
+        if (op.attributes) {
+          if (op.attributes.bold)
+            text = `<strong class="font-bold">${text}</strong>`;
+          if (op.attributes.italic) text = `<em class="italic">${text}</em>`;
+          if (op.attributes.underline)
+            text = `<u class="underline">${text}</u>`;
+          if (op.attributes.strike)
+            text = `<s class="line-through">${text}</s>`;
+          if (op.attributes.link)
+            text = `<a href="${op.attributes.link}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">${text}</a>`;
+          if (op.attributes.code)
+            text = `<code class="bg-gray-100 rounded px-1 py-0.5 font-mono text-sm">${text}</code>`;
+          if (op.attributes.blockquote)
+            text = `<blockquote class="border-l-4 border-gray-300 pl-4 italic my-4">${text}</blockquote>`;
+        }
+        textBuffer += text;
+      } else if (op.insert?.image) {
+        // For images, first flush any buffered text in p tags
+        if (textBuffer) {
+          html += `<p class="text-base leading-relaxed mb-4 text-gray-800">${textBuffer}</p>`;
+          textBuffer = '';
+        }
+        html += `<img src="${op.insert.image}" alt="Blog content image" class="max-w-full h-auto rounded-lg my-6 shadow-lg"/>`;
       }
     }
 
-    if (inList) {
-      html += `</${listType}>`;
+    // Add any remaining buffered text in p tags
+    if (textBuffer) {
+      html += `<p class="text-base leading-relaxed mb-4 text-gray-800">${textBuffer}</p>`;
     }
 
     return html;

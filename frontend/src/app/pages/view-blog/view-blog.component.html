@@ -38,7 +38,9 @@
       <article class="space-y-6">
         <!-- Title & Meta -->
         <div class="space-y-4">
-          <h1 class="text-3xl md:text-4xl font-bold">{{ blog()?.title }}</h1>
+          <h1 class="text-3xl md:text-5xl font-bold text-gray-900 md:mt-4">
+            {{ blog()?.title }}
+          </h1>
           <div class="flex items-center gap-4 text-sm text-base-content/70">
             <span>{{ formatDate(blog()!.createdAt) }}</span>
             <span>•</span>

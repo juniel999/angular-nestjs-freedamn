@@ -157,6 +157,8 @@ export class BlogComposeComponent implements OnInit {
 
     // Get the Quill editor content in Delta format
     const deltaContent = this.quillEditor?.quillEditor?.getContents();
+    console.log(deltaContent);
+    console.log(this.quillEditor?.quillEditor);
 
     if (!deltaContent) {
       this.toastService.show('Content cannot be empty', 'error');
