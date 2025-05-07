@@ -87,10 +87,10 @@ export class BlogsService {
             const headerClasses =
               {
                 1: 'text-2xl md:text-4xl mb-6 mt-8',
-                2: 'text-1xl md:text-3xl mb-5 mt-7',
-                3: 'text-xl md:text-2xl mb-4 mt-6',
-                4: 'text-lg md:text-xl mb-3 mt-5',
-                5: 'text-base md:text-lg mb-2 mt-4',
+                2: 'text-xl md:text-3xl mb-5 mt-7',
+                3: 'text-lg md:text-2xl mb-4 mt-6',
+                4: 'text-base md:text-xl mb-3 mt-5',
+                5: 'text-sm md:text-lg mb-2 mt-4',
                 6: 'text-sm md:text-base mb-2 mt-3',
               }[op.attributes.header] || 'text-2xl font-bold mb-4';
 
