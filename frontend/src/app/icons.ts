@@ -47,6 +47,7 @@ import {
   faCamera,
   faCircleUser,
   faLocationDot,
+  faUserPlus,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCommentDots,
@@ -128,6 +129,7 @@ export function initializeIcons(library: FaIconLibrary) {
     faPlusSquareRegular,
     faArrowAltCircleRightRegular,
     faCircleUser,
-    faLocationDot
+    faLocationDot,
+    faUserPlus
   );
 }
