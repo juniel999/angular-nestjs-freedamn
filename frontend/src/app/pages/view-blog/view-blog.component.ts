@@ -59,6 +59,8 @@ export class ViewBlogComponent {
           safeHtml: this.sanitizer.bypassSecurityTrustHtml(blog.contentHtml),
         };
         this.blog.set(extendedBlog);
+        console.log(extendedBlog);
+        console.log(this.userId());
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -122,6 +124,37 @@ export class ViewBlogComponent {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+    });
+  }
+
+  openDeleteModal() {
+    const modal = document.getElementById(
+      'delete_confirm_modal'
+    ) as HTMLDialogElement;
+    modal.showModal();
+  }
+
+  closeDeleteModal() {
+    const modal = document.getElementById(
+      'delete_confirm_modal'
+    ) as HTMLDialogElement;
+    modal.close();
+  }
+
+  confirmDelete() {
+    if (!this.blog()) return;
+
+    this.blogService.deleteBlog(this.blog()?._id!).subscribe({
+      next: () => {
+        this.toastService.show('Blog post deleted successfully');
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.toastService.show('Failed to delete blog post', 'error');
+      },
+      complete: () => {
+        this.closeDeleteModal();
+      },
     });
   }
 }

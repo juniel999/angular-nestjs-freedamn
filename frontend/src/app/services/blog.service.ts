@@ -364,6 +364,13 @@ export class BlogService {
   }
 
   /**
+   * Delete a blog post
+   */
+  deleteBlog(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  /**
    * Update a blog in the state after like/unlike
    */
   updateBlogInState(updatedBlog: BlogPostType): void {
