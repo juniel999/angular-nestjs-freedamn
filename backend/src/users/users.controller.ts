@@ -131,13 +131,13 @@ export class UsersController {
     return this.usersService.getUserSavedPosts(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get(':id/followers')
   getUserFollowers(@Param('id') id: string) {
     return this.usersService.getUserFollowers(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get(':id/following')
   getUserFollowing(@Param('id') id: string) {
     return this.usersService.getUserFollowing(id);
