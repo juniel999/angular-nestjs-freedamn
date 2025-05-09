@@ -371,6 +371,21 @@ export class BlogService {
   }
 
   /**
+   * Update an existing blog post
+   */
+  updateBlog(
+    id: string,
+    blogData: Partial<BlogPostType>
+  ): Observable<BlogPostType> {
+    return this.http.patch<BlogPostType>(`${this.apiUrl}/${id}`, blogData).pipe(
+      tap((blog) => {
+        // Update local state if the blog exists in any of our lists
+        this.updateBlogInState(blog);
+      })
+    );
+  }
+
+  /**
    * Update a blog in the state after like/unlike
    */
   updateBlogInState(updatedBlog: BlogPostType): void {

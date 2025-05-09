@@ -29,6 +29,11 @@ export const routes: Routes = [
         component: ViewBlogComponent,
       },
       {
+        path: 'blogs/:id/edit',
+        component: BlogComposeComponent,
+        canActivate: [onboardingCompletedGuard],
+      },
+      {
         path: 'profile/:username',
         component: ProfileComponent,
         canActivate: [onboardingCompletedGuard],

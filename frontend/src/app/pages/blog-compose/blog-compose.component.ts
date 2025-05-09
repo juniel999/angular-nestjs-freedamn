@@ -5,7 +5,7 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BlogService } from '../../services/blog.service';
 import { ToastService } from '../../services/toast.service';
@@ -34,6 +34,9 @@ export class BlogComposeComponent implements OnInit {
   availableTags: TagData[] = [];
   isSubmitting = false;
   imageUploading = false;
+  isEditMode = false;
+  blogId: string | null = null;
+  private pendingContent: any = null;
 
   quillConfig = {
     toolbar: [
@@ -62,13 +65,60 @@ export class BlogComposeComponent implements OnInit {
     private blogService: BlogService,
     private userService: UserService,
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.blogForm = this.createBlogForm();
   }
 
   ngOnInit(): void {
     this.loadAvailableTags();
+
+    // Check if we're in edit mode
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode = true;
+      this.blogId = id;
+      this.loadBlogData(id);
+    }
+  }
+
+  private loadBlogData(id: string) {
+    this.blogService.getBlogById(id).subscribe({
+      next: (blog) => {
+        // Store the image URLs
+        this.uploadedImages = blog.images || [];
+
+        // Update form with blog data
+        this.blogForm.patchValue({
+          title: blog.title,
+          tags: blog.tags,
+          published: blog.published,
+          coverImage: blog.coverImage,
+        });
+
+        // Store content to be set when editor is ready
+        this.pendingContent = blog.content;
+
+        // Try to set content if editor is already ready
+        if (this.quillEditor?.quillEditor) {
+          this.quillEditor.quillEditor.setContents(this.pendingContent);
+          this.pendingContent = null;
+        }
+      },
+      error: (err) => {
+        this.toastService.show('Failed to load blog post', 'error');
+        console.error('Error loading blog:', err);
+        this.router.navigate(['/']);
+      },
+    });
+  }
+
+  onEditorCreated() {
+    if (this.pendingContent && this.quillEditor?.quillEditor) {
+      this.quillEditor.quillEditor.setContents(this.pendingContent);
+      this.pendingContent = null;
+    }
   }
 
   private createBlogForm(): FormGroup {
@@ -157,8 +207,6 @@ export class BlogComposeComponent implements OnInit {
 
     // Get the Quill editor content in Delta format
     const deltaContent = this.quillEditor?.quillEditor?.getContents();
-    console.log(deltaContent);
-    console.log(this.quillEditor?.quillEditor);
 
     if (!deltaContent) {
       this.toastService.show('Content cannot be empty', 'error');
@@ -168,30 +216,44 @@ export class BlogComposeComponent implements OnInit {
 
     const blogData = {
       ...this.blogForm.value,
-      content: deltaContent, // Send the Delta format
-      images: this.uploadedImages, // Send all uploaded image URLs
-      coverImage: this.uploadedImages[0] || '', // Use first image as cover if available
+      content: deltaContent,
+      images: this.uploadedImages,
+      coverImage: this.uploadedImages[0] || '',
     };
 
-    this.blogService
-      .createBlog(blogData)
+    const request = this.isEditMode
+      ? this.blogService.updateBlog(this.blogId!, blogData)
+      : this.blogService.createBlog(blogData);
+
+    request
       .pipe(
         finalize(() => {
           this.isSubmitting = false;
         })
       )
       .subscribe({
-        next: (newBlog) => {
-          this.toastService.show('Blog post created successfully');
-          this.router.navigate(['/blog', newBlog._id]);
+        next: (blog) => {
+          this.toastService.show(
+            this.isEditMode
+              ? 'Blog post updated successfully'
+              : 'Blog post created successfully'
+          );
+          this.router.navigate(['/blogs', blog._id]);
         },
         error: (err) => {
           const errorMessage =
             err.status === 413
               ? 'Blog post content is too large. Try reducing the number of images or content size.'
+              : this.isEditMode
+              ? 'Failed to update blog post'
               : 'Failed to create blog post';
           this.toastService.show(errorMessage, 'error');
-          console.error('Error creating blog post:', err);
+          console.error(
+            this.isEditMode
+              ? 'Error updating blog post:'
+              : 'Error creating blog post:',
+            err
+          );
         },
       });
   }
@@ -236,6 +298,7 @@ export class BlogComposeComponent implements OnInit {
               this.uploadedImages.push(response.url);
               this.toastService.show('Image inserted successfully');
             } else {
+              // If no selection, append at the end
               const length = this.quillEditor.quillEditor.getLength();
               this.quillEditor.quillEditor.insertEmbed(
                 length - 1,
