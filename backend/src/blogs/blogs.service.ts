@@ -416,9 +416,37 @@ export class BlogsService {
       await this.tagsService.addTagsIfNotExist(updateBlogDto.tags);
     }
 
-    return this.blogModel
+    // If content is being updated, process it
+    if (updateBlogDto.content) {
+      const { processedContent, processedContentHtml, imageUrls } =
+        await this.processImagesInContent(updateBlogDto.content);
+
+      updateBlogDto = {
+        ...updateBlogDto,
+        content: processedContent,
+        contentHtml: processedContentHtml,
+        images: imageUrls,
+        // Only update cover image if one doesn't already exist or if explicitly set
+        ...(!updateBlogDto.coverImage &&
+          imageUrls.length > 0 && {
+            coverImage: imageUrls[0],
+          }),
+      };
+    }
+
+    const updatedBlog = await this.blogModel
       .findByIdAndUpdate(id, updateBlogDto, { new: true })
+      .populate(
+        'author',
+        'username firstName lastName avatar pronouns title location bio email posts followers following',
+      )
       .exec();
+
+    if (!updatedBlog) {
+      throw new NotFoundException('Blog not found');
+    }
+
+    return updatedBlog;
   }
 
   async remove(id: string): Promise<Blog | null> {

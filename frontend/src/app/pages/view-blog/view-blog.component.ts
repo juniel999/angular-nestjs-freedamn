@@ -59,6 +59,8 @@ export class ViewBlogComponent {
           safeHtml: this.sanitizer.bypassSecurityTrustHtml(blog.contentHtml),
         };
         this.blog.set(extendedBlog);
+        console.log(extendedBlog);
+        console.log(this.userId());
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -117,11 +119,58 @@ export class ViewBlogComponent {
     }
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('en-US', {
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 120) return 'Just now.';
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minutes ago.`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hours ago.`;
+
+    // For dates beyond a day, return formatted date
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  openDeleteModal() {
+    const modal = document.getElementById(
+      'delete_confirm_modal'
+    ) as HTMLDialogElement;
+    modal.showModal();
+  }
+
+  closeDeleteModal() {
+    const modal = document.getElementById(
+      'delete_confirm_modal'
+    ) as HTMLDialogElement;
+    modal.close();
+  }
+
+  confirmDelete() {
+    if (!this.blog()) return;
+
+    this.blogService.deleteBlog(this.blog()?._id!).subscribe({
+      next: () => {
+        this.toastService.show('Blog post deleted successfully');
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.toastService.show('Failed to delete blog post', 'error');
+      },
+      complete: () => {
+        this.closeDeleteModal();
+      },
     });
   }
 }

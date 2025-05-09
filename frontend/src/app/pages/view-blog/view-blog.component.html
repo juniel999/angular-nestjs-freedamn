@@ -45,6 +45,31 @@
             <span>{{ formatDate(blog()!.createdAt) }}</span>
             <span>•</span>
             <span>{{ blog()?.viewCount ?? 0 }} views</span>
+
+            <!-- Blog Owner Actions -->
+            @if (blog()?.author?._id === userId()) {
+            <div class="dropdown dropdown-end ml-auto text-black">
+              <button class="btn btn-ghost btn-sm" tabindex="0">
+                <fa-icon [icon]="['fas', 'ellipsis-vertical']"></fa-icon>
+              </button>
+              <ul
+                class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+              >
+                <li>
+                  <a [routerLink]="['/blogs', blog()?._id, 'edit']">
+                    <fa-icon [icon]="['fas', 'edit']"></fa-icon>
+                    Edit
+                  </a>
+                </li>
+                <li>
+                  <button (click)="openDeleteModal()">
+                    <fa-icon [icon]="['fas', 'trash']"></fa-icon>
+                    Delete
+                  </button>
+                </li>
+              </ul>
+            </div>
+            }
           </div>
         </div>
 
@@ -191,4 +216,39 @@
     </aside>
   </div>
   }
+
+  <!-- Delete Confirmation Modal -->
+  <dialog id="delete_confirm_modal" class="modal">
+    <div
+      class="modal-box max-w-sm mx-auto bg-base-100 p-4 rounded-lg shadow-xl transform transition-all duration-300"
+    >
+      <div class="flex flex-col items-center text-center">
+        <fa-icon
+          [icon]="['fas', 'trash']"
+          class="text-2xl text-primary-content mb-2"
+        ></fa-icon>
+        <p class="text-base-content/70 text-sm mb-6">
+          Are you sure you want to delete this post? This action cannot be
+          undone.
+        </p>
+        <div class="flex gap-3 w-full">
+          <button
+            class="btn-sm btn btn-ghost flex-1"
+            (click)="closeDeleteModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn-sm btn btn-primary flex-1"
+            (click)="confirmDelete()"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop bg-black/50">
+      <button>close</button>
+    </form>
+  </dialog>
 </div>

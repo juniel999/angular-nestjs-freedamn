@@ -1,5 +1,7 @@
 <div class="max-w-3xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-6">Create New Blog Post</h1>
+  <h1 class="text-3xl font-bold mb-6">
+    {{ isEditMode ? "Edit Blog Post" : "Create New Blog Post" }}
+  </h1>
 
   <form [formGroup]="blogForm" (ngSubmit)="onSubmit()" class="space-y-6">
     <!-- Title Input -->
@@ -48,6 +50,7 @@
         formControlName="content"
         [styles]="{ height: '300px' }"
         [modules]="quillConfig"
+        (onEditorCreated)="onEditorCreated()"
         placeholder="Start writing your amazing blog post..."
       ></quill-editor>
       @if (blogForm.get('content')?.touched && blogForm.get('content')?.invalid)
@@ -122,7 +125,7 @@
       >
         <fa-icon [icon]="['fas', 'paper-plane']" class="mr-2"></fa-icon>
         @if (!isSubmitting) {
-        <span>Publish Blog Post</span>
+        <span>{{ isEditMode ? "Update Blog Post" : "Publish Blog Post" }}</span>
         } @else {
         <span>
           <fa-icon
@@ -130,7 +133,7 @@
             animation="spin"
             class="mr-2"
           ></fa-icon>
-          Publishing...
+          {{ isEditMode ? "Updating..." : "Publishing..." }}
         </span>
         }
       </button>
