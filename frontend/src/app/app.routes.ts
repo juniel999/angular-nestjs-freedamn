@@ -9,6 +9,8 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { publicOnlyGuard } from './guards/public-only.guard';
 import { HomeComponent } from './pages/home/home.component';
 import { ViewBlogComponent } from './pages/view-blog/view-blog.component';
+import { authGuard } from './guards/auth.guard';
+import { BlogAuthorGuard } from './guards/blog-author.guard';
 
 export const routes: Routes = [
   {
@@ -22,7 +24,7 @@ export const routes: Routes = [
       {
         path: 'compose',
         component: BlogComposeComponent,
-        canActivate: [onboardingCompletedGuard],
+        canActivate: [authGuard, onboardingCompletedGuard],
       },
       {
         path: 'blogs/:id',
@@ -31,7 +33,7 @@ export const routes: Routes = [
       {
         path: 'blogs/:id/edit',
         component: BlogComposeComponent,
-        canActivate: [onboardingCompletedGuard],
+        canActivate: [authGuard, BlogAuthorGuard, onboardingCompletedGuard],
       },
       {
         path: 'profile/:username',
@@ -41,7 +43,7 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent,
-        canActivate: [onboardingCompletedGuard],
+        canActivate: [authGuard, onboardingCompletedGuard],
       },
       {
         path: 'settings',
@@ -49,7 +51,7 @@ export const routes: Routes = [
           import('./pages/settings/settings.module').then(
             (m) => m.SettingsModule
           ),
-        canActivate: [onboardingCompletedGuard],
+        canActivate: [authGuard, onboardingCompletedGuard],
       },
     ],
   },
@@ -69,7 +71,7 @@ export const routes: Routes = [
       import('./pages/onboarding/onboarding.module').then(
         (m) => m.OnboardingModule
       ),
-    canActivate: [onboardingGuard],
+    canActivate: [authGuard, onboardingGuard],
   },
   { path: '**', redirectTo: '/' },
 ];

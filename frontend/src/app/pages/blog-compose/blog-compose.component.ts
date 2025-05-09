@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -14,6 +14,7 @@ import { finalize } from 'rxjs/operators';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TagData } from '../../types/tag.type';
 import { QuillModule, QuillEditorComponent } from 'ngx-quill';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-blog-compose',
@@ -29,6 +30,7 @@ import { QuillModule, QuillEditorComponent } from 'ngx-quill';
 })
 export class BlogComposeComponent implements OnInit {
   @ViewChild('quillEditor') quillEditor?: QuillEditorComponent;
+  private authService = inject(AuthService);
 
   blogForm: FormGroup;
   availableTags: TagData[] = [];
