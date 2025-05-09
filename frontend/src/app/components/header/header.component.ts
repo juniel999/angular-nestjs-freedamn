@@ -76,4 +76,11 @@ export class HeaderComponent implements OnInit {
   onLinkClick(): void {
     this.closeDropdowns();
   }
+
+  toggleMobileSearch(): void {
+    const drawer = document.getElementById('mobile-menu') as HTMLInputElement;
+    if (drawer) {
+      drawer.checked = !drawer.checked;
+    }
+  }
 }

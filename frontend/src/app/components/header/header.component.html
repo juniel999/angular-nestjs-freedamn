@@ -44,7 +44,7 @@
       </div>
       }
 
-      <!-- Logged In Section - Desktop Only -->
+      <!-- Logged In Section - Desktop -->
       @if (isLoggedIn) {
       <div class="hidden sm:flex items-center space-x-3">
         <button routerLink="/compose" class="btn btn-primary btn-sm">
@@ -57,7 +57,6 @@
           <label tabindex="0" class="btn btn-ghost btn-sm btn-circle">
             <div class="indicator">
               <fa-icon [icon]="['far', 'bell']" [size]="'2xl'"></fa-icon>
-              <span class="badge badge-xs badge-primary indicator-item">3</span>
             </div>
           </label>
           <ul
@@ -67,17 +66,7 @@
             <li class="menu-title">Notifications</li>
             <li>
               <a class="focus:!bg-base-200" tabindex="0" (click)="onLinkClick()"
-                >New message from user</a
-              >
-            </li>
-            <li>
-              <a class="focus:!bg-base-200" tabindex="0" (click)="onLinkClick()"
-                >Your post was liked</a
-              >
-            </li>
-            <li>
-              <a class="focus:!bg-base-200" tabindex="0" (click)="onLinkClick()"
-                >Someone mentioned you</a
+                >No notifications yet.</a
               >
             </li>
           </ul>
@@ -108,7 +97,7 @@
           </label>
           <ul
             tabindex="0"
-            class="menu dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 transform opacity-0 scale-95 transition-all duration-200 origin-top-right group-focus:opacity-100 group-focus:scale-100"
+            class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-3 z-[1]"
           >
             <li>
               <a
@@ -144,50 +133,116 @@
           </ul>
         </div>
       </div>
+
+      <!-- Mobile User Profile -->
+      <div class="sm:hidden">
+        <div class="flex items-center space-x-3">
+          <!-- Search Button -->
+          <!-- <button
+            class="btn btn-circle btn-circle btn-sm text-gray-700"
+            (click)="toggleMobileSearch()"
+          >
+            <fa-icon [icon]="['fas', 'search']" [size]="'xl'"></fa-icon>
+          </button> -->
+
+          <!-- Notification Bell -->
+          <div class="dropdown dropdown-end">
+            <label
+              tabindex="0"
+              class="btn btn-ghost btn-sm btn-circle text-gray-700"
+            >
+              <div class="indicator">
+                <fa-icon [icon]="['far', 'bell']" size="2xl"></fa-icon>
+              </div>
+            </label>
+            <ul
+              tabindex="0"
+              class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-3 z-[1]"
+            >
+              <li class="menu-title">Notifications</li>
+              <li>
+                <a
+                  class="focus:!bg-base-200"
+                  tabindex="0"
+                  (click)="onLinkClick()"
+                  >No notifications yet.</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- User Profile Dropdown -->
+          <div class="dropdown dropdown-end">
+            <label
+              tabindex="0"
+              class="flex items-center space-x-2 px-2 py-1 rounded-full cursor-pointer hover:bg-base-200 transition-all duration-200"
+            >
+              <div class="avatar">
+                <div
+                  class="w-8 h-8 rounded-full overflow-hidden ring-1 ring-primary/20"
+                >
+                  <img
+                    [src]="userAvatar()"
+                    [alt]="username() + ' avatar'"
+                    onerror="this.src='https://ui-avatars.com/api/'"
+                  />
+                </div>
+              </div>
+            </label>
+            <ul
+              tabindex="0"
+              class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-3 z-[1]"
+            >
+              <li>
+                <a
+                  routerLink="/compose"
+                  class="focus:!bg-base-200"
+                  tabindex="0"
+                  (click)="onLinkClick()"
+                >
+                  <fa-icon [icon]="['fas', 'edit']" class="mr-2"></fa-icon>
+                  Write
+                </a>
+              </li>
+              <li>
+                <a
+                  routerLink="/profile"
+                  class="focus:!bg-base-200"
+                  tabindex="0"
+                  (click)="onLinkClick()"
+                >
+                  <fa-icon [icon]="['far', 'user']" class="mr-2"></fa-icon>
+                  Profile
+                </a>
+              </li>
+              <li>
+                <a
+                  routerLink="/settings"
+                  class="focus:!bg-base-200"
+                  tabindex="0"
+                  (click)="onLinkClick()"
+                >
+                  <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>
+                  Settings
+                </a>
+              </li>
+              <li>
+                <a (click)="logout()" class="focus:!bg-base-200" tabindex="0">
+                  <fa-icon
+                    [icon]="['far', 'arrow-alt-circle-right']"
+                    class="mr-2"
+                  ></fa-icon>
+                  Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
       }
     </div>
   </div>
 </header>
-
-<!-- Mobile Bottom Navigation - Only for logged-in users -->
-@if (isLoggedIn) {
-<nav
-  class="sm:hidden fixed bottom-0 left-0 right-0 bg-black text-primary shadow-lg border-t border-base-200 z-[999]"
->
-  <div class="flex justify-around items-center py-2">
-    <a routerLink="/profile" class="flex flex-col items-center p-2">
-      <fa-icon [icon]="['far', 'user']" size="xl"></fa-icon>
-      <!-- <span class="text-xs mt-1">Profile</span> -->
-    </a>
-
-    <a class="flex flex-col items-center p-2">
-      <div class="indicator">
-        <fa-icon [icon]="['far', 'bell']" size="xl"></fa-icon>
-        <!-- <span class="badge badge-xs badge-primary indicator-item">3</span> -->
-      </div>
-      <!-- <span class="text-xs mt-1">Alerts</span> -->
-    </a>
-
-    <a routerLink="/compose" class="flex flex-col items-center p-2">
-      <fa-icon
-        [icon]="['far', 'plus-square']"
-        size="xl"
-        class="text-primary-content"
-      ></fa-icon>
-      <!-- <span class="text-xs mt-1">Create</span> -->
-    </a>
-
-    <a routerLink="/settings" class="flex flex-col items-center p-2">
-      <fa-icon [icon]="['fas', 'cog']" size="xl"></fa-icon>
-    </a>
-
-    <button (click)="logout()" class="flex flex-col items-center p-2">
-      <fa-icon [icon]="['far', 'arrow-alt-circle-right']" size="xl"></fa-icon>
-      <!-- <span class="text-xs mt-1">Logout</span> -->
-    </button>
-  </div>
-</nav>
-}
 
 <!-- Mobile Menu Drawer -->
 <div class="drawer sm:hidden">
@@ -195,27 +250,6 @@
   <div class="drawer-side z-10">
     <label for="mobile-menu" class="drawer-overlay"></label>
     <ul class="menu p-4 w-80 h-full bg-base-100 text-base-content">
-      <!-- Mobile User Info - Only shown when logged in -->
-      @if (isLoggedIn) {
-      <li class="mb-4">
-        <div class="flex items-center p-2 border-b border-base-200">
-          <div class="avatar mr-3">
-            <div class="w-10 h-10 rounded-full">
-              <img
-                [src]="userAvatar()"
-                [alt]="username() + ' avatar'"
-                onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'"
-              />
-            </div>
-          </div>
-          <div routerLink="/profile">
-            <p class="font-medium">{{ username() }}</p>
-            <p class="text-xs text-gray-500">View profile</p>
-          </div>
-        </div>
-      </li>
-      }
-
       <!-- Search Input for Mobile -->
       <li class="mb-4">
         <div class="form-control">
@@ -243,37 +277,6 @@
         <a class="btn btn-primary justify-start mt-2" [routerLink]="['/signup']"
           >Sign Up</a
         >
-      </li>
-      } @if (isLoggedIn) {
-      <li>
-        <a routerLink="/compose" class="btn btn-primary justify-start">
-          <fa-icon [icon]="['far', 'plus-square']" class="mr-2"></fa-icon
-          >Compose
-        </a>
-      </li>
-      <li class="mt-2">
-        <a>
-          <fa-icon [icon]="['far', 'bell']" class="mr-2"></fa-icon>Notifications
-        </a>
-      </li>
-      <li>
-        <a routerLink="/profile">
-          <fa-icon [icon]="['far', 'user']" class="mr-2"></fa-icon>Profile
-        </a>
-      </li>
-      <li>
-        <a routerLink="/settings">
-          <fa-icon [icon]="['fas', 'cog']" class="mr-2"></fa-icon>Settings
-        </a>
-      </li>
-      <li>
-        <a (click)="logout()">
-          <fa-icon
-            [icon]="['far', 'arrow-alt-circle-right']"
-            class="mr-2"
-          ></fa-icon
-          >Logout
-        </a>
       </li>
       }
     </ul>
