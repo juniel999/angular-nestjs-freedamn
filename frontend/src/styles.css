@@ -19,3 +19,9 @@ input:focus {
   border-color: #e5b400 !important;
   outline-color: transparent !important;
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

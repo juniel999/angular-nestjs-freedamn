@@ -16,38 +16,57 @@
 
   <!-- Tabs & Filters Row -->
   <div
-    class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8"
+    class="flex flex-col sm:flex-row justify-between items-stretch gap-4 mb-8"
   >
     <!-- Tabs -->
-    <div class="tabs tabs-lifted gap-1 overflow-x-auto self-start">
-      @if (isLoggedIn) {
-      <a
-        class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
-        [class.tab-active]="currentTab() === 'for-you'"
-        (click)="changeTab('for-you')"
+    <div class="relative">
+      <div
+        class="overflow-x-auto -mx-4 sm:mx-0 scrollbar-hide no-scrollbar [-ms-overflow-style:none] [scrollbar-width:none]"
       >
-        <fa-icon [icon]="['fas', 'star']" class="text-sm"></fa-icon>
-        For You
-      </a>
-      }
-      <a
-        class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
-        [class.tab-active]="currentTab() === 'explore'"
-        (click)="changeTab('explore')"
+        <div class="tabs tabs-lifted gap-1 px-4 sm:px-0 min-w-max">
+          @if (isLoggedIn) {
+          <a
+            class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
+            [class.tab-active]="currentTab() === 'for-you'"
+            (click)="changeTab('for-you')"
+          >
+            <fa-icon [icon]="['fas', 'star']" class="text-sm"></fa-icon>
+            For You
+          </a>
+          }
+          <a
+            class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
+            [class.tab-active]="currentTab() === 'explore'"
+            (click)="changeTab('explore')"
+          >
+            <fa-icon [icon]="['fas', 'compass']" class="text-sm"></fa-icon>
+            Explore
+          </a>
+          @if (isLoggedIn) {
+          <a
+            class="tab tab-lg gap-2 transition-colors hover:bg-base-200 me-4"
+            [class.tab-active]="currentTab() === 'following'"
+            (click)="changeTab('following')"
+          >
+            <fa-icon [icon]="['fas', 'user-friends']" class="text-sm"></fa-icon>
+            Following
+          </a>
+          }
+        </div>
+      </div>
+      <!-- Scroll indicator -->
+      <div
+        class="absolute right-0 top-0 bottom-0 pointer-events-none sm:hidden"
       >
-        <fa-icon [icon]="['fas', 'compass']" class="text-sm"></fa-icon>
-        Explore
-      </a>
-      @if (isLoggedIn) {
-      <a
-        class="tab tab-lg gap-2 transition-colors hover:bg-base-200"
-        [class.tab-active]="currentTab() === 'following'"
-        (click)="changeTab('following')"
-      >
-        <fa-icon [icon]="['fas', 'user-friends']" class="text-sm"></fa-icon>
-        Following
-      </a>
-      }
+        <div
+          class="w-8 h-full bg-gradient-to-l from-base-100 flex items-center justify-end pr-2"
+        >
+          <fa-icon
+            [icon]="['fas', 'chevron-right']"
+            class="text-sm text-base-content/50"
+          ></fa-icon>
+        </div>
+      </div>
     </div>
 
     <!-- Filter Button -->
