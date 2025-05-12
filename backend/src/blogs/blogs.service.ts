@@ -20,7 +20,15 @@ export class BlogsService {
     @InjectModel(User.name) private userModel: Model<User>,
     private tagsService: TagsService,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) {
+    // Add virtual field for author's posts count
+    this.userModel.schema.virtual('posts', {
+      ref: 'Blog',
+      localField: '_id',
+      foreignField: 'author',
+      count: true,
+    });
+  }
 
   private async processImagesInContent(content: any): Promise<{
     processedContent: any;
@@ -194,10 +202,12 @@ export class BlogsService {
         .sort(sortOptions)
         .skip(skip)
         .limit(limit)
-        .populate(
-          'author',
-          'username firstName lastName avatar pronouns title location bio email posts followers following',
-        )
+        .populate({
+          path: 'author',
+          select:
+            'username firstName lastName avatar pronouns title location bio email posts followers following',
+          populate: { path: 'posts' },
+        })
         .exec(),
       this.blogModel.countDocuments(query).exec(),
     ]);
@@ -217,10 +227,12 @@ export class BlogsService {
         published: true,
       })
       .sort({ createdAt: -1 })
-      .populate(
-        'author',
-        'username firstName lastName avatar pronouns title location bio email posts followers following',
-      )
+      .populate({
+        path: 'author',
+        select:
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        populate: { path: 'posts' },
+      })
       .exec();
   }
 
@@ -235,10 +247,12 @@ export class BlogsService {
         published: true,
       })
       .sort({ createdAt: -1 })
-      .populate(
-        'author',
-        'username firstName lastName avatar pronouns title location bio email posts followers following',
-      )
+      .populate({
+        path: 'author',
+        select:
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        populate: { path: 'posts' },
+      })
       .exec();
   }
 
@@ -249,10 +263,12 @@ export class BlogsService {
       .find({ published: true })
       .sort({ likes: -1, viewCount: -1, createdAt: -1 })
       .limit(10)
-      .populate(
-        'author',
-        'username firstName lastName avatar pronouns title location bio email posts followers following',
-      )
+      .populate({
+        path: 'author',
+        select:
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        populate: { path: 'posts' },
+      })
       .exec();
   }
 
@@ -278,10 +294,12 @@ export class BlogsService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate(
-          'author',
-          'username firstName lastName avatar pronouns title location bio email posts followers following',
-        )
+        .populate({
+          path: 'author',
+          select:
+            'username firstName lastName avatar pronouns title location bio email posts followers following',
+          populate: { path: 'posts' },
+        })
         .exec(),
       this.blogModel.countDocuments(query).exec(),
     ]);
@@ -302,35 +320,48 @@ export class BlogsService {
     const posts = await this.blogModel
       .aggregate([
         { $match: { published: true } },
-        { $sample: { size: limit } }, // Use $sample for true randomization
+        { $sample: { size: limit } },
         {
           $lookup: {
             from: 'users',
             localField: 'author',
             foreignField: '_id',
             as: 'author',
-            pipeline: [
-              {
-                $project: {
-                  _id: 1,
-                  username: 1,
-                  firstName: 1,
-                  lastName: 1,
-                  avatar: 1,
-                  pronouns: 1,
-                  title: 1,
-                  location: 1,
-                  bio: 1,
-                  email: 1,
-                  posts: 1,
-                  followers: 1,
-                  following: 1,
-                },
-              },
-            ],
           },
         },
         { $unwind: '$author' },
+        // Add lookup for posts count
+        {
+          $lookup: {
+            from: 'blogs',
+            let: { authorId: '$author._id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$author', '$$authorId'] },
+                      { $eq: ['$published', true] },
+                    ],
+                  },
+                },
+              },
+              { $count: 'count' },
+            ],
+            as: 'postCount',
+          },
+        },
+        {
+          $addFields: {
+            'author.posts': {
+              $cond: {
+                if: { $gt: [{ $size: '$postCount' }, 0] },
+                then: { $arrayElemAt: ['$postCount.count', 0] },
+                else: 0,
+              },
+            },
+          },
+        },
       ])
       .exec();
 
@@ -367,10 +398,12 @@ export class BlogsService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate(
-          'author',
-          'username firstName lastName avatar pronouns title location bio email posts followers following',
-        )
+        .populate({
+          path: 'author',
+          select:
+            'username firstName lastName avatar pronouns title location bio email posts followers following',
+          populate: { path: 'posts' },
+        })
         .exec(),
       this.blogModel.countDocuments(query).exec(),
     ]);
@@ -391,10 +424,12 @@ export class BlogsService {
     // Return the blog with populated author and comments information
     return this.blogModel
       .findById(id)
-      .populate(
-        'author',
-        'username firstName lastName avatar pronouns title location bio email posts followers following',
-      )
+      .populate({
+        path: 'author',
+        select:
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        populate: { path: 'posts' },
+      })
       .populate({
         path: 'comments',
         populate: {

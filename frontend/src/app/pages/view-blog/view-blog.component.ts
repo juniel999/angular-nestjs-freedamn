@@ -48,6 +48,7 @@ export class ViewBlogComponent {
     }
 
     this.loadBlog(blogId);
+    console.log(this.blog());
   }
 
   private loadBlog(id: string) {
@@ -58,9 +59,10 @@ export class ViewBlogComponent {
           ...blog,
           safeHtml: this.sanitizer.bypassSecurityTrustHtml(blog.contentHtml),
         };
+        console.log('Blog data:', extendedBlog);
+        console.log('Author data:', extendedBlog.author);
+        console.log('Author posts:', extendedBlog.author.posts);
         this.blog.set(extendedBlog);
-        console.log(extendedBlog);
-        console.log(this.userId());
         this.isLoading.set(false);
       },
       error: (error) => {
