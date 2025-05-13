@@ -80,8 +80,25 @@ export class User extends Document {
   @Prop({ type: SocialLinks, default: {} })
   socials: SocialLinks;
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }], default: [] })
+  @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
+    default: [],
+  })
   following: User[]; // Users that this user is following
+
+  posts?: number; // Virtual field for posts count
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+// Add virtual field for posts count
+UserSchema.virtual('posts', {
+  ref: 'Blog',
+  localField: '_id',
+  foreignField: 'author',
+  count: true,
+});
+
+// Ensure virtuals are included in JSON
+UserSchema.set('toJSON', { virtuals: true });
+UserSchema.set('toObject', { virtuals: true });

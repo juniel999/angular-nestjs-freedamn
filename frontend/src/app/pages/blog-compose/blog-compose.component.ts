@@ -10,7 +10,8 @@ import { CommonModule } from '@angular/common';
 import { BlogService } from '../../services/blog.service';
 import { ToastService } from '../../services/toast.service';
 import { UserService } from '../../services/user.service';
-import { finalize } from 'rxjs/operators';
+import { finalize, switchMap, catchError, map } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TagData } from '../../types/tag.type';
 import { QuillModule, QuillEditorComponent } from 'ngx-quill';
@@ -220,9 +221,63 @@ export class BlogComposeComponent implements OnInit {
       ...this.blogForm.value,
       content: deltaContent,
       images: this.uploadedImages,
-      coverImage: this.uploadedImages[0] || '',
+      coverImage:
+        this.blogForm.get('coverImage')?.value || this.uploadedImages[0] || '',
     };
 
+    // If in edit mode, find images to delete
+    if (this.isEditMode) {
+      this.blogService
+        .getBlogById(this.blogId!)
+        .pipe(
+          finalize(() => {
+            this.isSubmitting = false;
+          }),
+          switchMap((oldBlog) => {
+            const oldImages = oldBlog.images || [];
+            // Find images that are no longer used
+            const imagesToDelete = oldImages.filter(
+              (oldImg) => !this.uploadedImages.includes(oldImg)
+            );
+
+            // Delete unused images
+            const deletionRequests = imagesToDelete.map((img) =>
+              this.blogService.deleteImage(img).pipe(
+                catchError((err) => {
+                  console.error('Failed to delete image:', err);
+                  return of(null);
+                })
+              )
+            );
+
+            return forkJoin([of(blogData), ...deletionRequests]);
+          }),
+          map(([blogData]) => blogData)
+        )
+        .subscribe({
+          next: (blogData) => this.saveBlog(blogData),
+          error: (err) => {
+            const errorMessage =
+              err.status === 413
+                ? 'Blog post content is too large. Try reducing the number of images or content size.'
+                : this.isEditMode
+                ? 'Failed to update blog post'
+                : 'Failed to create blog post';
+            this.toastService.show(errorMessage, 'error');
+            console.error(
+              this.isEditMode
+                ? 'Error updating blog post:'
+                : 'Error creating blog post:',
+              err
+            );
+          },
+        });
+    } else {
+      this.saveBlog(blogData);
+    }
+  }
+
+  private saveBlog(blogData: any) {
     const request = this.isEditMode
       ? this.blogService.updateBlog(this.blogId!, blogData)
       : this.blogService.createBlog(blogData);

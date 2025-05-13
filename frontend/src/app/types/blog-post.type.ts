@@ -15,7 +15,7 @@ export type BlogPostType = {
     title?: string;
     location?: string;
     bio?: string;
-    posts?: any[];
+    posts: number; // Change from any[] to number since it's a virtual count field
     followers?: any[];
     following?: any[];
   };
