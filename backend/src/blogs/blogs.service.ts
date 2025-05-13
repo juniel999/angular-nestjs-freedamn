@@ -446,6 +446,12 @@ export class BlogsService {
       throw new NotFoundException('Invalid blog ID format');
     }
 
+    // Get the current blog to compare images
+    const currentBlog = await this.blogModel.findById(id);
+    if (!currentBlog) {
+      throw new NotFoundException('Blog not found');
+    }
+
     // If tags are being updated, process them
     if (updateBlogDto.tags && updateBlogDto.tags.length > 0) {
       await this.tagsService.addTagsIfNotExist(updateBlogDto.tags);
@@ -456,17 +462,45 @@ export class BlogsService {
       const { processedContent, processedContentHtml, imageUrls } =
         await this.processImagesInContent(updateBlogDto.content);
 
+      // Find images that are no longer used
+      const oldImages = currentBlog.images || [];
+      const imagesToDelete = oldImages.filter(
+        (oldImg) => !imageUrls.includes(oldImg),
+      );
+
+      // Delete unused images from Cloudinary
+      for (const imageUrl of imagesToDelete) {
+        try {
+          await this.cloudinaryService.deleteImageByUrl(imageUrl);
+        } catch (error) {
+          console.error('Failed to delete image:', error);
+          // Continue with other deletions even if one fails
+        }
+      }
+
       updateBlogDto = {
         ...updateBlogDto,
         content: processedContent,
         contentHtml: processedContentHtml,
         images: imageUrls,
-        // Only update cover image if one doesn't already exist or if explicitly set
-        ...(!updateBlogDto.coverImage &&
-          imageUrls.length > 0 && {
-            coverImage: imageUrls[0],
-          }),
+        // Only update cover image if:
+        // 1. No cover image provided and we have new images, OR
+        // 2. Current cover image was deleted
+        ...(shouldUpdateCoverImage() && {
+          coverImage: updateBlogDto.coverImage || imageUrls[0],
+        }),
       };
+
+      function shouldUpdateCoverImage(): boolean {
+        // We already checked currentBlog is not null above
+        const blog = currentBlog!;
+        const noCoverImageButHasNewImages =
+          !updateBlogDto.coverImage && imageUrls.length > 0;
+        const currentCoverImageWasDeleted = Boolean(
+          blog.coverImage && imagesToDelete.includes(blog.coverImage),
+        );
+        return noCoverImageButHasNewImages || currentCoverImageWasDeleted;
+      }
     }
 
     const updatedBlog = await this.blogModel
@@ -487,6 +521,23 @@ export class BlogsService {
   async remove(id: string): Promise<Blog | null> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Invalid blog ID format');
+    }
+
+    // Get the blog to get its images before deletion
+    const blog = await this.blogModel.findById(id);
+    if (!blog) {
+      throw new NotFoundException('Blog not found');
+    }
+
+    // Delete all images associated with the blog
+    const images = blog.images || [];
+    for (const imageUrl of images) {
+      try {
+        await this.cloudinaryService.deleteImageByUrl(imageUrl);
+      } catch (error) {
+        console.error('Failed to delete image:', error);
+        // Continue with other deletions even if one fails
+      }
     }
 
     return this.blogModel.findByIdAndDelete(id).exec();

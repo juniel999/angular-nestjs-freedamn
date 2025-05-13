@@ -350,6 +350,15 @@ export class BlogService {
   }
 
   /**
+   * Delete an image from Cloudinary
+   */
+  deleteImage(imageUrl: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/delete-image`, {
+      body: { imageUrl },
+    });
+  }
+
+  /**
    * Create a new blog post
    */
   createBlog(blogData: Partial<BlogPostType>): Observable<BlogPostType> {

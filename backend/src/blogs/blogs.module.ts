@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
 import { Blog, BlogSchema } from './blog.schema';
 import { BlogsService } from './blogs.service';
 import { BlogsController } from './blogs.controller';
@@ -11,13 +12,14 @@ import { UserSchema, User } from '../users/user.schema';
   imports: [
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
-      { name: User.name, schema: UserSchema }
+      { name: User.name, schema: UserSchema },
     ]),
     TagsModule,
-    CloudinaryModule
+    CloudinaryModule,
+    ConfigModule,
   ],
   controllers: [BlogsController],
   providers: [BlogsService],
-  exports: [BlogsService]
+  exports: [BlogsService],
 })
 export class BlogsModule {}

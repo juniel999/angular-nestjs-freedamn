@@ -53,21 +53,24 @@ export class CloudinaryService {
 
   async deleteImageByUrl(imageUrl: string): Promise<boolean> {
     try {
-      // Extract public_id from the Cloudinary URL
-      // URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/public_id.ext
       if (!imageUrl) return false;
 
-      const urlParts = imageUrl.split('/');
-      // Get the filename with extension from the URL
-      const filenameWithExt = urlParts[urlParts.length - 1];
-      // Remove the file extension to get the public_id
-      const publicId = filenameWithExt.split('.')[0];
+      // Extract public_id from the Cloudinary URL
+      // URL format: https://res.cloudinary.com/cloud_name/image/upload/v1234567890/folder/public_id.ext
 
-      // If we have a folder structure in the URL, include it in the public_id
-      const folderPath = urlParts[urlParts.length - 2];
-      const fullPublicId = `${folderPath}/${publicId}`;
+      // Get everything after /upload/
+      const uploadIndex = imageUrl.indexOf('/upload/');
+      if (uploadIndex === -1) return false;
 
-      const result = await cloudinary.uploader.destroy(fullPublicId);
+      const pathAfterUpload = imageUrl.slice(uploadIndex + 8);
+
+      // Remove version number if present (v1234567890/)
+      const pathWithoutVersion = pathAfterUpload.replace(/v\d+\//, '');
+
+      // Remove file extension
+      const publicId = pathWithoutVersion.replace(/\.[^/.]+$/, '');
+
+      const result = await cloudinary.uploader.destroy(publicId);
       return result.result === 'ok';
     } catch (error) {
       console.error('Error deleting image from Cloudinary:', error);

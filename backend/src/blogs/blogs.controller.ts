@@ -14,14 +14,19 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  BadRequestException,
 } from '@nestjs/common';
 import { BlogsService } from './blogs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 
 @Controller('blogs')
 export class BlogsController {
-  constructor(private readonly blogsService: BlogsService) {}
+  constructor(
+    private readonly blogsService: BlogsService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -106,6 +111,20 @@ export class BlogsController {
     file: Express.Multer.File,
   ) {
     return this.blogsService.uploadImage(file);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete-image')
+  async deleteImage(@Body('imageUrl') imageUrl: string) {
+    try {
+      const result = await this.cloudinaryService.deleteImageByUrl(imageUrl);
+      if (!result) {
+        throw new Error('Failed to delete image');
+      }
+      return { success: true };
+    } catch (error) {
+      throw new BadRequestException('Failed to delete image');
+    }
   }
 
   @Get(':id')

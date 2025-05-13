@@ -9,7 +9,7 @@
       <div class="w-full h-40 bg-base-200">
         @if (blog.coverImage || (blog.images && blog.images.length > 0)) {
         <img
-          [src]="blog.coverImage || blog.images[0]"
+          [src]="blog.images[0]"
           alt="Blog preview"
           class="w-full h-40 object-cover"
         />
