@@ -366,10 +366,10 @@ export class BlogService {
   }
 
   /**
-   * Get a single blog by ID
+   * Get a single blog by ID or slug
    */
-  getBlogById(id: string): Observable<BlogPostType> {
-    return this.http.get<BlogPostType>(`${this.apiUrl}/${id}`);
+  getBlogById(idOrSlug: string): Observable<BlogPostType> {
+    return this.http.get<BlogPostType>(`${this.apiUrl}/${idOrSlug}`);
   }
 
   /**
@@ -416,6 +416,7 @@ export class BlogService {
         };
       };
 
+      // Create new state with updated blog in all categories
       return {
         ...state,
         forYou: updateBlogInResponse(state.forYou),

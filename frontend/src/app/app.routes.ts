@@ -1,16 +1,10 @@
 import { Routes } from '@angular/router';
-import { SignUpComponent } from './pages/sign-up/sign-up.component';
-import { SignInComponent } from './pages/sign-in/sign-in.component';
-import { BlogComposeComponent } from './pages/blog-compose/blog-compose.component';
+import { authGuard } from './guards/auth.guard';
+import { publicOnlyGuard } from './guards/public-only.guard';
+import { BlogAuthorGuard } from './guards/blog-author.guard';
 import { onboardingGuard } from './guards/onboarding.guard';
 import { onboardingCompletedGuard } from './guards/onboarding-completed.guard';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
-import { ProfileComponent } from './pages/profile/profile.component';
-import { publicOnlyGuard } from './guards/public-only.guard';
-import { HomeComponent } from './pages/home/home.component';
-import { ViewBlogComponent } from './pages/view-blog/view-blog.component';
-import { authGuard } from './guards/auth.guard';
-import { BlogAuthorGuard } from './guards/blog-author.guard';
 
 export const routes: Routes = [
   {
@@ -19,30 +13,70 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: HomeComponent, // Direct component reference for public access
+        loadComponent: () =>
+          import('./pages/home/home.component').then((m) => m.HomeComponent),
+      },
+      {
+        path: 'signin',
+        loadComponent: () =>
+          import('./pages/sign-in/sign-in.component').then(
+            (m) => m.SignInComponent
+          ),
+        canActivate: [publicOnlyGuard],
+      },
+      {
+        path: 'signup',
+        loadComponent: () =>
+          import('./pages/sign-up/sign-up.component').then(
+            (m) => m.SignUpComponent
+          ),
+        canActivate: [publicOnlyGuard],
+      },
+      {
+        path: 'onboarding',
+        loadComponent: () =>
+          import('./pages/onboarding/onboarding/onboarding.component').then(
+            (m) => m.OnboardingComponent
+          ),
+        canActivate: [authGuard, onboardingGuard],
       },
       {
         path: 'compose',
-        component: BlogComposeComponent,
+        loadComponent: () =>
+          import('./pages/blog-compose/blog-compose.component').then(
+            (m) => m.BlogComposeComponent
+          ),
         canActivate: [authGuard, onboardingCompletedGuard],
       },
       {
-        path: 'blogs/:id',
-        component: ViewBlogComponent,
+        path: 'blogs/:idOrSlug',
+        loadComponent: () =>
+          import('./pages/view-blog/view-blog.component').then(
+            (m) => m.ViewBlogComponent
+          ),
       },
       {
-        path: 'blogs/:id/edit',
-        component: BlogComposeComponent,
+        path: 'blogs/:idOrSlug/edit',
+        loadComponent: () =>
+          import('./pages/blog-compose/blog-compose.component').then(
+            (m) => m.BlogComposeComponent
+          ),
         canActivate: [authGuard, BlogAuthorGuard, onboardingCompletedGuard],
       },
       {
         path: 'profile/:username',
-        component: ProfileComponent,
+        loadComponent: () =>
+          import('./pages/profile/profile.component').then(
+            (m) => m.ProfileComponent
+          ),
         canActivate: [onboardingCompletedGuard],
       },
       {
         path: 'profile',
-        component: ProfileComponent,
+        loadComponent: () =>
+          import('./pages/profile/profile.component').then(
+            (m) => m.ProfileComponent
+          ),
         canActivate: [authGuard, onboardingCompletedGuard],
       },
       {
@@ -54,24 +88,6 @@ export const routes: Routes = [
         canActivate: [authGuard, onboardingCompletedGuard],
       },
     ],
-  },
-  {
-    path: 'signup',
-    component: SignUpComponent,
-    canActivate: [publicOnlyGuard],
-  },
-  {
-    path: 'signin',
-    component: SignInComponent,
-    canActivate: [publicOnlyGuard],
-  },
-  {
-    path: 'onboarding',
-    loadChildren: () =>
-      import('./pages/onboarding/onboarding.module').then(
-        (m) => m.OnboardingModule
-      ),
-    canActivate: [authGuard, onboardingGuard],
   },
   { path: '**', redirectTo: '/' },
 ];

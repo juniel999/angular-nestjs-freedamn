@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Blog } from './blog.schema';
+import { Blog, BlogModel } from './blog.schema';
 import { User } from '../users/user.schema';
 import { TagsService } from '../tags/tags.service';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
@@ -16,7 +16,7 @@ export class BlogsService {
   private seenRandomBlogIds: Set<string> = new Set();
 
   constructor(
-    @InjectModel(Blog.name) private blogModel: Model<Blog>,
+    @InjectModel(Blog.name) private blogModel: Model<Blog> & BlogModel,
     @InjectModel(User.name) private userModel: Model<User>,
     private tagsService: TagsService,
     private cloudinaryService: CloudinaryService,
@@ -156,12 +156,24 @@ export class BlogsService {
     const { processedContent, processedContentHtml, imageUrls } =
       await this.processImagesInContent(createBlogDto.content);
 
+    // Generate slug from title if not provided
+    if (!createBlogDto.slug) {
+      let baseSlug = this.blogModel.generateSlug(createBlogDto.title);
+      let slug = baseSlug;
+      let counter = 1;
+      while (await this.blogModel.findOne({ slug })) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+      createBlogDto.slug = slug;
+    }
+
     const createdBlog = new this.blogModel({
       ...createBlogDto,
       content: processedContent,
       contentHtml: processedContentHtml,
       images: imageUrls,
-      coverImage: imageUrls[0] || createBlogDto.coverImage, // Use first image as cover if not specified
+      coverImage: createBlogDto.coverImage || imageUrls[0], // Use first image as cover if not specified
       author: user._id || user.userId, // Support both formats
     });
 
@@ -413,7 +425,8 @@ export class BlogsService {
 
   async findOne(id: string): Promise<Blog | null> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new NotFoundException('Invalid blog ID format');
+      // Try finding by slug if id is not valid ObjectId
+      return this.findBySlug(id);
     }
 
     // Increment view count
@@ -424,6 +437,32 @@ export class BlogsService {
     // Return the blog with populated author and comments information
     return this.blogModel
       .findById(id)
+      .populate({
+        path: 'author',
+        select:
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        populate: { path: 'posts' },
+      })
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'userId',
+          select: 'username avatar',
+        },
+        options: { sort: { createdAt: -1 } },
+      })
+      .exec();
+  }
+
+  private async findBySlug(slug: string): Promise<Blog | null> {
+    // Increment view count
+    await this.blogModel
+      .findOneAndUpdate({ slug }, { $inc: { viewCount: 1 } })
+      .exec();
+
+    // Return the blog with populated author and comments information
+    return this.blogModel
+      .findOne({ slug })
       .populate({
         path: 'author',
         select:
@@ -455,6 +494,20 @@ export class BlogsService {
     // If tags are being updated, process them
     if (updateBlogDto.tags && updateBlogDto.tags.length > 0) {
       await this.tagsService.addTagsIfNotExist(updateBlogDto.tags);
+    }
+
+    // If title is being updated, generate new slug
+    if (updateBlogDto.title && updateBlogDto.title !== currentBlog.title) {
+      let baseSlug = this.blogModel.generateSlug(updateBlogDto.title);
+
+      // Check for duplicate slugs and append number if needed
+      let slug = baseSlug;
+      let counter = 1;
+      while (await this.blogModel.findOne({ slug, _id: { $ne: id } })) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+      updateBlogDto.slug = slug;
     }
 
     // If content is being updated, process it
