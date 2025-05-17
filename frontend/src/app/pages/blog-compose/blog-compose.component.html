@@ -1,142 +1,148 @@
 <div class="max-w-3xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-6">
-    {{ isEditMode ? "Edit Blog Post" : "Create New Blog Post" }}
-  </h1>
+    <!-- Cancel button at top -->
+    <a [routerLink]="['/']" class="btn btn-ghost btn-sm mb-4">
+      <fa-icon [icon]="['fas', 'arrow-left']"></fa-icon>
+      Cancel
+    </a>
 
-  <form [formGroup]="blogForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    <!-- Title Input -->
-    <div class="form-control">
-      <label for="title" class="label">
-        <span class="label-text text-lg font-medium">Title</span>
-        @if (blogForm.get('title')?.hasError('required') &&
-        blogForm.get('title')?.touched) {
-        <span class="label-text-alt text-error">Required</span>
-        }
-      </label>
-      <input
-        type="text"
-        id="title"
-        formControlName="title"
-        class="input input-bordered w-full"
-        placeholder="Enter a catchy title for your blog post"
-      />
-      @if (blogForm.get('title')?.touched && blogForm.get('title')?.invalid) {
-      <div class="mt-1 text-sm text-error">
-        @if (blogForm.get('title')?.errors?.['minlength']) {
-        <div>Title must be at least 5 characters long.</div>
-        } @if (blogForm.get('title')?.errors?.['maxlength']) {
-        <div>Title cannot exceed 100 characters.</div>
-        }
-      </div>
-      }
-    </div>
+    <h1 class="text-3xl font-bold mb-6">
+      {{ isEditMode ? "Edit Blog Post" : "Create New Blog Post" }}
+    </h1>
 
-    <!-- Content Editor -->
-    <div class="form-control">
-      <label for="content" class="label">
-        <span class="label-text text-lg font-medium">Content</span>
-        @if (blogForm.get('content')?.hasError('required') &&
-        blogForm.get('content')?.touched) {
-        <span class="label-text-alt text-error">Required</span>
-        }
-      </label>
-      <p class="text-sm text-base-content/70 mb-2">
-        Use the image button in the toolbar to add images. The first image you
-        add will be used as the cover image.
-      </p>
-      <quill-editor
-        #quillEditor
-        id="content"
-        formControlName="content"
-        [styles]="{ height: '300px' }"
-        [modules]="quillConfig"
-        (onEditorCreated)="onEditorCreated()"
-        placeholder="Start writing your amazing blog post..."
-      ></quill-editor>
-      @if (blogForm.get('content')?.touched && blogForm.get('content')?.invalid)
-      {
-      <div class="mt-1 text-sm text-error">
-        @if (blogForm.get('content')?.errors?.['minlength']) {
-        <div>Content must be at least 50 characters long.</div>
-        }
-      </div>
-      }
-    </div>
-
-    <!-- Tags Selection -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-lg font-medium">Tags</span>
-        @if (blogForm.get('tags')?.hasError('required') &&
-        blogForm.get('tags')?.touched) {
-        <span class="label-text-alt text-error">Required</span>
-        }
-      </label>
-      <p class="text-sm text-base-content/70 mb-2">
-        Select at least one tag that best describes your post.
-      </p>
-
-      <div class="flex flex-wrap gap-2">
-        @for (tag of availableTags; track tag._id) {
-        <div
-          class="badge badge-lg cursor-pointer transition-colors"
-          [class.badge-primary]="blogForm.get('tags')?.value.includes(tag.name)"
-          [class.badge-outline]="
-            !blogForm.get('tags')?.value.includes(tag.name)
-          "
-          (click)="toggleTag(tag._id, tag.name)"
-        >
-          <fa-icon [icon]="['fas', 'hashtag']" class="mr-1 text-xs"></fa-icon>
-          {{ tag.name }}
+    <form [formGroup]="blogForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Title Input -->
+        <div class="form-control">
+            <label for="title" class="label">
+                <span class="label-text text-lg font-medium">Title</span>
+                @if (blogForm.get('title')?.hasError('required') &&
+                blogForm.get('title')?.touched) {
+                <span class="label-text-alt text-error">Required</span>
+                }
+            </label>
+            <input
+                type="text"
+                id="title"
+                formControlName="title"
+                class="input input-bordered w-full"
+                placeholder="Enter a catchy title for your blog post"
+            />
+            @if (blogForm.get('title')?.touched && blogForm.get('title')?.invalid) {
+            <div class="mt-1 text-sm text-error">
+                @if (blogForm.get('title')?.errors?.['minlength']) {
+                <div>Title must be at least 5 characters long.</div>
+                } @if (blogForm.get('title')?.errors?.['maxlength']) {
+                <div>Title cannot exceed 100 characters.</div>
+                }
+            </div>
+            }
         </div>
-        }
-      </div>
 
-      @if (blogForm.get('tags')?.touched &&
-      blogForm.get('tags')?.hasError('minlength')) {
-      <div class="mt-1 text-sm text-error">At least one tag is required.</div>
-      }
-    </div>
+        <!-- Content Editor -->
+        <div class="form-control">
+            <label for="content" class="label">
+                <span class="label-text text-lg font-medium">Content</span>
+                @if (blogForm.get('content')?.hasError('required') &&
+                blogForm.get('content')?.touched) {
+                <span class="label-text-alt text-error">Required</span>
+                }
+            </label>
+            <p class="text-sm text-base-content/70 mb-2">
+                Use the image button in the toolbar to add images. The first image you
+                add will be used as the cover image.
+            </p>
+            <quill-editor
+                #quillEditor
+                id="content"
+                formControlName="content"
+                [styles]="{ height: '300px' }"
+                [modules]="quillConfig"
+                (onEditorCreated)="onEditorCreated()"
+                placeholder="Start writing your amazing blog post..."
+            ></quill-editor>
+            @if (blogForm.get('content')?.touched && blogForm.get('content')?.invalid)
+            {
+            <div class="mt-1 text-sm text-error">
+                @if (blogForm.get('content')?.errors?.['minlength']) {
+                <div>Content must be at least 50 characters long.</div>
+                }
+            </div>
+            }
+        </div>
 
-    <!-- Publish Toggle -->
-    <div class="form-control">
-      <label class="label cursor-pointer justify-start gap-3">
-        <input
-          type="checkbox"
-          id="published"
-          formControlName="published"
-          class="toggle toggle-primary"
-        />
-        <span class="label-text text-lg">Publish immediately</span>
-      </label>
-    </div>
+        <!-- Tags Selection -->
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text text-lg font-medium">Tags</span>
+                @if (blogForm.get('tags')?.hasError('required') &&
+                blogForm.get('tags')?.touched) {
+                <span class="label-text-alt text-error">Required</span>
+                }
+            </label>
+            <p class="text-sm text-base-content/70 mb-2">
+                Select at least one tag that best describes your post.
+            </p>
 
-    <!-- Submit Buttons -->
-    <div class="flex justify-between pt-4">
-      <button type="button" class="btn btn-ghost" routerLink="/">
-        <fa-icon [icon]="['fas', 'times']" class="mr-2"></fa-icon>
-        Cancel
-      </button>
+            <div class="flex flex-wrap gap-2">
+                @for (tag of availableTags; track tag._id) {
+                <div
+                    class="badge badge-lg cursor-pointer transition-colors"
+                    [class.badge-primary]="blogForm.get('tags')?.value.includes(tag.name)"
+                    [class.badge-outline]="
+                        !blogForm.get('tags')?.value.includes(tag.name)
+                    "
+                    (click)="toggleTag(tag._id, tag.name)"
+                >
+                    <fa-icon [icon]="['fas', 'hashtag']" class="mr-1 text-xs"></fa-icon>
+                    {{ tag.name }}
+                </div>
+                }
+            </div>
 
-      <button
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="isSubmitting || imageUploading"
-      >
-        <fa-icon [icon]="['fas', 'paper-plane']" class="mr-2"></fa-icon>
-        @if (!isSubmitting) {
-        <span>{{ isEditMode ? "Update Blog Post" : "Publish Blog Post" }}</span>
-        } @else {
-        <span>
-          <fa-icon
-            [icon]="['fas', 'spinner']"
-            animation="spin"
-            class="mr-2"
-          ></fa-icon>
-          {{ isEditMode ? "Updating..." : "Publishing..." }}
-        </span>
-        }
-      </button>
-    </div>
-  </form>
+            @if (blogForm.get('tags')?.touched &&
+            blogForm.get('tags')?.hasError('minlength')) {
+            <div class="mt-1 text-sm text-error">At least one tag is required.</div>
+            }
+        </div>
+
+        <!-- Publish Toggle -->
+        <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-3">
+                <input
+                    type="checkbox"
+                    id="published"
+                    formControlName="published"
+                    class="toggle toggle-primary"
+                />
+                <span class="label-text text-lg">Publish immediately</span>
+            </label>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex justify-between pt-4">
+            <button type="button" class="btn btn-ghost" routerLink="/">
+                <fa-icon [icon]="['fas', 'times']" class="mr-2"></fa-icon>
+                Cancel
+            </button>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="isSubmitting || imageUploading"
+            >
+                <fa-icon [icon]="['fas', 'paper-plane']" class="mr-2"></fa-icon>
+                @if (!isSubmitting) {
+                <span>{{ isEditMode ? "Update Blog Post" : "Publish Blog Post" }}</span>
+                } @else {
+                <span>
+                    <fa-icon
+                        [icon]="['fas', 'spinner']"
+                        animation="spin"
+                        class="mr-2"
+                    ></fa-icon>
+                    {{ isEditMode ? "Updating..." : "Publishing..." }}
+                </span>
+                }
+            </button>
+        </div>
+    </form>
 </div>

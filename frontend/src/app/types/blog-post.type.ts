@@ -1,6 +1,7 @@
 export type BlogPostType = {
   _id: string;
   title: string;
+  slug: string;
   content: string;
   contentHtml: string;
   tags: string[];

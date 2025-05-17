@@ -51,6 +51,7 @@ import {
   faEllipsisVertical,
   faEdit,
   faChevronRight,
+  faArrowLeft
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCommentDots,
@@ -136,6 +137,7 @@ export function initializeIcons(library: FaIconLibrary) {
     faUserPlus,
     faEllipsisVertical,
     faEdit,
-    faChevronRight
+    faChevronRight,
+    faArrowLeft
   );
 }

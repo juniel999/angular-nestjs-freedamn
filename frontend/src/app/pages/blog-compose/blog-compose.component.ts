@@ -78,17 +78,19 @@ export class BlogComposeComponent implements OnInit {
     this.loadAvailableTags();
 
     // Check if we're in edit mode
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
+    const idOrSlug = this.route.snapshot.paramMap.get('idOrSlug');
+    if (idOrSlug) {
       this.isEditMode = true;
-      this.blogId = id;
-      this.loadBlogData(id);
+      this.loadBlogData(idOrSlug);
     }
   }
 
-  private loadBlogData(id: string) {
-    this.blogService.getBlogById(id).subscribe({
+  private loadBlogData(idOrSlug: string) {
+    this.blogService.getBlogById(idOrSlug).subscribe({
       next: (blog) => {
+        // Store the blog ID for updates
+        this.blogId = blog._id;
+        
         // Store the image URLs
         this.uploadedImages = blog.images || [];
 
@@ -295,7 +297,7 @@ export class BlogComposeComponent implements OnInit {
               ? 'Blog post updated successfully'
               : 'Blog post created successfully'
           );
-          this.router.navigate(['/blogs', blog._id]);
+          this.router.navigate(['/blogs', blog.slug]);
         },
         error: (err) => {
           const errorMessage =

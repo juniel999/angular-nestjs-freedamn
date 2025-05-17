@@ -39,29 +39,25 @@ export class ViewBlogComponent {
       this.userId.set(user ? user.sub : '');
     });
 
-    // Get blog ID from route params and load blog
-    const blogId = this.route.snapshot.paramMap.get('id');
-    if (!blogId) {
+    // Get blog from route params and load blog
+    const idOrSlug = this.route.snapshot.paramMap.get('idOrSlug');
+    if (!idOrSlug) {
       this.error.set('Blog post not found');
       this.isLoading.set(false);
       return;
     }
 
-    this.loadBlog(blogId);
-    console.log(this.blog());
+    this.loadBlog(idOrSlug);
   }
 
-  private loadBlog(id: string) {
-    this.blogService.getBlogById(id).subscribe({
+  private loadBlog(idOrSlug: string) {
+    this.blogService.getBlogById(idOrSlug).subscribe({
       next: (blog) => {
         // Add sanitized HTML content
         const extendedBlog: ExtendedBlogPost = {
           ...blog,
           safeHtml: this.sanitizer.bypassSecurityTrustHtml(blog.contentHtml),
         };
-        console.log('Blog data:', extendedBlog);
-        console.log('Author data:', extendedBlog.author);
-        console.log('Author posts:', extendedBlog.author.posts);
         this.blog.set(extendedBlog);
         this.isLoading.set(false);
       },
@@ -165,7 +161,7 @@ export class ViewBlogComponent {
     this.blogService.deleteBlog(this.blog()?._id!).subscribe({
       next: () => {
         this.toastService.show('Blog post deleted successfully');
-        this.router.navigate(['/']);
+        this.router.navigate(['/']); // Navigate to home after deletion
       },
       error: () => {
         this.toastService.show('Failed to delete blog post', 'error');

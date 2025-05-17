@@ -1,11 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document, Schema as MongooseSchema, Model } from 'mongoose';
 import { User } from '../users/user.schema';
 
 @Schema({ timestamps: true })
 export class Blog extends Document {
   @Prop({ required: true })
   title: string;
+
+  @Prop({ required: true, unique: true })
+  slug: string;
 
   @Prop({ type: Object, required: true })
   content: any; // Store Delta format
@@ -38,7 +41,28 @@ export class Blog extends Document {
   likes: User[];
 }
 
+// Define interface for Blog model with static methods
+export interface BlogModel extends Model<Blog> {
+  generateSlug(title: string): string;
+}
+
 export const BlogSchema = SchemaFactory.createForClass(Blog);
+
+// Static method to generate slug from title
+BlogSchema.statics.generateSlug = function(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+// Add pre-save hook to generate slug
+BlogSchema.pre('save', function(next) {
+  if (this.isModified('title')) {
+    this.slug = (this.constructor as any).generateSlug(this.title);
+  }
+  next();
+});
 
 // Add virtual property for comments
 BlogSchema.virtual('comments', {

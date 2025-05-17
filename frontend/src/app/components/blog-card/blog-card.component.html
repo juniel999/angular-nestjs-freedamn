@@ -1,5 +1,5 @@
 <div
-  [routerLink]="['/blogs', blog._id]"
+  [routerLink]="['/blogs', blog.slug]"
   class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-base-200"
 >
   <div class="card-body p-0">
@@ -28,7 +28,7 @@
         class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent"
       >
         <a
-          [routerLink]="[`/blogs/${blog._id}`]"
+          [routerLink]="['/blogs', blog.slug]"
           class="hover:underline hover:decoration-4 hover:decoration-yellow-600"
         >
           <h2 class="card-title text-lg md:text-xl font-bold text-white">
@@ -98,7 +98,7 @@
           </button>
 
           <a
-            [routerLink]="['/blogs', blog._id]"
+            [routerLink]="['/blogs', blog.slug]"
             class="btn btn-xs btn-ghost gap-1 px-2"
             (click)="$event.stopPropagation()"
           >
