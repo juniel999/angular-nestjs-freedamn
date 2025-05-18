@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, HostListener } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -16,6 +16,12 @@ export class HeaderComponent implements OnInit {
   userAvatar = signal(localStorage.getItem('avatar') || '');
   isLoggedIn = false;
   userId = '';
+  isScrolled = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    this.isScrolled = window.scrollY > 0;
+  }
 
   constructor(
     private router: Router,
