@@ -17,22 +17,6 @@ export const routes: Routes = [
           import('./pages/home/home.component').then((m) => m.HomeComponent),
       },
       {
-        path: 'signin',
-        loadComponent: () =>
-          import('./pages/sign-in/sign-in.component').then(
-            (m) => m.SignInComponent
-          ),
-        canActivate: [publicOnlyGuard],
-      },
-      {
-        path: 'signup',
-        loadComponent: () =>
-          import('./pages/sign-up/sign-up.component').then(
-            (m) => m.SignUpComponent
-          ),
-        canActivate: [publicOnlyGuard],
-      },
-      {
         path: 'onboarding',
         loadComponent: () =>
           import('./pages/onboarding/onboarding/onboarding.component').then(
@@ -88,6 +72,22 @@ export const routes: Routes = [
         canActivate: [authGuard, onboardingCompletedGuard],
       },
     ],
+  },
+  {
+    path: 'signin',
+    loadComponent: () =>
+      import('./pages/sign-in/sign-in.component').then(
+        (m) => m.SignInComponent
+      ),
+    canActivate: [publicOnlyGuard],
+  },
+  {
+    path: 'signup',
+    loadComponent: () =>
+      import('./pages/sign-up/sign-up.component').then(
+        (m) => m.SignUpComponent
+      ),
+    canActivate: [publicOnlyGuard],
   },
   { path: '**', redirectTo: '/' },
 ];
