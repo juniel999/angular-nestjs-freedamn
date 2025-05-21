@@ -19,10 +19,9 @@
   } @else {
   <!-- Grid Container with Sticky Right Column -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 py-8">
-    <!-- Left Grid - Main Content -->
+    @if (isLoading()) {
+    <!-- Left Grid - Main Content Loading Skeleton -->
     <div class="lg:col-span-2">
-      @if (isLoading()) {
-      <!-- Loading Skeleton -->
       <div class="space-y-4">
         <div class="h-64 w-full rounded-t-box bg-base-300 animate-pulse"></div>
         <div class="bg-base-100 shadow-sm rounded-b-box p-6 relative">
@@ -40,8 +39,49 @@
             </div>
           </div>
         </div>
+        <!-- Posts Section Skeleton -->
+        <div class="mt-6">
+          <div class="h-8 w-32 bg-base-300 rounded animate-pulse mb-4"></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="h-64 bg-base-300 rounded-box animate-pulse"></div>
+            <div class="h-64 bg-base-300 rounded-box animate-pulse"></div>
+            <div class="h-64 bg-base-300 rounded-box animate-pulse"></div>
+            <div class="h-64 bg-base-300 rounded-box animate-pulse"></div>
+          </div>
+        </div>
       </div>
-      } @else {
+    </div>
+
+    <!-- Right Grid - Skeleton -->
+    <aside class="lg:block">
+      <div class="space-y-6 lg:sticky lg:top-20">
+        <!-- Social Links Skeleton -->
+        <div class="bg-base-100 shadow-sm rounded-box p-6">
+          <div class="h-8 w-40 bg-base-300 rounded animate-pulse mb-4"></div>
+          <div class="space-y-4">
+            <div class="flex flex-wrap gap-2">
+              <div class="h-8 w-24 bg-base-300 rounded animate-pulse"></div>
+              <div class="h-8 w-24 bg-base-300 rounded animate-pulse"></div>
+              <div class="h-8 w-24 bg-base-300 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Liked Topics Skeleton -->
+        <div class="bg-base-100 shadow-lg rounded-box p-6">
+          <div class="h-8 w-40 bg-base-300 rounded animate-pulse mb-4"></div>
+          <div class="flex flex-wrap gap-2">
+            <div class="h-6 w-20 bg-base-300 rounded animate-pulse"></div>
+            <div class="h-6 w-24 bg-base-300 rounded animate-pulse"></div>
+            <div class="h-6 w-16 bg-base-300 rounded animate-pulse"></div>
+            <div class="h-6 w-20 bg-base-300 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    } @else {
+    <!-- Left Grid - Main Content -->
+    <div class="lg:col-span-2">
       <!-- Cover Photo Section -->
       <div
         class="relative h-64 w-full bg-base-200 rounded-t-box overflow-hidden"
@@ -150,7 +190,6 @@
         </div>
         }
       </div>
-      }
     </div>
 
     <!-- Right Grid - Fixed Position -->
@@ -161,8 +200,14 @@
           <h2 class="text-xl text-primary-content font-semibold mb-4">
             Social Links
           </h2>
-          @if (userProfile()?.socials && hasSocialLinks(userProfile()?.socials))
-          {
+          @if (isLoading()) {
+          <!-- Loading Skeleton -->
+          <div class="space-y-4">
+            <div class="h-8 w-32 bg-base-300 rounded animate-pulse"></div>
+            <div class="h-8 w-32 bg-base-300 rounded animate-pulse"></div>
+            <div class="h-8 w-32 bg-base-300 rounded animate-pulse"></div>
+          </div>
+          } @else if (userProfile()?.socials && hasSocialLinks(userProfile()?.socials)) {
           <div class="flex flex-wrap gap-2">
             @if (userProfile()?.socials?.github) {
             <app-social-link-button
@@ -212,7 +257,14 @@
           <h2 class="text-xl font-semibold mb-4 text-primary-content">
             Liked Topics
           </h2>
-          @if (userTags().length) {
+          @if (isLoading()) {
+          <!-- Loading Skeleton -->
+          <div class="space-y-4">
+            <div class="h-8 w-32 bg-base-300 rounded animate-pulse"></div>
+            <div class="h-8 w-32 bg-base-300 rounded animate-pulse"></div>
+            <div class="h-8 w-32 bg-base-300 rounded animate-pulse"></div>
+          </div>
+          } @else if (userTags().length) {
           <div class="flex flex-wrap gap-2">
             @for (tag of userTags(); track tag._id) {
             <span class="badge badge-primary font-bold text-xs">
@@ -226,6 +278,7 @@
         </div>
       </div>
     </aside>
+    }
   </div>
   }
 </div>
