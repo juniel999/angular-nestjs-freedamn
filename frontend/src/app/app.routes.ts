@@ -17,14 +17,6 @@ export const routes: Routes = [
           import('./pages/home/home.component').then((m) => m.HomeComponent),
       },
       {
-        path: 'onboarding',
-        loadComponent: () =>
-          import('./pages/onboarding/onboarding/onboarding.component').then(
-            (m) => m.OnboardingComponent
-          ),
-        canActivate: [authGuard, onboardingGuard],
-      },
-      {
         path: 'compose',
         loadComponent: () =>
           import('./pages/blog-compose/blog-compose.component').then(
@@ -88,6 +80,14 @@ export const routes: Routes = [
         (m) => m.SignUpComponent
       ),
     canActivate: [publicOnlyGuard],
+  },
+  {
+    path: 'onboarding',
+    loadChildren: () =>
+      import('./pages/onboarding/onboarding.module').then(
+        (m) => m.OnboardingModule
+      ),
+    canActivate: [authGuard, onboardingGuard],
   },
   { path: '**', redirectTo: '/' },
 ];
