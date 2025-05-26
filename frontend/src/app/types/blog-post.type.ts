@@ -1,3 +1,5 @@
+import { CommentType } from './comment.type';
+
 export type BlogPostType = {
   _id: string;
   title: string;
@@ -16,16 +18,16 @@ export type BlogPostType = {
     title?: string;
     location?: string;
     bio?: string;
-    posts: number; // Change from any[] to number since it's a virtual count field
-    followers?: any[];
-    following?: any[];
+    posts: number;
+    followers?: string[];
+    following?: string[];
   };
   published: boolean;
   coverImage?: string;
   images: string[];
   viewCount: number;
   likes: string[];
-  comments: any[];
+  comments: CommentType[];
   createdAt: string;
   updatedAt: string;
 };

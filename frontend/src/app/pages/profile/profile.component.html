@@ -136,9 +136,17 @@
             </div>
             } @else if (isLoggedIn()) {
             <div class="flex gap-2">
-              <button class="btn btn-primary btn-sm">
-                <fa-icon [icon]="['fas', 'user-plus']"></fa-icon>
-                Follow
+              <button
+                class="btn"
+                [class.btn-primary]="!isFollowing()"
+                [class.btn-outline]="isFollowing()"
+                [disabled]="isFollowLoading()"
+                (click)="toggleFollow($event)"
+              >
+                <fa-icon
+                  [icon]="['fas', isFollowing() ? 'user-minus' : 'user-plus']"
+                ></fa-icon>
+                {{ isFollowing() ? "Unfollow" : "Follow" }}
               </button>
             </div>
             }
@@ -207,7 +215,8 @@
             <div class="h-8 w-32 bg-base-300 rounded animate-pulse"></div>
             <div class="h-8 w-32 bg-base-300 rounded animate-pulse"></div>
           </div>
-          } @else if (userProfile()?.socials && hasSocialLinks(userProfile()?.socials)) {
+          } @else if (userProfile()?.socials &&
+          hasSocialLinks(userProfile()?.socials)) {
           <div class="flex flex-wrap gap-2">
             @if (userProfile()?.socials?.github) {
             <app-social-link-button

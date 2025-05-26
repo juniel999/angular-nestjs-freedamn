@@ -100,6 +100,35 @@ export class UserService {
   }
 
   /**
+   * Follow a user
+   */
+  followUser(userId: string): Observable<{ success: boolean; following: boolean }> {
+    return this.http.post<{ success: boolean; following: boolean }>(
+      `${this.apiUrl}/users/${userId}/follow`,
+      {}
+    );
+  }
+
+  /**
+   * Unfollow a user
+   */
+  unfollowUser(userId: string): Observable<{ success: boolean; following: boolean }> {
+    return this.http.post<{ success: boolean; following: boolean }>(
+      `${this.apiUrl}/users/${userId}/unfollow`,
+      {}
+    );
+  }
+
+  /**
+   * Check if current user is following another user
+   */
+  isFollowing(userId: string): Observable<{ following: boolean }> {
+    return this.http.get<{ following: boolean }>(
+      `${this.apiUrl}/users/${userId}/following-status`
+    );
+  }
+
+  /**
    * Get user social links
    */
   getUserSocials(userId: string): Observable<SocialLinks> {

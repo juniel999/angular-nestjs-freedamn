@@ -621,10 +621,12 @@ export class BlogsService {
       // Return populated blog data
       const updatedBlog = await this.blogModel
         .findById(blogId)
-        .populate(
-          'author',
-          'username firstName lastName avatar pronouns title location bio email posts followers following',
-        )
+        .populate({
+          path: 'author',
+          select:
+            'username firstName lastName avatar pronouns title location bio email posts followers following',
+          populate: { path: 'posts' },
+        })
         .exec();
 
       if (!updatedBlog) {
@@ -663,10 +665,12 @@ export class BlogsService {
     // Return populated blog data
     const updatedBlog = await this.blogModel
       .findById(blogId)
-      .populate(
-        'author',
-        'username firstName lastName avatar pronouns title location bio email posts followers following',
-      )
+      .populate({
+        path: 'author',
+        select:
+          'username firstName lastName avatar pronouns title location bio email posts followers following',
+        populate: { path: 'posts' },
+      })
       .exec();
 
     if (!updatedBlog) {

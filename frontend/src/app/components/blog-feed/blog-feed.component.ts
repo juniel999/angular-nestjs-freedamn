@@ -224,7 +224,7 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
     const user = localStorage.getItem('userProfile');
     if (!user) return;
 
-    const userId = JSON.parse(user).id;
+    const userId = JSON.parse(user)._id;
     const currentlyLiked = blog.likes.includes(userId);
 
     // Only proceed if there's a state change
@@ -260,7 +260,7 @@ export class BlogFeedComponent implements OnInit, OnDestroy {
     if (!this.isLoggedIn) return false;
     const user = localStorage.getItem('userProfile');
     if (!user) return false;
-    const userId = JSON.parse(user).id;
+    const userId = JSON.parse(user)._id;
     return blog.likes.includes(userId);
   }
 
