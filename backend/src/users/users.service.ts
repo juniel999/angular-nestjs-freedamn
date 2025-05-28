@@ -223,7 +223,7 @@ export class UsersService {
     }
 
     return {
-      id: user._id,
+      _id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
@@ -373,5 +373,85 @@ export class UsersService {
       followersCount,
       followingCount,
     };
+  }
+
+  // Follow a user
+  async followUser(followerId: string, targetUserId: string) {
+    if (followerId === targetUserId) {
+      throw new BadRequestException('Users cannot follow themselves');
+    }
+
+    const [follower, targetUser] = await Promise.all([
+      this.userModel.findById(followerId),
+      this.userModel.findById(targetUserId),
+    ]);
+
+    if (!follower || !targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if already following
+    const isAlreadyFollowing = follower.following?.some(
+      (followedUser: User) => followedUser?._id?.toString() === targetUserId,
+    );
+
+    if (isAlreadyFollowing) {
+      throw new BadRequestException('Already following this user');
+    }
+
+    // Add to following list
+    if (!follower.following) {
+      follower.following = [];
+    }
+    follower.following.push(targetUser);
+
+    await follower.save();
+
+    return {
+      success: true,
+      following: true,
+    };
+  }
+
+  // Unfollow a user
+  async unfollowUser(followerId: string, targetUserId: string) {
+    const follower = await this.userModel.findById(followerId);
+    if (!follower) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if actually following
+    const isFollowing = follower.following?.some(
+      (followedUser: User) => followedUser?._id?.toString() === targetUserId,
+    );
+
+    if (!isFollowing) {
+      throw new BadRequestException('Not following this user');
+    }
+
+    // Remove from following list
+    follower.following = follower.following.filter(
+      (followedUser: User) => followedUser?._id?.toString() !== targetUserId,
+    );
+    await follower.save();
+
+    return {
+      success: true,
+      following: false,
+    };
+  }
+
+  // Check if user is following another user
+  async isFollowing(userId: string, targetUserId: string): Promise<boolean> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      return false;
+    }
+
+    return (
+      user.following?.some(
+        (followedUser: User) => followedUser?._id?.toString() === targetUserId,
+      ) || false
+    );
   }
 }

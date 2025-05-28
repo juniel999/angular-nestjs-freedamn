@@ -143,6 +143,25 @@ export class UsersController {
     return this.usersService.getUserFollowing(id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/follow')
+  async followUser(@Request() req, @Param('id') targetUserId: string) {
+    return this.usersService.followUser(req.user.userId, targetUserId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/unfollow')
+  async unfollowUser(@Request() req, @Param('id') targetUserId: string) {
+    return this.usersService.unfollowUser(req.user.userId, targetUserId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/following-status')
+  async isFollowing(@Request() req, @Param('id') targetUserId: string) {
+    const following = await this.usersService.isFollowing(req.user.userId, targetUserId);
+    return { following };
+  }
+
   // Social links (protected updates, public viewing)
   @Get(':id/socials')
   getUserSocials(@Param('id') id: string) {

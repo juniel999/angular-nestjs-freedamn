@@ -53,6 +53,7 @@ export class ViewBlogComponent {
   private loadBlog(idOrSlug: string) {
     this.blogService.getBlogById(idOrSlug).subscribe({
       next: (blog) => {
+        console.log(blog);
         // Add sanitized HTML content
         const extendedBlog: ExtendedBlogPost = {
           ...blog,
@@ -81,8 +82,9 @@ export class ViewBlogComponent {
 
     const user = localStorage.getItem('userProfile');
     if (!user) return;
+    console.log('User profile:', user);
 
-    const userId = JSON.parse(user).id;
+    const userId = JSON.parse(user)._id;
     const currentlyLiked = blog.likes.includes(userId);
 
     // Only proceed if there's a state change

@@ -41,6 +41,9 @@ export class ProfileComponent {
   isLoggedIn = signal(false);
   error = signal<string | null>(null);
 
+  isFollowing = signal(false);
+  isFollowLoading = signal(false);
+
   defaultAvatar = 'https://ui-avatars.com/api/?background=E5B400&name=';
   defaultCoverPhoto = 'assets/images/default-cover.jpg';
 
@@ -139,6 +142,12 @@ export class ProfileComponent {
           this.userStats.set(stats);
           this.userTags.set(tags);
           this.userPosts.set(Array.isArray(posts) ? posts : posts.posts || []);
+
+          // Check following status if viewing another user's profile
+          if (!this.isCurrentUser() && profile?._id) {
+            this.checkFollowingStatus(profile._id);
+          }
+
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -147,6 +156,67 @@ export class ProfileComponent {
           this.isLoading.set(false);
         },
       });
+  }
+
+  private checkFollowingStatus(userId: string) {
+    if (!this.isLoggedIn()) return;
+
+    this.userService.isFollowing(userId).subscribe({
+      next: (response) => {
+        this.isFollowing.set(response.following);
+      },
+      error: (error) => {
+        console.error('Error checking follow status:', error);
+      },
+    });
+  }
+
+  toggleFollow(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!this.isLoggedIn()) {
+      this.toastService.show('Please sign in to follow users', 'error');
+      return;
+    }
+
+    const userId = this.userProfile()?._id;
+    if (!userId) return;
+
+    this.isFollowLoading.set(true);
+
+    const action = this.isFollowing()
+      ? this.userService.unfollowUser(userId)
+      : this.userService.followUser(userId);
+
+    action.subscribe({
+      next: (response) => {
+        this.isFollowing.set(response.following);
+
+        // Update stats directly
+        const currentStats = this.userStats();
+        if (currentStats) {
+          this.userStats.set({
+            ...currentStats,
+            followersCount: currentStats.followersCount,
+          });
+        }
+
+        this.toastService.show(
+          `Successfully ${response.following ? 'followed' : 'unfollowed'} user`,
+          'success'
+        );
+      },
+      error: (error) => {
+        this.toastService.show(
+          error.error?.message || 'Failed to update following status',
+          'error'
+        );
+      },
+      complete: () => {
+        this.isFollowLoading.set(false);
+      },
+    });
   }
 
   getExcerpt(content: string, maxLength: number = 150): string {
@@ -163,7 +233,7 @@ export class ProfileComponent {
     if (!this.isLoggedIn()) return false;
     const user = localStorage.getItem('userProfile');
     if (!user) return false;
-    const userId = JSON.parse(user).id;
+    const userId = JSON.parse(user)._id;
     return blog.likes.includes(userId);
   }
 
@@ -179,7 +249,7 @@ export class ProfileComponent {
     const user = localStorage.getItem('userProfile');
     if (!user) return;
 
-    const userId = JSON.parse(user).id;
+    const userId = JSON.parse(user)._id;
     const currentlyLiked = blog.likes.includes(userId);
 
     // Only proceed if there's a state change
