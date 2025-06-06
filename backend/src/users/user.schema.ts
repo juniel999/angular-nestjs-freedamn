@@ -86,6 +86,12 @@ export class User extends Document {
   })
   following: User[]; // Users that this user is following
 
+  @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
+    default: [],
+  })
+  followers: User[]; // Users that follow this user
+
   posts?: number; // Virtual field for posts count
 }
 

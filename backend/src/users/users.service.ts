@@ -303,11 +303,18 @@ export class UsersService {
 
   // Get a user's followers
   async getUserFollowers(userId: string) {
-    // We'd typically query users where userId is in their following array
-    // For now, return mock data
+    const user = await this.userModel
+      .findById(userId)
+      .populate('following', '-password')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
     return {
-      followers: [],
-      count: 0,
+      followers: [user.followers || []],
+      count: user.followers?.length || 0,
     };
   }
 
@@ -399,13 +406,23 @@ export class UsersService {
       throw new BadRequestException('Already following this user');
     }
 
-    // Add to following list
+    // Initialize following array if it doesn't exist
     if (!follower.following) {
       follower.following = [];
     }
-    follower.following.push(targetUser);
 
-    await follower.save();
+    // Initialize followers array if it doesn't exist
+    if (!targetUser.followers) {
+      targetUser.followers = [];
+    }
+
+    // Add targetUser to follower's following list
+    follower.following.push(targetUser);
+    // Add follower to targetUser's followers list
+    targetUser.followers.push(follower);
+
+    // Save both users
+    await Promise.all([follower.save(), targetUser.save()]);
 
     return {
       success: true,
@@ -415,8 +432,12 @@ export class UsersService {
 
   // Unfollow a user
   async unfollowUser(followerId: string, targetUserId: string) {
-    const follower = await this.userModel.findById(followerId);
-    if (!follower) {
+    const [follower, targetUser] = await Promise.all([
+      this.userModel.findById(followerId),
+      this.userModel.findById(targetUserId),
+    ]);
+
+    if (!follower || !targetUser) {
       throw new NotFoundException('User not found');
     }
 
@@ -429,11 +450,18 @@ export class UsersService {
       throw new BadRequestException('Not following this user');
     }
 
-    // Remove from following list
+    // Remove from follower's following list
     follower.following = follower.following.filter(
       (followedUser: User) => followedUser?._id?.toString() !== targetUserId,
     );
-    await follower.save();
+
+    // Remove from targetUser's followers list
+    targetUser.followers = targetUser.followers.filter(
+      (followerUser: User) => followerUser?._id?.toString() !== followerId,
+    );
+
+    // Save both users
+    await Promise.all([follower.save(), targetUser.save()]);
 
     return {
       success: true,
