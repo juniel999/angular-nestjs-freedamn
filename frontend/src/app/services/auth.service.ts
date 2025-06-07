@@ -55,6 +55,8 @@ export class AuthService {
         tap((response) => {
           this.saveToken(response.access_token);
           this.loadUserFromStorage();
+          // Use window.location to force a full page reload after login
+          window.location.href = '/';
         })
       );
   }
@@ -93,6 +95,53 @@ export class AuthService {
           throw error;
         })
       );
+  }
+
+  initiateGoogleLogin(): void {
+    window.location.href = `${this.apiUrl}/auth/google`;
+  }
+
+  handleOAuthCallback(token: string): void {
+    if (!token) return;
+
+    // Store the JWT token
+    localStorage.setItem(this.tokenKey, token);
+
+    // First load from JWT token
+    this.loadUserFromStorage();
+
+    // Then get fresh profile from API
+    this.getProfile().subscribe({
+      next: (profile) => {
+        // Store the complete profile
+        const completeProfile: UserProfile = {
+          ...profile,
+          sub: profile.sub, // Ensure we have sub from either source
+        };
+        localStorage.setItem('userProfile', JSON.stringify(completeProfile));
+        this.currentUserSubject.next(completeProfile);
+      },
+      error: (error) => {
+        console.error('Error fetching user profile:', error);
+        // On error, try to use the JWT data as fallback
+        const token = this.getToken();
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const fallbackProfile: UserProfile = {
+              username: payload.username,
+              sub: payload.sub,
+              roles: payload.roles || ['user'],
+              firstName: payload.firstName,
+              email: payload.email,
+            };
+            this.currentUserSubject.next(fallbackProfile);
+          } catch (e) {
+            console.error('Failed to parse token payload:', e);
+          }
+        }
+      },
+    });
   }
 
   getToken(): string | null {

@@ -115,19 +115,37 @@ export class UsersService {
     return newUser.save();
   }
 
-  async updateAvatar(userId: string, file: Express.Multer.File): Promise<User> {
-    // Find the user first to get the current avatar URL
+  async updateAvatar(
+    userId: string,
+    avatarInput: string | Express.Multer.File,
+  ): Promise<User> {
     const user = await this.userModel.findById(userId).exec();
-
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
 
-    // Upload new image to Cloudinary
-    const newAvatarUrl = await this.cloudinaryService.uploadImage(
-      file,
-      'user-avatars',
-    );
+    let newAvatarUrl: string;
+
+    if (typeof avatarInput === 'string') {
+      // If input is a URL string, use it directly
+      newAvatarUrl = avatarInput;
+    } else {
+      // If input is a file, upload it to Cloudinary
+      newAvatarUrl = await this.cloudinaryService.uploadImage(
+        avatarInput,
+        'user-avatars',
+      );
+
+      // Delete the old avatar image if it exists
+      if (user.avatar) {
+        try {
+          await this.cloudinaryService.deleteImageByUrl(user.avatar);
+        } catch (error) {
+          console.error('Failed to delete old avatar image:', error);
+          // Continue execution even if deletion fails
+        }
+      }
+    }
 
     // Update user with new avatar URL
     const updatedUser = await this.userModel
@@ -138,16 +156,6 @@ export class UsersService {
       throw new NotFoundException(
         `User with id ${userId} not found after update`,
       );
-    }
-
-    // Delete the old avatar image if it exists
-    if (user.avatar) {
-      try {
-        await this.cloudinaryService.deleteImageByUrl(user.avatar);
-      } catch (error) {
-        console.error('Failed to delete old avatar image:', error);
-        // Continue execution even if deletion fails
-      }
     }
 
     return updatedUser;

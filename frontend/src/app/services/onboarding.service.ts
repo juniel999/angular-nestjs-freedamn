@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, switchMap, of, take, tap, map } from 'rxjs';
+import { Observable, switchMap, of, take, tap, map, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { TagData } from '../types/tag.type';
@@ -40,14 +40,19 @@ export class OnboardingService {
    */
   private getUserId(userId?: string): Observable<string> {
     if (userId) {
+      if (!userId.trim()) {
+        return throwError(() => new Error('Invalid user ID provided'));
+      }
       return of(userId);
     }
 
     return this.authService.currentUser$.pipe(
       take(1),
       switchMap((user) => {
-        if (!user) {
-          throw new Error('No authenticated user found');
+        if (!user || !user.sub || !user.sub.trim()) {
+          return throwError(
+            () => new Error('No authenticated user found or invalid user ID')
+          );
         }
         return of(user.sub);
       })

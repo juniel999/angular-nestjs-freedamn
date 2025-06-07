@@ -89,5 +89,12 @@ export const routes: Routes = [
       ),
     canActivate: [authGuard, onboardingGuard],
   },
+  {
+    path: 'auth-callback',
+    loadComponent: () =>
+      import('./pages/auth-callback/auth-callback.component').then(
+        (m) => m.AuthCallbackComponent
+      ),
+  },
   { path: '**', redirectTo: '/' },
 ];

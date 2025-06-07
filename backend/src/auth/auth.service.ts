@@ -6,12 +6,27 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { User } from '../users/user.schema';
+import { Document, Types } from 'mongoose';
 
-type User = {
+type UserType = {
   userId: string;
   username: string;
-  roles: [];
+  roles: string[];
 };
+
+interface OAuthUser {
+  email: string;
+  firstName: string;
+  lastName: string;
+  picture?: string;
+  accessToken: string;
+}
+
+interface UserDocument extends User, Document {
+  _id: Types.ObjectId;
+}
 
 @Injectable()
 export class AuthService {
@@ -44,14 +59,21 @@ export class AuthService {
     // Create JWT payload
     const payload = {
       username: user.username,
-      sub: user._id,
+      sub: user._id.toString(), // Ensure we're using string version of _id
       roles: user.roles,
       preferredTags: user.preferredTags || [],
       firstName: user.firstName,
     };
 
-    // Return JWT token
+    // Get the complete user profile
+    const fullUser = await this.usersService.getUserProfile(
+      user._id.toString(),
+    );
+
+    // Return JWT token and user data
     return {
+      ...fullUser,
+      sub: user._id.toString(),
       access_token: this.jwtService.sign(payload),
     };
   }
@@ -95,7 +117,7 @@ export class AuthService {
   }
 
   // return user profile without password
-  async getProfile(user: User): Promise<Omit<User, 'password'> | null> {
+  async getProfile(user: UserType): Promise<Omit<UserType, 'password'> | null> {
     const userProfile = await this.usersService.findById(user.userId);
     if (!userProfile) {
       return null;
@@ -148,6 +170,81 @@ export class AuthService {
       }
       throw new BadRequestException(
         'Failed to change password: ' + error.message,
+      );
+    }
+  }
+
+  async validateOAuthUser(oauthUser: OAuthUser): Promise<any> {
+    try {
+      // Check if user exists with this email
+      let user = (await this.usersService.findByEmail(
+        oauthUser.email,
+      )) as UserDocument | null;
+
+      if (!user) {
+        // Create new user if doesn't exist
+        const baseUsername = oauthUser.firstName
+          .toLowerCase()
+          .replace(/\s+/g, '');
+        let username = baseUsername;
+        let counter = 1;
+
+        // Keep trying until we find a unique username
+        while (await this.usersService.findOne(username)) {
+          username = `${baseUsername}${counter}`;
+          counter++;
+        }
+
+        // Generate a secure random password for OAuth users
+        const password = crypto.randomBytes(16).toString('hex');
+
+        user = (await this.usersService.create(
+          username,
+          oauthUser.email,
+          password,
+          oauthUser.firstName,
+          oauthUser.lastName,
+        )) as UserDocument;
+      }
+
+      if (!user) {
+        throw new BadRequestException('Failed to create or find user');
+      }
+
+      // If the user has a profile picture from Google and it's a new user
+      if (oauthUser.picture) {
+        await this.usersService.updateAvatar(user.id, oauthUser.picture);
+        const updatedUser = (await this.usersService.findById(
+          user.id,
+        )) as UserDocument;
+        if (updatedUser) {
+          user = updatedUser;
+        }
+      }
+
+      // Create JWT payload
+      const payload = {
+        username: user.username,
+        sub: user._id.toString(), // Ensure we're using string version of _id
+        roles: user.roles || ['user'],
+        preferredTags: user.preferredTags || [],
+        firstName: user.firstName,
+      };
+
+      // Get the complete user object with virtuals populated
+      const fullUser = await this.usersService.getUserProfile(
+        user._id.toString(),
+      );
+
+      // Return user data with access token
+      return {
+        ...fullUser,
+        sub: user._id.toString(), // Explicitly include sub in the response
+        access_token: this.jwtService.sign(payload),
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to authenticate with Google: ' + error.message,
       );
     }
   }

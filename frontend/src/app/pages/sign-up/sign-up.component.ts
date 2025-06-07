@@ -84,6 +84,10 @@ export class SignUpComponent {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
+  signInWithGoogle() {
+    this.authService.initiateGoogleLogin();
+  }
+
   onSubmit() {
     if (this.signUpForm.valid) {
       this.isLoading = true;

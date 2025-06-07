@@ -45,6 +45,10 @@ export class SignInComponent {
     this.showPassword = !this.showPassword;
   }
 
+  signInWithGoogle() {
+    this.authService.initiateGoogleLogin();
+  }
+
   onSubmit() {
     if (this.signInForm.valid) {
       this.isLoading = true;

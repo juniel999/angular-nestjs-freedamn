@@ -181,6 +181,25 @@
       </div>
     </form>
 
+    <!-- Social Login Options -->
+    <div class="relative my-8">
+      <div class="absolute inset-0 flex items-center">
+        <div class="w-full border-t border-base-300"></div>
+      </div>
+      <div class="relative flex justify-center text-sm">
+        <span class="px-2 bg-base-100 text-base-content/70"
+          >Or continue with</span
+        >
+      </div>
+    </div>
+
+    <div class="flex justify-center">
+      <button (click)="signInWithGoogle()" class="btn btn-outline gap-2 w-full">
+        <img src="assets/google.svg" alt="Google logo" class="w-5 h-5" />
+        Sign up with Google
+      </button>
+    </div>
+
     <!-- Login Link -->
     <div class="text-center mt-8">
       <p class="text-base-content/70">
